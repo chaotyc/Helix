@@ -12,6 +12,7 @@ const db = openDatabase();
 // The only way the server talks to a client. Because `msg` must be a ServerMsg,
 // TypeScript rejects any reply that doesn't match the contract.
 function send(socket: WebSocket, msg: ServerMsg): void {
+  if (socket.readyState !== socket.OPEN) return; // the client left (e.g. mid-extraction)
   socket.send(JSON.stringify(msg));
 }
 
@@ -32,12 +33,11 @@ function handleMessage(socket: WebSocket, raw: string): void {
     return;
   }
 
-  try {
-    send(socket, handle(db, result.data));
-  } catch (err) {
-    console.error(`Failed to handle ${result.data.type}:`, err);
+  const msg = result.data;
+  handle(db, msg, (reply) => send(socket, reply)).catch((err: unknown) => {
+    console.error(`Failed to handle ${msg.type}:`, err);
     send(socket, { type: "error", message: err instanceof Error ? err.message : String(err) });
-  }
+  });
 }
 
 const server = new WebSocketServer({ host: HOST, port: PORT });

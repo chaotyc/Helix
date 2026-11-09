@@ -42,6 +42,11 @@ export function createGoal(db: DatabaseSync, input: GoalInput): Goal {
   return goal;
 }
 
+export function getGoal(db: DatabaseSync, id: string): Goal | undefined {
+  const row = db.prepare("SELECT * FROM goal WHERE id = $id").get({ id });
+  return row ? toGoal(row) : undefined;
+}
+
 export function listGoals(db: DatabaseSync): Goal[] {
   return db.prepare("SELECT * FROM goal ORDER BY created_at").all().map(toGoal);
 }

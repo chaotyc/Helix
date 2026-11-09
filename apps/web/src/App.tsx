@@ -15,6 +15,8 @@ export function App() {
   const goals = useAppStore((state) => state.goals);
   const sessions = useAppStore((state) => state.sessions);
   const addSession = useAppStore((state) => state.addSession);
+  const maps = useAppStore((state) => state.maps);
+  const extraction = useAppStore((state) => state.extraction);
 
   // ---- State only this screen uses. ----
   const [timelines, setTimelines] = useState<Record<string, TimelineItem[]>>(fixtures.timelines);
@@ -26,11 +28,14 @@ export function App() {
   // ---- Values worked out from state (not stored separately, so they can't go stale). ----
   const selectedGoal = goals.find((g) => g.id === selectedGoalId);
   const timeline = selectedSessionId ? (timelines[selectedSessionId] ?? []) : [];
-  const concepts = selectedGoalId ? (fixtures.conceptMaps[selectedGoalId] ?? []) : [];
+  const concepts = selectedGoalId ? (fixtures.conceptMaps[selectedGoalId] ?? []) : []; // fake, for the fake timeline
+  const goalMap = selectedGoalId ? maps[selectedGoalId] : undefined;
+  const progress = selectedGoalId ? extraction[selectedGoalId] : undefined;
 
   // ---- Actions: the only places state changes. ----
   function selectGoal(goalId: string): void {
     setSelectedGoalId(goalId);
+    send({ type: "map.get", goalId }); // the map panel fills in when the server replies
     // Open the goal's most recent session, or none if it has no sessions yet.
     const latest = sessions.findLast((s) => s.goalId === goalId);
     setSelectedSessionId(latest?.id ?? null);
@@ -124,7 +129,7 @@ export function App() {
         <Composer disabled={!selectedSessionId} onSend={sendAnswer} />
       </main>
 
-      {mapOpen && <MapPanel concepts={concepts} />}
+      {mapOpen && <MapPanel map={goalMap} progress={progress} />}
       {paletteOpen && <CommandPalette commands={commands} onClose={() => setPaletteOpen(false)} />}
     </div>
   );

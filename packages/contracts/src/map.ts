@@ -55,6 +55,15 @@ export const ConceptGraph = z.object({
 });
 export type ConceptGraph = z.infer<typeof ConceptGraph>;
 
+// One course's slice of the global graph: the concepts in its view and the arrows among them.
+export const GoalMap = z.object({
+  goalId: z.string(),
+  concepts: z.array(Concept),
+  view: z.array(ViewEntry),
+  edges: z.array(Edge),
+});
+export type GoalMap = z.infer<typeof GoalMap>;
+
 // ---------------------------------------------------------------------------
 // Map changes: one entry in the map diary (the `map_event` table).
 // `payload` is what was asked for; `before` and `after` are the affected things'
