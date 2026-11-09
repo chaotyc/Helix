@@ -1,9 +1,11 @@
 import { z } from "zod";
-import { Effort, ExtractionStage } from "./extraction.ts";
+import { ClarifyAnswer, ClarifyQuestion } from "./clarification.ts";
+import { Effort, ExtractionStage, SourceKind } from "./extraction.ts";
 import { GoalMap } from "./map.ts";
 
 export * from "./map.ts";
 export * from "./extraction.ts";
+export * from "./clarification.ts";
 
 // How deep a learner holds a concept: 0 = not at all, 1 = orient ... 5 = expert.
 export const Depth = z.number().int().min(0).max(5);
@@ -59,11 +61,20 @@ export const ClientMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ping"), text: z.string() }),
   z.object({ type: z.literal("goal.create"), goal: GoalInput }),
   z.object({ type: z.literal("goal.list") }),
-  // Build a course's map with Claude. No source text: Claude works from the goal alone.
+  // Building a map takes two steps. First, the clarifier reads the goal and source and asks
+  // up to 3 questions (reply: map.questions). No source text: Claude works from the goal and answers.
+  z.object({
+    type: z.literal("map.clarify"),
+    goalId: z.string(),
+    sourceText: z.string().optional(),
+    sourceKind: SourceKind.optional(), // what sourceText is; default "other"
+  }),
+  // Then the map is built from that round's source and every answer (all are required).
   z.object({
     type: z.literal("map.extract"),
     goalId: z.string(),
-    sourceText: z.string().optional(),
+    roundId: z.string(), // from map.questions
+    answers: z.array(ClarifyAnswer),
     effort: Effort.optional(), // default "high"
   }),
   z.object({ type: z.literal("map.get"), goalId: z.string() }),
@@ -77,6 +88,7 @@ export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("goals"), goals: z.array(Goal) }),
   z.object({ type: z.literal("goal.created"), goal: Goal }),
   z.object({ type: z.literal("map.progress"), goalId: z.string(), stage: ExtractionStage, detail: z.string() }),
+  z.object({ type: z.literal("map.questions"), goalId: z.string(), roundId: z.string(), questions: z.array(ClarifyQuestion) }),
   z.object({ type: z.literal("map.updated"), map: GoalMap }),
 ]);
 export type ServerMsg = z.infer<typeof ServerMsg>;

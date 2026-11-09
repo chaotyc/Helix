@@ -9,7 +9,7 @@ type Props = {
 // The selected course's concepts, with the depth the course needs for each.
 // A list for now; the drawn graph and editing come in Step 10.
 export function MapPanel({ map, progress }: Props) {
-  const running = progress && !["saved", "failed"].includes(progress.stage);
+  const running = progress && !["asked", "saved", "failed"].includes(progress.stage);
 
   return (
     <aside className="w-72 shrink-0 overflow-y-auto border-l border-zinc-800 bg-zinc-950 p-4">
