@@ -40,6 +40,12 @@ function handleMessage(raw: string): void {
     case "error":
       console.warn("Server error:", msg.message);
       return;
+    case "goals":
+      useAppStore.getState().setGoals(msg.goals);
+      return;
+    case "goal.created":
+      useAppStore.getState().addGoal(msg.goal);
+      return;
   }
 }
 
@@ -58,6 +64,7 @@ export function connect(): void {
   socket.onopen = () => {
     failedAttempts = 0;
     useAppStore.getState().setStatus("connected");
+    send({ type: "goal.list" }); // load (or reload, after a reconnect) the real goals
   };
 
   socket.onmessage = (event) => {

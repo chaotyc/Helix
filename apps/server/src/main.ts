@@ -1,9 +1,13 @@
 import { WebSocketServer, type WebSocket } from "ws";
 import { z } from "zod";
 import { ClientMsg, type ServerMsg } from "@helix/contracts";
+import { openDatabase } from "./db/open.ts";
+import { handle } from "./handlers.ts";
 
 const HOST = "127.0.0.1"; // localhost only: other machines can't connect
 const PORT = 8765;
+
+const db = openDatabase();
 
 // The only way the server talks to a client. Because `msg` must be a ServerMsg,
 // TypeScript rejects any reply that doesn't match the contract.
@@ -28,9 +32,11 @@ function handleMessage(socket: WebSocket, raw: string): void {
     return;
   }
 
-  const msg = result.data;
-  if (msg.type === "ping") {
-    send(socket, { type: "pong", text: msg.text, receivedAt: new Date().toISOString() });
+  try {
+    send(socket, handle(db, result.data));
+  } catch (err) {
+    console.error(`Failed to handle ${result.data.type}:`, err);
+    send(socket, { type: "error", message: err instanceof Error ? err.message : String(err) });
   }
 }
 
