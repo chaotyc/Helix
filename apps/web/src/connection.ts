@@ -49,6 +49,10 @@ function handleMessage(raw: string): void {
     case "map.progress":
       useAppStore.getState().setProgress(msg.goalId, { stage: msg.stage, detail: msg.detail });
       return;
+    case "map.questions":
+      // Answered in the UI once the goal form exists (Step 10); for now the CLI asks them.
+      console.info(`${msg.questions.length} clarifying questions for goal ${msg.goalId}`);
+      return;
     case "map.updated":
       useAppStore.getState().setMap(msg.map);
       return;

@@ -4,6 +4,10 @@ import { z } from "zod";
 export const Effort = z.enum(["low", "medium", "high", "xhigh", "max"]);
 export type Effort = z.infer<typeof Effort>;
 
+// What kind of source material the extractor is given. The prompt says how to read each.
+export const SourceKind = z.enum(["syllabus", "contents", "notes", "other"]);
+export type SourceKind = z.infer<typeof SourceKind>;
+
 // ---------------------------------------------------------------------------
 // What the extractor (Claude) must return. This schema is sent to the API as the
 // required output format, so it only uses what structured outputs support: no number
@@ -44,6 +48,7 @@ export const ExtractionProposal = z.strictObject({
 });
 export type ExtractionProposal = z.infer<typeof ExtractionProposal>;
 
-// Progress updates while a map is being extracted.
-export const ExtractionStage = z.enum(["started", "thinking", "writing", "checking", "retrying", "saved", "failed"]);
+// Progress updates while questions are chosen or a map is extracted. "asked": the questions
+// are ready and waiting for answers.
+export const ExtractionStage = z.enum(["started", "thinking", "writing", "checking", "retrying", "asked", "saved", "failed"]);
 export type ExtractionStage = z.infer<typeof ExtractionStage>;

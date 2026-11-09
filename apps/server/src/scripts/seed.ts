@@ -65,7 +65,7 @@ recordMapChange(
   },
   {
     actor: "extractor",
-    sourceId: createSource(db, signals.id, "Week 1: Complex exponentials. Week 2: LTI systems. Week 3: Convolution..."),
+    sourceId: createSource(db, signals.id, "Week 1: Complex exponentials. Week 2: LTI systems. Week 3: Convolution...", "syllabus"),
     promptVersion: "seed@demo",
     model: "none",
   },
@@ -107,7 +107,7 @@ recordMapChange(
   },
   {
     actor: "extractor",
-    sourceId: createSource(db, control.id, "Unit 1: Laplace review. Unit 2: Transfer functions. Unit 3: Stability..."),
+    sourceId: createSource(db, control.id, "Unit 1: Laplace review. Unit 2: Transfer functions. Unit 3: Stability...", "syllabus"),
     promptVersion: "seed@demo",
     model: "none",
   },
