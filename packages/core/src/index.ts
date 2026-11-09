@@ -1,1 +1,2 @@
-export * from "./map.ts";
+export * from "./graph.ts";
+export * from "./loops.ts";

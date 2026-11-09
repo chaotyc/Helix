@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node --watch src/main.ts",
     "seed": "node src/scripts/seed.ts",
-    "rebuild-maps": "node src/scripts/rebuild-maps.ts"
+    "rebuild-graph": "node src/scripts/rebuild-graph.ts"
   },
   "dependencies": {
     "@helix/contracts": "workspace:*",
