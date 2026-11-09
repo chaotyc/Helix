@@ -1,6 +1,9 @@
 import { z } from "zod";
+import { Effort, ExtractionStage } from "./extraction.ts";
+import { GoalMap } from "./map.ts";
 
 export * from "./map.ts";
+export * from "./extraction.ts";
 
 // How deep a learner holds a concept: 0 = not at all, 1 = orient ... 5 = expert.
 export const Depth = z.number().int().min(0).max(5);
@@ -56,6 +59,14 @@ export const ClientMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ping"), text: z.string() }),
   z.object({ type: z.literal("goal.create"), goal: GoalInput }),
   z.object({ type: z.literal("goal.list") }),
+  // Build a course's map with Claude. No source text: Claude works from the goal alone.
+  z.object({
+    type: z.literal("map.extract"),
+    goalId: z.string(),
+    sourceText: z.string().optional(),
+    effort: Effort.optional(), // default "high"
+  }),
+  z.object({ type: z.literal("map.get"), goalId: z.string() }),
 ]);
 export type ClientMsg = z.infer<typeof ClientMsg>;
 
@@ -65,5 +76,7 @@ export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("error"), message: z.string() }),
   z.object({ type: z.literal("goals"), goals: z.array(Goal) }),
   z.object({ type: z.literal("goal.created"), goal: Goal }),
+  z.object({ type: z.literal("map.progress"), goalId: z.string(), stage: ExtractionStage, detail: z.string() }),
+  z.object({ type: z.literal("map.updated"), map: GoalMap }),
 ]);
 export type ServerMsg = z.infer<typeof ServerMsg>;

@@ -6,6 +6,7 @@ import {
   describeChange,
   diffGraphs,
   emptyGraph,
+  goalSlice,
   replayGraph,
   type MapCommand,
 } from "./graph.ts";
@@ -185,6 +186,27 @@ describe("replayGraph: rebuilds the graph from its whole diary", () => {
     const copy = structuredClone(signals);
     run(signals, { op: "delete_concept", conceptId: "lti" });
     expect(signals).toEqual(copy);
+  });
+});
+
+describe("goalSlice: one course's part of the global graph", () => {
+  it("includes the course's concepts and only the arrows between them", () => {
+    const g = run(signals, {
+      op: "extract",
+      goalId: "control",
+      concepts: [concept("complex-numbers"), concept("stability")],
+      edges: [needs("stability", 1, "complex-numbers", 2)],
+      view: [background("complex-numbers"), taught("stability")],
+      raw: null,
+    });
+    const slice = goalSlice(g, "control");
+    expect(slice.concepts.map((c) => c.id)).toEqual(["complex-numbers", "stability"]);
+    expect(slice.edges).toEqual([needs("stability", 1, "complex-numbers", 2)]);
+    expect(slice.view).toEqual([background("complex-numbers"), taught("stability")]);
+  });
+
+  it("is empty for a course with no map yet", () => {
+    expect(goalSlice(signals, "nothing")).toEqual({ goalId: "nothing", concepts: [], view: [], edges: [] });
   });
 });
 

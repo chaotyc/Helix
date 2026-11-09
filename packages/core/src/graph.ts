@@ -6,6 +6,7 @@ import type {
   ConceptChanges,
   ConceptGraph,
   Edge,
+  GoalMap,
   MapChange,
   ViewEntry,
 } from "@helix/contracts";
@@ -250,6 +251,20 @@ export function applyChange(graph: ConceptGraph, change: MapChange): ConceptGrap
 // Rebuilds the graph from scratch by rereading the whole diary, oldest entry first.
 export function replayGraph(changes: MapChange[]): ConceptGraph {
   return changes.reduce(applyChange, emptyGraph());
+}
+
+// ---- One course's slice ----
+
+// The concepts in a goal's view (in view order) and the arrows that run between them.
+export function goalSlice(graph: ConceptGraph, goalId: string): GoalMap {
+  const view = graph.views[goalId] ?? [];
+  const inView = new Set(view.map((e) => e.conceptId));
+  return {
+    goalId,
+    concepts: view.flatMap((e) => graph.concepts.filter((c) => c.id === e.conceptId)),
+    view,
+    edges: graph.edges.filter((e) => inView.has(e.src) && inView.has(e.dst)),
+  };
 }
 
 // ---- Comparing two graphs ----
