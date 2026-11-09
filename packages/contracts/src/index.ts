@@ -1,23 +1,10 @@
 import { z } from "zod";
 
+export * from "./map.ts";
+
 // How deep a learner holds a concept: 0 = not at all, 1 = orient ... 5 = expert.
 export const Depth = z.number().int().min(0).max(5);
 export type Depth = z.infer<typeof Depth>;
-
-export const Concept = z.object({
-  id: z.string().regex(/^[a-z0-9-]+$/),
-  name: z.string().min(1),
-  kind: z.enum(["concept", "skill", "decision"]),
-  sourceRef: z.string().optional(),
-});
-export type Concept = z.infer<typeof Concept>;
-
-export const Edge = z.object({
-  src: z.string(),
-  dst: z.string(),
-  type: z.enum(["prereq", "part_of"]),
-});
-export type Edge = z.infer<typeof Edge>;
 
 // What the learner is working toward. Only courses for now; jobs and projects come later.
 export const Goal = z.object({
@@ -25,9 +12,14 @@ export const Goal = z.object({
   title: z.string().min(1),
   kind: z.enum(["course"]),
   capstone: z.string(), // "what would prove you've got it?"
+  examDate: z.iso.date().optional(), // "2026-12-14"
   createdAt: z.string(), // ISO timestamp, e.g. "2026-11-08T21:46:01.065Z"
 });
 export type Goal = z.infer<typeof Goal>;
+
+// What the UI sends to create a goal: a goal without the parts the server fills in.
+export const GoalInput = Goal.omit({ id: true, createdAt: true });
+export type GoalInput = z.infer<typeof GoalInput>;
 
 // One sitting of study for a goal.
 export const Session = z.object({
@@ -62,6 +54,8 @@ export type TimelineItem = z.infer<typeof TimelineItem>;
 // Client (UI) to server
 export const ClientMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ping"), text: z.string() }),
+  z.object({ type: z.literal("goal.create"), goal: GoalInput }),
+  z.object({ type: z.literal("goal.list") }),
 ]);
 export type ClientMsg = z.infer<typeof ClientMsg>;
 
@@ -69,5 +63,7 @@ export type ClientMsg = z.infer<typeof ClientMsg>;
 export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("pong"), text: z.string(), receivedAt: z.string() }),
   z.object({ type: z.literal("error"), message: z.string() }),
+  z.object({ type: z.literal("goals"), goals: z.array(Goal) }),
+  z.object({ type: z.literal("goal.created"), goal: Goal }),
 ]);
 export type ServerMsg = z.infer<typeof ServerMsg>;

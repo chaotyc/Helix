@@ -3,10 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/main.ts"
+    "dev": "node --watch src/main.ts",
+    "seed": "node src/scripts/seed.ts",
+    "rebuild-maps": "node src/scripts/rebuild-maps.ts"
   },
   "dependencies": {
     "@helix/contracts": "workspace:*",
+    "@helix/core": "workspace:*",
     "ws": "^8.22.1",
     "zod": "^4.6.7"
   }

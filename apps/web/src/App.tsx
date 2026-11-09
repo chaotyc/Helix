@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Goal, Session, TimelineItem } from "@helix/contracts";
+import type { Session, TimelineItem } from "@helix/contracts";
 import * as fixtures from "./fixtures.ts";
 import { send } from "./connection.ts";
 import { useAppStore } from "./store.ts";
@@ -14,13 +14,12 @@ export function App() {
   // ---- App-wide state from the store (shared with the connection module). ----
   const goals = useAppStore((state) => state.goals);
   const sessions = useAppStore((state) => state.sessions);
-  const addGoal = useAppStore((state) => state.addGoal);
   const addSession = useAppStore((state) => state.addSession);
 
   // ---- State only this screen uses. ----
   const [timelines, setTimelines] = useState<Record<string, TimelineItem[]>>(fixtures.timelines);
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>("goal-signals");
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>("session-1");
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(true);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
@@ -42,17 +41,14 @@ export function App() {
     setSelectedSessionId(session.id);
   }
 
+  // Asks the server to create a goal. It appears in the sidebar when the server's
+  // goal.created reply arrives. The placeholder title stays until Step 10's goal form.
   function newGoal(): void {
-    const goal: Goal = {
-      id: crypto.randomUUID(),
-      title: `New goal ${goals.length + 1}`,
-      kind: "course",
-      capstone: "",
-      createdAt: new Date().toISOString(),
-    };
-    addGoal(goal);
-    setSelectedGoalId(goal.id);
-    setSelectedSessionId(null);
+    const sent = send({
+      type: "goal.create",
+      goal: { title: `New goal ${goals.length + 1}`, kind: "course", capstone: "" },
+    });
+    if (!sent) console.warn("Not connected, so the goal wasn't created.");
   }
 
   function newSession(): void {
