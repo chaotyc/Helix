@@ -99,19 +99,19 @@ export const timelines: Record<string, TimelineItem[]> = {
 // Each goal's concept map (just a list for now), looked up by goal id.
 export const conceptMaps: Record<string, MapConcept[]> = {
   "goal-signals": [
-    { concept: { id: "complex-exponentials", name: "Complex exponentials", kind: "concept", targetDepth: 3 }, depth: 4 },
-    { concept: { id: "lti-systems", name: "LTI systems", kind: "concept", targetDepth: 3 }, depth: 3 },
-    { concept: { id: "convolution", name: "Convolution", kind: "skill", targetDepth: 3 }, depth: 2 },
-    { concept: { id: "fourier-series", name: "Fourier series", kind: "concept", targetDepth: 3 }, depth: 1 },
-    { concept: { id: "fourier-transform", name: "Fourier transform", kind: "concept", targetDepth: 3 }, depth: 0 },
-    { concept: { id: "sampling", name: "Sampling theorem", kind: "concept", targetDepth: 3 }, depth: 0 },
-    { concept: { id: "laplace-transform", name: "Laplace transform", kind: "skill", targetDepth: 3 }, depth: 0 },
+    { concept: { id: "complex-exponentials", name: "Complex exponentials", description: "Complex exponentials.", kind: "concept" }, depth: 4 },
+    { concept: { id: "lti-systems", name: "LTI systems", description: "LTI systems.", kind: "concept" }, depth: 3 },
+    { concept: { id: "convolution", name: "Convolution", description: "Convolution.", kind: "skill" }, depth: 2 },
+    { concept: { id: "fourier-series", name: "Fourier series", description: "Fourier series.", kind: "concept" }, depth: 1 },
+    { concept: { id: "fourier-transform", name: "Fourier transform", description: "Fourier transform.", kind: "concept" }, depth: 0 },
+    { concept: { id: "sampling", name: "Sampling theorem", description: "Sampling theorem.", kind: "concept" }, depth: 0 },
+    { concept: { id: "laplace-transform", name: "Laplace transform", description: "Laplace transform.", kind: "skill" }, depth: 0 },
   ],
   "goal-linalg": [
-    { concept: { id: "vectors", name: "Vectors and span", kind: "concept", targetDepth: 3 }, depth: 5 },
-    { concept: { id: "matrix-multiplication", name: "Matrix multiplication", kind: "skill", targetDepth: 3 }, depth: 4 },
-    { concept: { id: "linear-independence", name: "Linear independence", kind: "concept", targetDepth: 3 }, depth: 2 },
-    { concept: { id: "determinants", name: "Determinants", kind: "skill", targetDepth: 3 }, depth: 1 },
-    { concept: { id: "eigenvectors", name: "Eigenvectors", kind: "concept", targetDepth: 3 }, depth: 0 },
+    { concept: { id: "vectors", name: "Vectors and span", description: "Vectors and span.", kind: "concept" }, depth: 5 },
+    { concept: { id: "matrix-multiplication", name: "Matrix multiplication", description: "Matrix multiplication.", kind: "skill" }, depth: 4 },
+    { concept: { id: "linear-independence", name: "Linear independence", description: "Linear independence.", kind: "concept" }, depth: 2 },
+    { concept: { id: "determinants", name: "Determinants", description: "Determinants.", kind: "skill" }, depth: 1 },
+    { concept: { id: "eigenvectors", name: "Eigenvectors", description: "Eigenvectors.", kind: "concept" }, depth: 0 },
   ],
 };

@@ -1,86 +1,154 @@
-// Writes a demo goal whose map diary uses every kind of change, so the rebuild can be tested
-// before Step 8 produces real maps. Run with: pnpm --filter @helix/server seed
+// Writes two demo courses that share concepts, so the global graph, spirals, and the
+// rebuild can be tried before Step 8 produces real maps.
+// Run with: pnpm --filter @helix/server seed
 import { randomUUID } from "node:crypto";
-import type { Concept } from "@helix/contracts";
+import type { Concept, Edge, ViewEntry } from "@helix/contracts";
 import { openDatabase } from "../db/open.ts";
 import { createGoal } from "../db/goals.ts";
-import { readMap, readMapEvents, recordMapChange } from "../db/maps.ts";
+import { readGraph, readMapEvents, recordMapChange } from "../db/graph.ts";
 import { createSource } from "../db/sources.ts";
 
 const db = openDatabase();
 
-const goal = createGoal(db, {
+function c(id: string, name: string, description: string): Concept {
+  return { id, name, description, kind: "concept" };
+}
+// `dst` at `dstDepth` needs `src` at `srcDepth`.
+function needs(dst: string, dstDepth: number, src: string, srcDepth: number): Edge {
+  return { type: "prereq", src, srcDepth, dst, dstDepth };
+}
+function taught(conceptId: string, targetDepth: number): ViewEntry {
+  return { conceptId, targetDepth, role: "taught" };
+}
+function background(conceptId: string, targetDepth: number): ViewEntry {
+  return { conceptId, targetDepth, role: "background" };
+}
+
+// ---- Course 1: Signals and Systems ----
+
+const signals = createGoal(db, {
   title: "Signals and Systems (demo)",
   kind: "course",
   capstone: "Design a filter and predict its output for any input",
 });
-
-const syllabus = `Week 1: Complex exponentials. Week 2: LTI systems. Week 3: Convolution.
-Week 4: Fourier series. Week 5: Fourier transform. Week 6: Laplace transform.`;
-const sourceId = createSource(db, goal.id, syllabus);
-
-function c(id: string, name: string, sourceRef: string, targetDepth: number): Concept {
-  return { id, name, kind: "concept", sourceRef, targetDepth };
-}
-
-// 1. The "extractor" proposes a whole map (a stand-in until Step 8's real extraction).
 recordMapChange(
   db,
-  goal.id,
   {
     op: "extract",
-    map: {
-      concepts: [
-        c("complex-exp", "Complex exponentials", "Week 1", 3),
-        c("lti", "LTI systems", "Week 2", 4),
-        c("conv", "Conv", "Week 3", 4),
-        c("fourier-series", "Fourier series", "Week 4", 3),
-        c("fourier-transform", "Fourier transform", "Week 5", 3),
-        c("laplace", "Laplace transform", "Week 6", 2),
-      ],
-      edges: [
-        { src: "complex-exp", dst: "lti", type: "prereq" },
-        { src: "lti", dst: "conv", type: "prereq" },
-        { src: "conv", dst: "fourier-series", type: "prereq" },
-        { src: "fourier-series", dst: "fourier-transform", type: "prereq" },
-        { src: "fourier-series", dst: "laplace", type: "prereq" },
-      ],
-    },
+    goalId: signals.id,
+    concepts: [
+      c("complex-numbers", "Complex numbers", "Numbers a + bj, their arithmetic, and polar form."),
+      c("complex-exp", "Complex exponentials", "Signals of the form e^(st) and Euler's formula."),
+      c("lti", "LTI systems", "Systems that are linear and time-invariant."),
+      c("convolution", "Conv", "Computing an LTI system's output from its input and impulse response."),
+      c("fourier-series", "Fourier series", "Writing a periodic signal as a sum of complex exponentials."),
+      c("laplace", "Laplace transform", "Representing signals and systems as functions of complex frequency s."),
+    ],
+    edges: [
+      needs("complex-exp", 1, "complex-numbers", 2),
+      needs("lti", 2, "complex-exp", 1),
+      needs("complex-exp", 3, "lti", 2), // the spiral: why exponentials matter comes after LTI
+      needs("convolution", 1, "lti", 1),
+      needs("fourier-series", 1, "complex-exp", 2),
+      needs("fourier-series", 2, "convolution", 2),
+      needs("laplace", 1, "fourier-series", 1), // wrong; the editor fixes it below
+    ],
+    view: [
+      background("complex-numbers", 3),
+      taught("complex-exp", 4),
+      taught("lti", 4),
+      taught("convolution", 4),
+      taught("fourier-series", 3),
+      taught("laplace", 2),
+    ],
+    raw: { note: "stand-in for the extractor's answer" },
   },
-  { actor: "extractor", sourceId, promptVersion: "seed@demo", model: "none" },
+  {
+    actor: "extractor",
+    sourceId: createSource(db, signals.id, "Week 1: Complex exponentials. Week 2: LTI systems. Week 3: Convolution..."),
+    promptVersion: "seed@demo",
+    model: "none",
+  },
 );
 
-// 2. The learner corrects it through the "editor": one instruction, possibly several changes.
-const rename = randomUUID();
-recordMapChange(
-  db,
-  goal.id,
-  { op: "update_concept", conceptId: "conv", changes: { name: "Convolution" } },
-  { actor: "editor", requestId: rename, instruction: "Call it Convolution, not Conv" },
-);
+// ---- Course 2: Control Systems, which reuses complex numbers and Laplace ----
 
-const laplace = randomUUID();
-const laplaceInstruction = "Laplace doesn't need Fourier series first, it builds on LTI systems";
-recordMapChange(
-  db,
-  goal.id,
-  { op: "delete_edge", edge: { src: "fourier-series", dst: "laplace", type: "prereq" } },
-  { actor: "editor", requestId: laplace, instruction: laplaceInstruction },
-);
-recordMapChange(
-  db,
-  goal.id,
-  { op: "add_edge", edge: { src: "lti", dst: "laplace", type: "prereq" } },
-  { actor: "editor", requestId: laplace, instruction: laplaceInstruction },
-);
-
-// 3. A direct human edit: add a concept, then delete one (which also removes its edges).
-recordMapChange(db, goal.id, { op: "add_concept", concept: c("sampling", "Sampling theorem", "Week 7", 3) }, {
-  actor: "human",
+const control = createGoal(db, {
+  title: "Control Systems (demo)",
+  kind: "course",
+  capstone: "Design a feedback controller that keeps a system stable",
 });
-recordMapChange(db, goal.id, { op: "delete_concept", conceptId: "fourier-transform" }, { actor: "human" });
+recordMapChange(
+  db,
+  {
+    op: "extract",
+    goalId: control.id,
+    concepts: [
+      c("complex-numbers", "Complex arithmetic", "Numbers a + bj and their arithmetic."), // reused: keeps its old name
+      c("laplace", "Laplace transform", "Signals and systems as functions of s."), // reused
+      c("transfer-functions", "Transfer functions", "A system's output-to-input ratio in the s-domain."),
+      c("stability", "Stability", "Whether a system's output stays bounded, read from its poles."),
+      c("feedback", "Feedback", "Feeding a system's output back to change its behavior."),
+    ],
+    edges: [
+      needs("transfer-functions", 1, "laplace", 2),
+      needs("stability", 1, "transfer-functions", 2),
+      needs("stability", 2, "complex-numbers", 3),
+      needs("stability", 2, "feedback", 1),
+    ],
+    view: [
+      background("complex-numbers", 3),
+      background("laplace", 3), // same concept, a deeper target than Signals needs
+      taught("transfer-functions", 4),
+      taught("stability", 4),
+      taught("feedback", 3),
+    ],
+    raw: { note: "stand-in for the extractor's answer" },
+  },
+  {
+    actor: "extractor",
+    sourceId: createSource(db, control.id, "Unit 1: Laplace review. Unit 2: Transfer functions. Unit 3: Stability..."),
+    promptVersion: "seed@demo",
+    model: "none",
+  },
+);
 
-const map = readMap(db, goal.id);
-const entries = readMapEvents(db, goal.id).length;
-console.log(`Seeded goal "${goal.title}" (${goal.id})`);
-console.log(`Map: ${map.concepts.length} concepts, ${map.edges.length} edges, from ${entries} diary entries`);
+// ---- Corrections, through the "editor" (one instruction can make several changes) ----
+
+recordMapChange(
+  db,
+  { op: "update_concept", conceptId: "convolution", changes: { name: "Convolution" } },
+  { actor: "editor", goalId: signals.id, requestId: randomUUID(), instruction: "Call it Convolution, not Conv" },
+);
+
+const laplaceFix = { requestId: randomUUID(), instruction: "Laplace builds on LTI systems, not Fourier series" };
+recordMapChange(db, { op: "delete_edge", edge: needs("laplace", 1, "fourier-series", 1) }, {
+  actor: "editor",
+  goalId: signals.id,
+  ...laplaceFix,
+});
+recordMapChange(db, { op: "add_edge", edge: needs("laplace", 1, "lti", 2) }, {
+  actor: "editor",
+  goalId: signals.id,
+  ...laplaceFix,
+});
+
+// A change that would create a loop is refused, and nothing is written.
+try {
+  recordMapChange(db, { op: "add_edge", edge: needs("lti", 1, "convolution", 1) }, { actor: "human" });
+} catch (err) {
+  console.log(`Refused as expected: ${err instanceof Error ? err.message : err}`);
+}
+
+// ---- Summary ----
+
+const graph = readGraph(db);
+console.log(`Seeded "${signals.title}" and "${control.title}"`);
+console.log(
+  `Global graph: ${graph.concepts.length} concepts, ${graph.edges.length} arrows, ` +
+    `from ${readMapEvents(db).length} diary entries`,
+);
+for (const goal of [signals, control]) {
+  const view = graph.views[goal.id] ?? [];
+  console.log(`  ${goal.title}: ${view.map((e) => `${e.conceptId}→${e.targetDepth}`).join(", ")}`);
+}
