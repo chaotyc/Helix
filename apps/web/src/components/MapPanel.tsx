@@ -7,7 +7,7 @@ type Props = {
 };
 
 // The selected course's concepts, with the depth the course needs for each.
-// A list for now; the drawn graph and editing come in Step 10.
+// A compact list; the drawn map and editing are on the goal's Map page.
 export function MapPanel({ map, progress }: Props) {
   const running = progress && !["asked", "saved", "failed"].includes(progress.stage);
 

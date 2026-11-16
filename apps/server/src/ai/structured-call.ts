@@ -4,8 +4,8 @@
 //   2. Stop at once on a refusal or a cut-off answer: retrying won't help.
 //   3. Check the answer. If it breaks a rule, show Claude its answer and the problems, and ask again.
 import type { DatabaseSync } from "node:sqlite";
-import type { Effort, ExtractionStage } from "@helix/contracts";
-import { DEFAULT_MODEL, type ModelCall, type ModelRequest, type ModelResult } from "./claude.ts";
+import type { Effort, ExtractionStage, ModelId } from "@helix/contracts";
+import type { ModelCall, ModelRequest, ModelResult } from "./claude.ts";
 import { costUsd } from "./pricing.ts";
 import type { Prompt } from "./prompts.ts";
 import { logAiCall, type AiCallRecord } from "../db/ai-calls.ts";
@@ -17,6 +17,7 @@ export type Check<T> = { ok: true; value: T } | { ok: false; problems: string[] 
 export type StructuredCall<T> = {
   agent: string; // "clarify-map", "extract-map", ...
   goalId: string;
+  model: ModelId;
   prompt: Prompt;
   schema: Record<string, unknown>;
   effort: Effort;
@@ -47,7 +48,7 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
           agent: call.agent,
           goalId: call.goalId,
           promptVersion: prompt.version,
-          modelRequested: DEFAULT_MODEL,
+          modelRequested: call.model,
           model: result?.model,
           effort: call.effort,
           attempt,
@@ -68,6 +69,7 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
     let thinkingShown = false;
     try {
       result = await call.callModel({
+        model: call.model,
         system: prompt.text,
         messages,
         schema: call.schema,

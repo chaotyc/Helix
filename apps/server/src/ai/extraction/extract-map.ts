@@ -6,7 +6,7 @@
 //   4. Save it as one `extract` entry in the map diary (D2). Every call is logged (E7).
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
-import { ExtractionProposal, type ClarifyAnswer, type Effort, type ExtractionStage, type GoalMap } from "@helix/contracts";
+import { ExtractionProposal, type ClarifyAnswer, type Effort, type ExtractionStage, type GoalMap, type ModelId } from "@helix/contracts";
 import { goalSlice, replayGraph } from "@helix/core";
 import type { ModelCall } from "../claude.ts";
 import { loadPrompt } from "../prompts.ts";
@@ -14,6 +14,7 @@ import { REQUEST_PARTS_FILE } from "../request-parts.ts";
 import { structuredCall } from "../structured-call.ts";
 import { answersForGoal, getRound, saveAnswers } from "../../db/clarifications.ts";
 import { getGoal } from "../../db/goals.ts";
+import { getSettings } from "../../db/settings.ts";
 import { readGraph, readMapEvents, recordMapChange } from "../../db/graph.ts";
 import { getSource } from "../../db/sources.ts";
 import { checkProposal } from "./proposal.ts";
@@ -25,7 +26,8 @@ const AGENT = "extract-map";
 // `additionalProperties: false` on every object, which z.strictObject provides.
 const { $schema: _unused, ...OUTPUT_SCHEMA } = z.toJSONSchema(ExtractionProposal);
 
-export type ExtractInput = { goalId: string; roundId: string; answers: ClarifyAnswer[]; effort?: Effort };
+// `model`: overrides the generation model from settings (evaluations use this).
+export type ExtractInput = { goalId: string; roundId: string; answers: ClarifyAnswer[]; effort?: Effort; model?: ModelId };
 
 export type ExtractDeps = {
   callModel: ModelCall;
@@ -58,6 +60,7 @@ export async function extractMap(db: DatabaseSync, input: ExtractInput, deps: Ex
   const { value, result, aiCallIds } = await structuredCall(db, {
     agent: AGENT,
     goalId: goal.id,
+    model: input.model ?? getSettings(db).models.generation,
     prompt,
     schema: OUTPUT_SCHEMA,
     effort,

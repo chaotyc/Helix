@@ -39,22 +39,29 @@ function handleMessage(raw: string): void {
       return;
     case "error":
       console.warn("Server error:", msg.message);
+      useAppStore.getState().setServerError(msg.message);
       return;
     case "goals":
       useAppStore.getState().setGoals(msg.goals);
       return;
     case "goal.created":
       useAppStore.getState().addGoal(msg.goal);
+      useAppStore.getState().setCreatedGoalId(msg.goal.id);
       return;
     case "map.progress":
       useAppStore.getState().setProgress(msg.goalId, { stage: msg.stage, detail: msg.detail });
       return;
     case "map.questions":
-      // Answered in the UI once the goal form exists (Step 10); for now the CLI asks them.
-      console.info(`${msg.questions.length} clarifying questions for goal ${msg.goalId}`);
+      useAppStore.getState().setQuestions(msg.goalId, { roundId: msg.roundId, questions: msg.questions });
       return;
     case "map.updated":
-      useAppStore.getState().setMap(msg.map);
+      useAppStore.getState().setMap(msg.map, msg.sharedWith);
+      return;
+    case "map.edit.rejected":
+      useAppStore.getState().setEditError(msg.goalId, msg.reason);
+      return;
+    case "settings":
+      useAppStore.getState().setSettings(msg.settings);
       return;
   }
 }
@@ -75,6 +82,7 @@ export function connect(): void {
     failedAttempts = 0;
     useAppStore.getState().setStatus("connected");
     send({ type: "goal.list" }); // load (or reload, after a reconnect) the real goals
+    send({ type: "settings.get" });
   };
 
   socket.onmessage = (event) => {

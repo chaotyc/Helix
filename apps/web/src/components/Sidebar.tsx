@@ -8,6 +8,9 @@ type Props = {
   selectedSessionId: string | null;
   onSelectGoal: (goalId: string) => void;
   onSelectSession: (session: Session) => void;
+  onNewGoal: () => void;
+  settingsOpen: boolean;
+  onOpenSettings: () => void;
 };
 
 // "Nov 5, 1:00 PM" from an ISO timestamp, in the learner's own time zone.
@@ -27,6 +30,10 @@ export function Sidebar(props: Props) {
         <img src="/brand/helix-mark-on-dark.svg" alt="" className="h-5 w-5" />
         Helix
       </div>
+
+      <button onClick={props.onNewGoal} className="mx-2 mb-2 rounded-md px-2 py-1.5 text-left text-sm text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200">
+        + New goal
+      </button>
 
       <nav className="flex-1 overflow-y-auto px-2 pb-4">
         {props.goals.map((goal) => {
@@ -66,6 +73,15 @@ export function Sidebar(props: Props) {
           );
         })}
       </nav>
+
+      <button
+        onClick={props.onOpenSettings}
+        className={`mx-2 mb-1 rounded-md px-2 py-1.5 text-left text-sm ${
+          props.settingsOpen ? "bg-zinc-800 text-zinc-100" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+        }`}
+      >
+        Settings
+      </button>
 
       <ConnectionIndicator />
     </aside>

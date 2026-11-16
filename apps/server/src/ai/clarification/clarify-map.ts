@@ -4,13 +4,14 @@
 //   3. Check the questions (at most 3, the first about the goal) and save them as one round.
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
-import { ClarifyProposal, type ClarifyQuestion, type ExtractionStage, type SourceKind } from "@helix/contracts";
+import { ClarifyProposal, type ClarifyQuestion, type ExtractionStage, type ModelId, type SourceKind } from "@helix/contracts";
 import type { ModelCall } from "../claude.ts";
 import { loadPrompt } from "../prompts.ts";
 import { REQUEST_PARTS_FILE } from "../request-parts.ts";
 import { structuredCall } from "../structured-call.ts";
 import { answersForGoal, createRound } from "../../db/clarifications.ts";
 import { getGoal } from "../../db/goals.ts";
+import { getSettings } from "../../db/settings.ts";
 import { createSource } from "../../db/sources.ts";
 import { firstMessage, MESSAGES_FILE, retryMessage } from "./messages.ts";
 import { checkQuestions } from "./questions.ts";
@@ -20,7 +21,8 @@ const EFFORT = "medium"; // it only reads and asks; the map itself gets the user
 
 const { $schema: _unused, ...OUTPUT_SCHEMA } = z.toJSONSchema(ClarifyProposal);
 
-export type ClarifyInput = { goalId: string; sourceText?: string; sourceKind?: SourceKind };
+// `model`: overrides the generation model from settings (evaluations use this).
+export type ClarifyInput = { goalId: string; sourceText?: string; sourceKind?: SourceKind; model?: ModelId };
 
 export type ClarifyDeps = {
   callModel: ModelCall;
@@ -44,6 +46,7 @@ export async function clarifyMap(
   const { value, aiCallIds } = await structuredCall(db, {
     agent: AGENT,
     goalId: goal.id,
+    model: input.model ?? getSettings(db).models.generation,
     prompt: loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE]),
     schema: OUTPUT_SCHEMA,
     effort: EFFORT,

@@ -1,11 +1,10 @@
 // The one place Helix calls Claude. Agents receive a `ModelCall` function instead of calling
 // the SDK directly, so tests can hand them a fake model and never spend money.
 import Anthropic from "@anthropic-ai/sdk";
-import type { Effort } from "@helix/contracts";
-
-export const DEFAULT_MODEL = "claude-opus-5-5";
+import { MODELS, type Effort, type ModelId } from "@helix/contracts";
 
 export type ModelRequest = {
+  model: ModelId; // chosen per role in settings (J1)
   system: string;
   messages: Anthropic.Beta.BetaMessageParam[];
   schema: Record<string, unknown>; // the JSON schema the answer must follow
@@ -32,11 +31,13 @@ export const callClaude: ModelCall = async (request) => {
   client ??= new Anthropic(); // reads ANTHROPIC_API_KEY from the environment (apps/server/.env)
 
   const stream = client.beta.messages.stream({
-    model: DEFAULT_MODEL,
+    model: request.model,
     max_tokens: 64000,
-    // If a safety filter declines, retry on another model automatically; `model` below says which answered.
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
+    // If a safety filter declines, retry on another model automatically; `model` below says which
+    // answered. Only some models offer this; on the others a refusal simply comes back.
+    ...(MODELS[request.model].refusalFallback
+      ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
+      : {}),
     thinking: { type: "adaptive", display: "summarized" },
     output_config: { effort: request.effort, format: { type: "json_schema", schema: request.schema } },
     system: request.system,
