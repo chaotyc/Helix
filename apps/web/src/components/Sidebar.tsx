@@ -61,8 +61,8 @@ export function Sidebar(props: Props) {
                       : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
                   }`}
                 >
-                  {formatStart(session.startedAt)}
-                  {session.endedAt ? "" : " · in progress"}
+                  {session.kind === "diagnostic" ? "Diagnostic" : "Tutoring"} · {formatStart(session.startedAt)}
+                  {session.endedAt ? "" : " · open"}
                 </button>
               ))}
 

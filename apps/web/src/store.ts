@@ -1,19 +1,23 @@
 // App-wide state, shared by components and by code outside React (the connection module).
 import { create } from "zustand";
-import type { ClarifyQuestion, ExtractionStage, Goal, GoalMap, Session, Settings, SharedWith } from "@helix/contracts";
-import * as fixtures from "./fixtures.ts";
+import type { ClarifyQuestion, ConceptKnowledge, ExtractionStage, Goal, GoalMap, Session, Settings, SharedWith, TimelineItem } from "@helix/contracts";
 
 export type ConnectionStatus = "connecting" | "connected" | "reconnecting";
 
 type Pong = { text: string; receivedAt: string };
 type Progress = { stage: ExtractionStage; detail: string };
 export type PendingQuestions = { roundId: string; questions: ClarifyQuestion[] };
+export type SessionStatus = { busy: boolean; detail: string };
 
 type AppState = {
   // ---- Data ----
   status: ConnectionStatus;
   goals: Goal[]; // real goals, loaded from the server on connect
-  sessions: Session[]; // still fake data
+  sessions: Session[]; // every session, from the server
+  timelines: Record<string, TimelineItem[]>; // per session, loaded when it's opened
+  sessionStatus: Record<string, SessionStatus>; // per session: is the server working on it, and what failed
+  startedSessionId: string | null; // the session this window just started, to open it once it arrives
+  knowledge: Record<string, ConceptKnowledge>; // per concept: what the learner model says they know
   lastPong: Pong | null;
   maps: Record<string, GoalMap>; // each goal's slice of the global graph, from the server
   extraction: Record<string, Progress>; // the latest extraction update per goal
@@ -28,7 +32,13 @@ type AppState = {
   setStatus: (status: ConnectionStatus) => void;
   setGoals: (goals: Goal[]) => void;
   addGoal: (goal: Goal) => void;
-  addSession: (session: Session) => void;
+  setSessions: (sessions: Session[]) => void;
+  upsertSession: (session: Session) => void;
+  setStartedSessionId: (sessionId: string | null) => void;
+  setTimeline: (sessionId: string, items: TimelineItem[]) => void;
+  putItem: (sessionId: string, item: TimelineItem) => void;
+  setSessionStatus: (sessionId: string, status: SessionStatus) => void;
+  setKnowledge: (knowledge: ConceptKnowledge[]) => void;
   setLastPong: (pong: Pong) => void;
   setMap: (map: GoalMap, sharedWith: SharedWith) => void;
   setQuestions: (goalId: string, pending: PendingQuestions | null) => void;
@@ -44,7 +54,11 @@ type AppState = {
 export const useAppStore = create<AppState>()((set) => ({
   status: "connecting",
   goals: [],
-  sessions: fixtures.sessions,
+  sessions: [],
+  timelines: {},
+  sessionStatus: {},
+  startedSessionId: null,
+  knowledge: {},
   lastPong: null,
   maps: {},
   extraction: {},
@@ -58,7 +72,25 @@ export const useAppStore = create<AppState>()((set) => ({
   setStatus: (status) => set({ status }),
   setGoals: (goals) => set({ goals }),
   addGoal: (goal) => set((state) => ({ goals: [...state.goals, goal] })),
-  addSession: (session) => set((state) => ({ sessions: [...state.sessions, session] })),
+  setSessions: (sessions) => set({ sessions }),
+  // A new session is added; a known one (e.g. just ended) is replaced.
+  upsertSession: (session) =>
+    set((state) => ({
+      sessions: state.sessions.some((s) => s.id === session.id)
+        ? state.sessions.map((s) => (s.id === session.id ? session : s))
+        : [...state.sessions, session],
+    })),
+  setStartedSessionId: (sessionId) => set({ startedSessionId: sessionId }),
+  setTimeline: (sessionId, items) => set((state) => ({ timelines: { ...state.timelines, [sessionId]: items } })),
+  // Appends a new item; an item with a known id (the tutor's text as it streams) replaces the old one.
+  putItem: (sessionId, item) =>
+    set((state) => {
+      const items = state.timelines[sessionId] ?? [];
+      const next = items.some((i) => i.id === item.id) ? items.map((i) => (i.id === item.id ? item : i)) : [...items, item];
+      return { timelines: { ...state.timelines, [sessionId]: next } };
+    }),
+  setSessionStatus: (sessionId, status) => set((state) => ({ sessionStatus: { ...state.sessionStatus, [sessionId]: status } })),
+  setKnowledge: (knowledge) => set({ knowledge: Object.fromEntries(knowledge.map((k) => [k.conceptId, k])) }),
   setLastPong: (pong) => set({ lastPong: pong }),
   // A fresh map from the server also clears that goal's last edit error.
   setMap: (map, sharedWith) =>

@@ -1,0 +1,35 @@
+{
+  "name": "signals-new-learner",
+  "goal": { "title": "Signals and Systems", "capstone": "Predict an LTI system's output for any input" },
+  "concepts": [
+    { "id": "complex-exp", "name": "Complex exponentials", "description": "Signals of the form e^(st) and Euler's formula.", "kind": "concept" },
+    { "id": "lti", "name": "LTI systems", "description": "Systems that are linear and time-invariant.", "kind": "concept" },
+    { "id": "convolution", "name": "Convolution", "description": "Computing an LTI system's output from its input and impulse response.", "kind": "skill" }
+  ],
+  "edges": [
+    { "type": "prereq", "src": "complex-exp", "srcDepth": 1, "dst": "lti", "dstDepth": 2 },
+    { "type": "prereq", "src": "lti", "srcDepth": 2, "dst": "convolution", "dstDepth": 1 }
+  ],
+  "view": [
+    { "conceptId": "complex-exp", "targetDepth": 2, "role": "taught" },
+    { "conceptId": "lti", "targetDepth": 3, "role": "taught" },
+    { "conceptId": "convolution", "targetDepth": 3, "role": "taught" }
+  ],
+  "priorAnswers": [
+    { "conceptId": "complex-exp", "depth": 1, "correct": true },
+    { "conceptId": "complex-exp", "depth": 1, "correct": true },
+    { "conceptId": "complex-exp", "depth": 1, "correct": true }
+  ],
+  "learner": [
+    { "text": "I think it has something to do with e^(jωt) and rotating in the complex plane?" },
+    { "text": "e^(jθ) = cos θ + j sin θ", "confidence": 4 },
+    { "text": "I'm not sure. Maybe it means the output only depends on the input?" },
+    { "text": "Can I get a hint?" },
+    { "text": "Linear means scaling and adding inputs scales and adds the outputs?" },
+    { "text": "Time-invariant means if you delay the input, the output is just delayed by the same amount.", "confidence": 3 },
+    { "text": "Because then you can build any input from pieces and add up the responses." },
+    { "text": "A system is LTI if superposition holds and shifting the input shifts the output by the same amount.", "confidence": 4 },
+    { "text": "ok" },
+    { "text": "I don't know", "confidence": 1 }
+  ]
+}
