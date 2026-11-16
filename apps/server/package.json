@@ -2,6 +2,7 @@
   "name": "@helix/server",
   "private": true,
   "type": "module",
+  "exports": "./src/public.ts",
   "scripts": {
     "dev": "node --env-file-if-exists=.env --watch src/main.ts",
     "test": "vitest run",

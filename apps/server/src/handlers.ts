@@ -2,12 +2,12 @@
 // an extraction sends progress updates before its result.
 import type { DatabaseSync } from "node:sqlite";
 import type { ClientMsg, ExtractionStage, ServerMsg } from "@helix/contracts";
-import { goalSlice } from "@helix/core";
 import { callClaude } from "./ai/claude.ts";
 import { clarifyMap } from "./ai/clarification/clarify-map.ts";
 import { extractMap } from "./ai/extraction/extract-map.ts";
-import { createGoal, listGoals } from "./db/goals.ts";
-import { readGraph } from "./db/graph.ts";
+import { createGoal, getGoal, listGoals } from "./db/goals.ts";
+import { applyEdits, mapUpdate } from "./db/map-edits.ts";
+import { getSettings, saveSettings } from "./db/settings.ts";
 
 export async function handle(db: DatabaseSync, msg: ClientMsg, reply: (msg: ServerMsg) => void): Promise<void> {
   switch (msg.type) {
@@ -23,9 +23,29 @@ export async function handle(db: DatabaseSync, msg: ClientMsg, reply: (msg: Serv
       reply({ type: "goals", goals: listGoals(db) });
       return;
 
-    case "map.get":
-      reply({ type: "map.updated", map: goalSlice(readGraph(db), msg.goalId) });
+    case "settings.get":
+      reply({ type: "settings", settings: getSettings(db) });
       return;
+
+    case "settings.set":
+      reply({ type: "settings", settings: saveSettings(db, msg.settings) });
+      return;
+
+    case "map.get":
+      reply(mapUpdate(db, msg.goalId));
+      return;
+
+    case "map.edit": {
+      if (!getGoal(db, msg.goalId)) throw new Error(`No goal with id ${msg.goalId}`);
+      try {
+        applyEdits(db, msg.goalId, msg.edits);
+      } catch (err) {
+        reply({ type: "map.edit.rejected", goalId: msg.goalId, reason: err instanceof Error ? err.message : String(err) });
+        return;
+      }
+      reply(mapUpdate(db, msg.goalId));
+      return;
+    }
 
     case "map.clarify": {
       const { roundId, questions } = await clarifyMap(
@@ -43,7 +63,7 @@ export async function handle(db: DatabaseSync, msg: ClientMsg, reply: (msg: Serv
         { goalId: msg.goalId, roundId: msg.roundId, answers: msg.answers, effort: msg.effort },
         { callModel: callClaude, onProgress: progressTo(reply, msg.goalId) },
       );
-      reply({ type: "map.updated", map });
+      reply(mapUpdate(db, map.goalId));
       return;
     }
   }

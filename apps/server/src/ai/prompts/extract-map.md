@@ -20,7 +20,8 @@ The learner answered a few questions about this goal before the map was built. T
 
 A concept is something a question can test: "convolution", "Nyquist sampling theorem", "choosing a controller type". Not a chapter title, not a whole field.
 
-- Cover what the goal needs, at a grain where each concept could take one to a few study sessions. A semester course is usually 25–60 concepts.
+- Cover what the goal needs. Goals range from one specific problem to a whole textbook, so let the number of concepts follow from the goal's scope: a single problem may need only a handful, a whole textbook a few hundred.
+- Keep the grain the same whatever the goal's size: each concept could take one to a few study sessions. A bigger goal gets more concepts, not broader ones. The same grain everywhere is what lets concepts be shared across goals.
 - Include **background** concepts: things the course assumes but doesn't teach, whether or not the source mentions them (complex numbers for a signals course). These are what let the tutor find gaps in what the learner arrived with. Mark them `"role": "background"`; everything the course teaches is `"taught"`.
 - Name concepts the way the field does. You don't need to copy the source's wording.
 - `description`: one plain sentence saying what the concept is. This is how the same concept is recognized across courses, so make it specific.
