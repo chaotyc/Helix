@@ -63,6 +63,29 @@ function handleMessage(raw: string): void {
     case "settings":
       useAppStore.getState().setSettings(msg.settings);
       return;
+    case "sessions":
+      useAppStore.getState().setSessions(msg.sessions);
+      return;
+    case "session.started":
+      useAppStore.getState().upsertSession(msg.session);
+      useAppStore.getState().setTimeline(msg.session.id, []);
+      useAppStore.getState().setStartedSessionId(msg.session.id);
+      return;
+    case "session.ended":
+      useAppStore.getState().upsertSession(msg.session);
+      return;
+    case "session.timeline":
+      useAppStore.getState().setTimeline(msg.sessionId, msg.items);
+      return;
+    case "session.item":
+      useAppStore.getState().putItem(msg.sessionId, msg.item);
+      return;
+    case "session.status":
+      useAppStore.getState().setSessionStatus(msg.sessionId, { busy: msg.busy, detail: msg.detail });
+      return;
+    case "learner.state":
+      useAppStore.getState().setKnowledge(msg.knowledge);
+      return;
   }
 }
 
@@ -83,6 +106,8 @@ export function connect(): void {
     useAppStore.getState().setStatus("connected");
     send({ type: "goal.list" }); // load (or reload, after a reconnect) the real goals
     send({ type: "settings.get" });
+    send({ type: "session.list" });
+    send({ type: "learner.get" });
   };
 
   socket.onmessage = (event) => {

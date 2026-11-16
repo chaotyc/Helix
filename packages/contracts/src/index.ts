@@ -4,6 +4,8 @@ import { Effort, ExtractionStage, SourceKind } from "./extraction.ts";
 import { Settings } from "./settings.ts";
 import { GoalMap } from "./map.ts";
 import { MapEdit, SharedWith } from "./map-edit.ts";
+import { ConceptKnowledge } from "./learner.ts";
+import { Confidence, Session, SessionKind, TimelineItem } from "./session.ts";
 
 export * from "./map.ts";
 export * from "./map-edit.ts";
@@ -11,6 +13,8 @@ export * from "./extraction.ts";
 export * from "./clarification.ts";
 export * from "./settings.ts";
 export * from "./judge.ts";
+export * from "./learner.ts";
+export * from "./session.ts";
 
 // How deep a learner holds a concept: 0 = not at all, 1 = orient ... 5 = expert.
 export const Depth = z.number().int().min(0).max(5);
@@ -30,34 +34,6 @@ export type Goal = z.infer<typeof Goal>;
 // What the UI sends to create a goal: a goal without the parts the server fills in.
 export const GoalInput = Goal.omit({ id: true, createdAt: true });
 export type GoalInput = z.infer<typeof GoalInput>;
-
-// One sitting of study for a goal.
-export const Session = z.object({
-  id: z.string(),
-  goalId: z.string(),
-  startedAt: z.string(),
-  endedAt: z.string().optional(), // missing while the session is still going
-});
-export type Session = z.infer<typeof Session>;
-
-// One entry in a session's timeline. The `type` field says which kind it is.
-export const TimelineItem = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("tutor"), id: z.string(), text: z.string() }),
-  z.object({
-    type: z.literal("question"),
-    id: z.string(),
-    conceptId: z.string(),
-    depth: Depth,
-    prompt: z.string(),
-  }),
-  z.object({
-    type: z.literal("answer"),
-    id: z.string(),
-    text: z.string(),
-    confidence: z.number().int().min(1).max(5).optional(),
-  }),
-]);
-export type TimelineItem = z.infer<typeof TimelineItem>;
 
 // Messages over websocket
 
@@ -88,6 +64,16 @@ export const ClientMsg = z.discriminatedUnion("type", [
   // Which model does each job (J1). Both reply with `settings`.
   z.object({ type: z.literal("settings.get") }),
   z.object({ type: z.literal("settings.set"), settings: Settings }),
+  // Sessions (Steps 12–13). Every session step replies with session.item / session.status messages.
+  z.object({ type: z.literal("session.list") }),
+  z.object({ type: z.literal("session.start"), goalId: z.string(), kind: SessionKind }),
+  z.object({ type: z.literal("session.open"), sessionId: z.string() }), // reply: session.timeline
+  // The learner's reply. Answering a graded question needs a confidence rating (1–5).
+  z.object({ type: z.literal("session.reply"), sessionId: z.string(), text: z.string().trim().min(1), confidence: Confidence.optional() }),
+  // Carry on after a failed call: ask the next question, or get the tutor's next turn.
+  z.object({ type: z.literal("session.resume"), sessionId: z.string() }),
+  z.object({ type: z.literal("session.end"), sessionId: z.string() }),
+  z.object({ type: z.literal("learner.get") }), // reply: learner.state
 ]);
 export type ClientMsg = z.infer<typeof ClientMsg>;
 
@@ -103,5 +89,15 @@ export const ServerMsg = z.discriminatedUnion("type", [
   // An edit broke a rule (a loop, a missing concept, ...); nothing was changed.
   z.object({ type: z.literal("map.edit.rejected"), goalId: z.string(), reason: z.string() }),
   z.object({ type: z.literal("settings"), settings: Settings }),
+  z.object({ type: z.literal("sessions"), sessions: z.array(Session) }),
+  z.object({ type: z.literal("session.started"), session: Session }),
+  z.object({ type: z.literal("session.timeline"), sessionId: z.string(), items: z.array(TimelineItem) }),
+  // A new timeline item, or a newer version of one already sent (same id: the tutor's text as it streams).
+  z.object({ type: z.literal("session.item"), sessionId: z.string(), item: TimelineItem }),
+  // Whether the server is working on this session ("Writing a question…"), and what failed if a step did.
+  z.object({ type: z.literal("session.status"), sessionId: z.string(), busy: z.boolean(), detail: z.string() }),
+  z.object({ type: z.literal("session.ended"), session: Session }),
+  // What the learner knows, per concept, across every goal. Sent after every graded answer.
+  z.object({ type: z.literal("learner.state"), knowledge: z.array(ConceptKnowledge) }),
 ]);
 export type ServerMsg = z.infer<typeof ServerMsg>;

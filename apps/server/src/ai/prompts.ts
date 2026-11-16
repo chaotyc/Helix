@@ -12,8 +12,11 @@ export type Prompt = { name: string; text: string; version: string };
 
 // "extract-map" → the text of prompts/extract-map.md and a version like "extract-map@3f9a1c2e".
 // `templateFiles`: absolute paths of the files that write the request, hashed into the version.
-export function loadPrompt(name: string, templateFiles: string[] = []): Prompt {
-  const text = readFileSync(join(PROMPTS_DIR, `${name}.md`), "utf8");
+// `includes`: shared prompt parts appended to the text, e.g. "depth-levels" (prompts/depth-levels.md),
+// so several agents read the same definitions and each one's version changes when they do.
+export function loadPrompt(name: string, templateFiles: string[] = [], includes: string[] = []): Prompt {
+  const read = (file: string) => readFileSync(join(PROMPTS_DIR, `${file}.md`), "utf8");
+  const text = [read(name), ...includes.map(read)].join("\n\n");
   const templates = templateFiles.map((file) => readFileSync(file, "utf8"));
   return { name, text, version: promptVersion(name, text, templates) };
 }

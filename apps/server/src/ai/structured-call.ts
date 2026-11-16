@@ -1,5 +1,5 @@
 // One structured answer from Claude, checked, with one retry (E6) and every call logged (E7).
-// Shared by every agent that returns JSON: the clarifier and the extractor so far.
+// Shared by every agent that returns JSON.
 //   1. Ask Claude, streaming progress.
 //   2. Stop at once on a refusal or a cut-off answer: retrying won't help.
 //   3. Check the answer. If it breaks a rule, show Claude its answer and the problems, and ask again.
@@ -15,8 +15,8 @@ export const MAX_ATTEMPTS = 2;
 export type Check<T> = { ok: true; value: T } | { ok: false; problems: string[] };
 
 export type StructuredCall<T> = {
-  agent: string; // "clarify-map", "extract-map", ...
-  goalId: string;
+  agent: string; // "clarify-map", "extract-map", "grader", ...
+  goalId?: string; // missing when an eval grades a labeled answer outside any goal
   model: ModelId;
   prompt: Prompt;
   schema: Record<string, unknown>;

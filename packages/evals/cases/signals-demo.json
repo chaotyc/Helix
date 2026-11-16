@@ -1,0 +1,25 @@
+{
+  "name": "signals-demo",
+  "goal": {
+    "title": "Signals and Systems",
+    "capstone": "Design and analyze a simple digital low-pass filter"
+  },
+  "source": { "file": "signals-demo.syllabus.md", "kind": "syllabus" },
+  "answers": [
+    {
+      "about": "goal",
+      "question": "What do you want to be able to do when you finish this course?",
+      "answer": "Pass the final exam and be able to design a simple digital filter on my own."
+    },
+    {
+      "about": "scope",
+      "question": "Should the map cover continuous-time and discrete-time signals equally?",
+      "answer": "Both, with more weight on discrete-time."
+    },
+    {
+      "about": "background",
+      "question": "How comfortable are you with calculus and complex numbers?",
+      "answer": "Calculus is fine; complex numbers I've only seen briefly."
+    }
+  ]
+}

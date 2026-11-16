@@ -1,0 +1,21 @@
+{
+  "name": "@helix/evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "maps": "node --env-file-if-exists=../../apps/server/.env src/maps.ts",
+    "grader": "node --env-file-if-exists=../../apps/server/.env src/grader.ts",
+    "tutor": "node --env-file-if-exists=../../apps/server/.env src/tutor.ts",
+    "add-case": "node src/add-case.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@helix/contracts": "workspace:*",
+    "@helix/core": "workspace:*",
+    "@helix/server": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.0"
+  }
+}
