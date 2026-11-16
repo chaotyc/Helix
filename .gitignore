@@ -4,3 +4,7 @@ dist/
 *sqlite
 .DS_Store
 .helix-data/
+
+# Mac app build output
+apps/desktop/build/
+apps/desktop/release/
