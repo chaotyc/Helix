@@ -1,0 +1,60 @@
+{
+  "name": "@helix/desktop",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Helix, the Mac app: Electron shell that starts the server and opens a window on it",
+  "main": "build/main.mjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/build.mjs && electron .",
+    "dist": "node scripts/build.mjs && electron-builder --mac dmg --arm64",
+    "icon": "sh scripts/make-icon.sh"
+  },
+  "devDependencies": {
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2"
+  },
+  "build": {
+    "appId": "local.helix.app",
+    "productName": "Helix",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "build/main.mjs",
+      "build/preload.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/server",
+        "to": "server"
+      },
+      {
+        "from": "build/helix-src",
+        "to": "helix-src"
+      },
+      {
+        "from": "build/web",
+        "to": "web"
+      }
+    ],
+    "npmRebuild": false,
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.education",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "Helix"
+    }
+  }
+}

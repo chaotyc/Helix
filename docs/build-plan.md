@@ -155,6 +155,8 @@ You design the schema; Claude Code writes the migration code.
 - Bundle the server to JavaScript for packaging. Database in `~/Library/Application Support/Helix`. API key entered in Settings, stored with Electron's `safeStorage`.
 - App icon from `helix-app-icon.svg` (convert to `.icns`). Package to `.dmg`; first launch with right-click → Open.
 
+**Built:** the server serves the built UI and its WebSocket on one port (any free port in the app) and only accepts WebSocket connections from local pages. The server runs in Electron's own Node (Electron 45, Node 24) as a background process; bundling keeps prompt versions identical to development by shipping the files they hash. The app is ad-hoc signed, arm64 only.
+
 **Check:** Helix runs from Applications with no terminal open.
 
 ### Step 15 [own]: Use it for real

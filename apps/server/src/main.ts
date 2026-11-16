@@ -1,11 +1,17 @@
+import { createServer } from "node:http";
 import { WebSocketServer, type WebSocket } from "ws";
 import { z } from "zod";
 import { ClientMsg, type ServerMsg } from "@helix/contracts";
 import { openDatabase } from "./db/open.ts";
 import { handle } from "./handlers.ts";
+import { allowedOrigin } from "./origin.ts";
+import { staticFiles } from "./static.ts";
 
 const HOST = "127.0.0.1"; // localhost only: other machines can't connect
-const PORT = 8765;
+// 8765 in development (Vite's proxy expects it). The Mac app passes 0: any free port.
+const PORT = Number(process.env.HELIX_PORT ?? 8765);
+// The built UI to serve, set by the Mac app. Unset in development, where Vite serves the UI.
+const WEB_DIR = process.env.HELIX_WEB_DIR;
 
 const db = openDatabase();
 
@@ -40,13 +46,21 @@ function handleMessage(socket: WebSocket, raw: string): void {
   });
 }
 
-const server = new WebSocketServer({ host: HOST, port: PORT });
+const http = createServer(
+  WEB_DIR ? staticFiles(WEB_DIR) : (_req, res) => res.writeHead(404).end("In development the UI is served by Vite."),
+);
+const server = new WebSocketServer({ server: http, verifyClient: (info: { origin?: string }) => allowedOrigin(info.origin) });
 
-server.on("listening", () => {
-  console.log(`Helix server listening on ws://${HOST}:${PORT}`);
+http.on("listening", () => {
+  const address = http.address();
+  const port = typeof address === "object" && address ? address.port : PORT;
+  console.log(`Helix server listening on http://${HOST}:${port}`);
+  // Started by the Mac app: tell it where to point the window.
+  const parentPort = (process as { parentPort?: { postMessage(message: unknown): void } }).parentPort;
+  parentPort?.postMessage({ type: "listening", port });
 });
 
-server.on("error", (err: NodeJS.ErrnoException) => {
+http.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EADDRINUSE") {
     console.error(`Port ${PORT} is already in use. Is the server already running in another tab?`);
   } else {
@@ -60,3 +74,5 @@ server.on("connection", (socket) => {
   socket.on("message", (data) => handleMessage(socket, data.toString()));
   socket.on("close", () => console.log("Client disconnected"));
 });
+
+http.listen(PORT, HOST);

@@ -1,3 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+# Install scripts these packages ship, left off on purpose: electron-winstaller only builds
+# Windows installers, and esbuild works from its prebuilt binary without its script.
+allowBuilds:
+  electron-winstaller: false
+  esbuild: false

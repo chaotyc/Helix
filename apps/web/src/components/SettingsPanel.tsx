@@ -1,4 +1,6 @@
 import { MODELS, ModelId, ModelRole, type Settings } from "@helix/contracts";
+import { desktop } from "../desktop.ts";
+import { ApiKeySection } from "./ApiKeySection.tsx";
 
 type Props = {
   settings: Settings | null; // null until the server replies
@@ -7,7 +9,7 @@ type Props = {
 
 const ROLE_INFO: Record<ModelRole, { title: string; detail: string }> = {
   generation: { title: "Generation", detail: "Builds concept maps and asks the clarifying questions." },
-  teaching: { title: "Teaching", detail: "Tutors, writes questions, and grades answers (coming in Steps 12–13)." },
+  teaching: { title: "Teaching", detail: "Tutors, writes questions, grades answers, and summarizes sessions." },
   evaluation: { title: "Evaluation", detail: "Judges Helix's own output, such as how good a map is." },
 };
 
@@ -17,12 +19,15 @@ function priceLabel(id: ModelId): string {
   return `$${m.inputPerM} / $${m.outputPerM} per M tokens`;
 }
 
-// The settings tab: which model does each job. Changes are saved on the server at once.
+// The settings tab: the API key (Mac app only) and which model does each job. Model changes are
+// saved on the server at once.
 export function SettingsPanel({ settings, onChange }: Props) {
   return (
     <div className="max-w-xl p-8">
       <h1 className="mb-1 text-lg font-semibold text-zinc-100">Settings</h1>
       <p className="mb-6 text-sm text-zinc-500">Choose the model for each job. Prices are in / out.</p>
+
+      {desktop && <ApiKeySection desktop={desktop} />}
 
       <h2 className="mb-3 text-sm font-semibold text-zinc-300">Models</h2>
       {!settings ? (

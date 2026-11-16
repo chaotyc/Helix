@@ -75,6 +75,8 @@ pnpm typecheck                        # type-check the whole repo
 pnpm --filter @helix/server dev       # run the server, restart on save
 pnpm --filter @helix/web dev          # run the UI dev server
 pnpm --filter @helix/core test        # run core tests
+pnpm --filter @helix/desktop start    # build and run the Mac app without packaging
+pnpm --filter @helix/desktop dist     # package the Mac app: apps/desktop/release/Helix-<version>-arm64.dmg
 pnpm --filter @helix/evals maps       # build maps for every eval case, judge them, compare runs
 pnpm --filter @helix/evals grader     # score the grader against labeled answers
 pnpm --filter @helix/evals tutor      # replay scripted learners, check the tutor's rules
