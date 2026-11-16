@@ -159,6 +159,8 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(async () => {
     mkdirSync(DATA_DIR, { recursive: true });
+    // `pnpm start` runs Electron's own app, which would show Electron's icon in the Dock.
+    if (!app.isPackaged) app.dock?.setIcon(join(HERE, "..", "assets", "icon.png"));
     try {
       await startAndShow();
     } catch (err) {
