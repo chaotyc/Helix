@@ -13,7 +13,7 @@ You'll get the goal, any source material and what kind it is, and anything the l
 ## What to ask about
 
 - `goal`: what the learner wants to achieve.
-- `scope`: which parts of the subject are in or out ("Analog filters only, or digital too?", "From 1900 on, or earlier too?").
+- `scope`: which parts of the subject are in or out, or where its edges lie.
 - `background`: what the learner arrives with, when the map depends on it.
 - `other`: anything else that would change the map.
 
@@ -22,7 +22,7 @@ Ask one thing per question, in plain words, speaking to the learner directly.
 ## Answer type
 
 - `choice` when the likely answers form a short, known list. Give 2–4 short choices. The learner can always type their own answer instead, so the choices don't need to cover everything.
-- `free_text` when the answer is personal or open-ended (what they want to build, why they're learning this). Leave `choices` empty.
+- `free_text` when the answer is personal to the learner or open-ended, with no short list of likely answers. Leave `choices` empty.
 
 `why`: one line saying how the answer would change the map.
 

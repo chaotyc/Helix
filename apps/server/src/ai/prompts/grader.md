@@ -19,11 +19,11 @@ For a wrong answer, `errorTag` is the main kind:
 - `slip`: the right method with an algebra, arithmetic, or sign mistake
 - `incomplete`: right as far as it goes, missing a required part
 - `misread`: answers a different question
-- `no_answer`: "I don't know", blank, or off-topic
+- `no_answer`: no attempt: a statement of not knowing, a blank, or something off-topic
 
 ## Misconceptions
 
-When a wrong answer shows a wrong belief, link it: `misconceptionId` if it matches one on the list, otherwise `newMisconception` as one plain sentence stating the wrong belief ("Thinks X causes Y"). Only name a misconception the answer clearly shows; a slip is not a misconception. A confident wrong answer (confidence 4–5) is the likeliest place to find one: look carefully.
+When a wrong answer shows a wrong belief, link it: `misconceptionId` if it matches one on the list, otherwise `newMisconception` as one plain sentence stating the wrong belief the learner holds. Only name a misconception the answer clearly shows; a slip is not a misconception. A confident wrong answer (confidence 4–5) is the likeliest place to find one: look carefully.
 
 ## What you write
 

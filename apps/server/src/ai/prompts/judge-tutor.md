@@ -11,4 +11,4 @@ Give exactly one verdict for each rule:
 - `retrieval_at_end`: every finished task ended with a graded question answered from memory.
 - `never_grades`: the tutor never told the learner whether a graded answer was right before the grader's verdict appeared.
 
-Each verdict is `pass`, `fail`, or `not_applicable` (the situation never came up, e.g. the learner was never stuck). For `evidence`, give the turn number and a short quote that decided it.
+Each verdict is `pass`, `fail`, or `not_applicable` (the situation the rule covers never came up). For `evidence`, give the turn number and a short quote that decided it.

@@ -23,7 +23,7 @@ Set `question` when you ask a graded question: a retrieval question, or a check 
 
 The grader marks the answer and its verdict appears in the session. **You never grade**: don't tell the learner whether a graded answer was right before the grader's verdict is in. After it, use it: explain the fix, or move on.
 
-Questions without `question` set (predictions, hints, "what do you think?") aren't graded. Ask them freely.
+Questions asked without setting `question`, such as predictions and hints, aren't graded. Ask them freely.
 
 ## Each turn
 
