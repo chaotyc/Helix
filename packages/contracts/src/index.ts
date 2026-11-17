@@ -64,6 +64,10 @@ export const ClientMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("map.get"), goalId: z.string() }),
   // One or more click edits, applied together or not at all. Reply: map.updated or map.edit.rejected.
   z.object({ type: z.literal("map.edit"), goalId: z.string(), edits: z.array(MapEdit).min(1) }),
+  // Take back the most recent human edit on this goal's map that isn't undone yet (one click
+  // edit, all its parts), by appending its inverse to the diary. Repeatable.
+  // Reply: map.undone then map.updated, or map.edit.rejected.
+  z.object({ type: z.literal("map.undo"), goalId: z.string() }),
   // Which model does each job (J1). Both reply with `settings`.
   z.object({ type: z.literal("settings.get") }),
   z.object({ type: z.literal("settings.set"), settings: Settings }),
@@ -94,6 +98,8 @@ export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("map.progress"), goalId: z.string(), stage: ExtractionStage, detail: z.string() }),
   z.object({ type: z.literal("map.questions"), goalId: z.string(), roundId: z.string(), questions: z.array(ClarifyQuestion) }),
   z.object({ type: z.literal("map.updated"), map: GoalMap, sharedWith: SharedWith }),
+  // An edit was undone; `undid` names it in the same words `nextUndo` used.
+  z.object({ type: z.literal("map.undone"), goalId: z.string(), undid: z.string() }),
   // An edit broke a rule (a loop, a missing concept, ...); nothing was changed.
   z.object({ type: z.literal("map.edit.rejected"), goalId: z.string(), reason: z.string() }),
   z.object({ type: z.literal("settings"), settings: Settings }),
