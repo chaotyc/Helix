@@ -1,0 +1,202 @@
+{
+  "date": "2026-11-17T01:33:54.290Z",
+  "runs": [
+    {
+      "case": "signals-new-learner",
+      "tutorPromptVersion": "tutor@348cf713",
+      "judgePromptVersion": "judge-tutor@1d1292a7",
+      "tutorModel": "antigravity:gemini-4-argon",
+      "judgeModel": "antigravity:gemini-4-argon",
+      "ended": true,
+      "learnerTurnsUsed": 8,
+      "code": [
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "all 2 finished task(s) had one"
+        },
+        {
+          "rule": "one_question",
+          "verdict": "pass",
+          "evidence": "every tutor message asks at most one"
+        }
+      ],
+      "judge": [
+        {
+          "rule": "predict_first",
+          "verdict": "pass",
+          "evidence": "[8] \"Before we define them formally, what would you guess it means for such a system to be linear and time-invariant?\""
+        },
+        {
+          "rule": "one_question",
+          "verdict": "pass",
+          "evidence": "[12] \"...how would you expect tomorrow's echo to compare to today's?\""
+        },
+        {
+          "rule": "hints_before_solution",
+          "verdict": "pass",
+          "evidence": "[14] \"Of course! Break down the phrase 'time-invariant': invariant means 'does not change.'\""
+        },
+        {
+          "rule": "asks_why",
+          "verdict": "fail",
+          "evidence": "[18] \"...because they let us predict a system's output for any input by breaking the input into simple, shifted building blocks. ... Which LTI property does each one break?\""
+        },
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "[21] \"Graded question on LTI systems at depth 1 (Orient)...\""
+        },
+        {
+          "rule": "never_grades",
+          "verdict": "pass",
+          "evidence": "[6] \"You nailed the core form e^(jωt) and the geometry—rotating around the unit circle in the complex plane!\""
+        }
+      ],
+      "transcript": [
+        {
+          "type": "task",
+          "id": "3ba1c3ec-4bcc-4ec4-ae74-cb7b84c636e7",
+          "label": "Review: Complex exponentials at depth 1"
+        },
+        {
+          "type": "tutor",
+          "id": "05a16104-6d08-46fc-a557-800f10c87035",
+          "text": "Welcome! Before we move on to LTI systems today, let's do a quick review of complex exponentials.\n\nHere's a quick retrieval check from memory to get us started."
+        },
+        {
+          "type": "question",
+          "id": "5ce8dfc2-a826-4f2e-84bd-f6b3c12d741a",
+          "itemId": "79c96a47-7a97-4913-a5c1-84aace35db6c",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "What is a complex exponential signal (including how Euler's formula relates it to sinusoids), and what is it used for in signals and systems?",
+          "step": "Identify complex exponentials and their role in signals and systems (Orient)",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "d41b3057-c3bf-4039-b8ef-1e7afbdbe12a",
+          "text": "I think it has something to do with e^(jωt) and rotating in the complex plane?",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "b80436e9-7600-4bee-a5e5-47627c870ccd",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You're right that $e^{j\\omega t}$ is a complex exponential and corresponds to rotation in the complex plane. However, your answer is missing how Euler's formula relates it to sinusoids ($e^{j\\omega t} = \\cos(\\omega t) + j\\sin(\\omega t)$) and what complex exponentials are used for in signals and systems. To complete this, note that they serve as basic building blocks for representing and analyzing oscillating, growing, or decaying signals using simpler exponential algebra."
+        },
+        {
+          "type": "tutor",
+          "id": "60b45f7e-324d-4802-ab1b-33f749716461",
+          "text": "You nailed the core form $e^{j\\omega t}$ and the geometry—rotating around the unit circle in the complex plane!\n\nWhat had slipped were the two other parts of the question:\n1. **Euler's formula** ($e^{j\\omega t} = \\cos(\\omega t) + j\\sin(\\omega t)$), which connects that rotation directly to standard cosine and sine waves (its real and imaginary projections).\n2. **What they're for**: in signals and systems, complex exponentials $e^{st}$ act as fundamental building blocks that let us represent and analyze oscillating, growing, or decaying signals using simple exponential algebra instead of messy trig identities.\n\nWith that refreshed, we're ready to move on to our main topic today: LTI systems! What do you think \"linear\" and \"time-invariant\" might mean when describing a system that takes an input signal and produces an output signal?"
+        },
+        {
+          "type": "task",
+          "id": "869c8973-f3e1-442d-8e03-5d44bab6029e",
+          "label": "Learn: LTI systems to depth 1 (Orient)"
+        },
+        {
+          "type": "tutor",
+          "id": "e3da95a6-14bf-47db-a0e8-5e98059cd2f5",
+          "text": "Notice in step [6] I already transitioned us, or if we're starting fresh on **LTI systems** (Linear Time-Invariant systems):\n\nImagine a system—like an audio amplifier or an echo in a room—that takes an input signal and produces an output signal. Before we define them formally, what would you guess it means for such a system to be **linear** and **time-invariant**?"
+        },
+        {
+          "type": "answer",
+          "id": "73623e69-fca0-407d-b3e9-e58b2d21c011",
+          "text": "e^(jθ) = cos θ + j sin θ"
+        },
+        {
+          "type": "tutor",
+          "id": "8a6d1083-3686-453d-b330-f0397f7379d6",
+          "text": "Spot on—that's Euler's formula from our review! \n\nNow, shifting gears to our new topic—**LTI (Linear Time-Invariant) systems**: imagine an audio amplifier or an echo in a room that takes an input sound and produces an output sound. What would you guess it means for that system to be **linear** and **time-invariant**?"
+        },
+        {
+          "type": "answer",
+          "id": "0da8b35f-f212-46e0-bda2-6a19c36d1c79",
+          "text": "I'm not sure. Maybe it means the output only depends on the input?"
+        },
+        {
+          "type": "tutor",
+          "id": "8c560589-f796-47ad-a701-50ed86af9582",
+          "text": "That's a great starting intuition—every system transforms an input into an output! \"Linear\" and \"time-invariant\" are two specific rules about *how* the system behaves.\n\nLet's look at **time-invariant** first, since its name is a big clue: if you clap your hands in a room today and record the echo, and then make the exact same clap tomorrow, how would you expect tomorrow's echo to compare to today's?"
+        },
+        {
+          "type": "answer",
+          "id": "597efbef-5526-4cfa-b611-f73d1dbf85d6",
+          "text": "Can I get a hint?"
+        },
+        {
+          "type": "tutor",
+          "id": "bbdfb627-009a-4f1f-9d5e-2703637a8600",
+          "text": "Of course! Break down the phrase **\"time-invariant\"**: *invariant* means \"does not change.\" \n\nSo if the room's echo behavior doesn't change over time, would tomorrow's echo sound different from today's, or would it be the exact same echo just happening a day later?"
+        },
+        {
+          "type": "answer",
+          "id": "27bbf9f3-9d08-418b-828c-af053b9d0808",
+          "text": "Linear means scaling and adding inputs scales and adds the outputs?"
+        },
+        {
+          "type": "tutor",
+          "id": "b0c592b9-db07-428f-8a5e-f09004d12ba5",
+          "text": "Spot on for **linear**! That's the superposition principle: scaling an input scales the output by the same factor, and adding two inputs together gives the sum of their individual outputs.\n\nNow let's bring back **time-invariant** from our room-echo example: if the room's behavior doesn't change over time and you make the exact same clap tomorrow instead of today, how will tomorrow's echo compare to today's?"
+        },
+        {
+          "type": "answer",
+          "id": "e7ad20e7-3a3a-4861-9853-847c339da831",
+          "text": "Time-invariant means if you delay the input, the output is just delayed by the same amount."
+        },
+        {
+          "type": "tutor",
+          "id": "6211bf03-0cfe-418e-b9cc-8e5b100771e6",
+          "text": "Exactly! Shifting the input in time simply shifts the output by the same amount—the system's behavior doesn't change over time.\n\nTogether, **linearity** (scaling and adding inputs scales and adds outputs) and **time-invariance** define an **LTI system**. They show up everywhere in engineering—modeling audio filters, electrical circuits, and room acoustics—and they are the cornerstone of signals and systems because they let us predict a system's output for *any* input by breaking the input into simple, shifted building blocks.\n\nTo test spotting them in the wild: suppose a guitar distortion pedal clips loud sounds when you double the input volume, while a smart speaker changes its tone settings depending on the time of day. Which LTI property does each one break?"
+        },
+        {
+          "type": "answer",
+          "id": "1aa0bdc6-08cf-4d3d-9fc0-e3047a33f985",
+          "text": "Because then you can build any input from pieces and add up the responses."
+        },
+        {
+          "type": "tutor",
+          "id": "e9d1a4b0-4f51-4124-aa48-4c24f833728d",
+          "text": "Spot on! Because you can break any complicated input into simple, shifted pieces, find the response to each piece, and just scale and add them up—that's the exact superpower of LTI systems.\n\nBefore we wrap up this topic, let's do a quick retrieval check from memory to lock in what LTI systems are and where they come up."
+        },
+        {
+          "type": "question",
+          "id": "d67afed6-0d98-4e1e-9c67-56a85a31e170",
+          "itemId": "25dc89af-f7bc-48d1-8c7f-446674a925e0",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "In your own words, what are the two properties that define an LTI (Linear Time-Invariant) system, and why are LTI systems so useful in signals and systems (along with an example of what they model)?",
+          "step": "Identify what an LTI system is, its two defining properties, and what it is used for (Orient)",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "365a1a3e-60c3-4c7d-9ab2-87907a7dc649",
+          "text": "A system is LTI if superposition holds and shifting the input shifts the output by the same amount.",
+          "confidence": 4
+        },
+        {
+          "type": "feedback",
+          "id": "34489e7b-cbec-4d16-aede-ade60685703e",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You accurately defined both properties of an LTI system: linearity (superposition) and time-invariance (shifting the input in time shifts the output by the same amount). However, your answer is incomplete because it omits why LTI systems are useful and an example of what they model. To complete your answer, explain that these two properties let us find the output for any input by breaking the input into shifted building blocks and summing their responses, and include a real-world example like an electrical circuit, audio filter, or room acoustics."
+        },
+        {
+          "type": "tutor",
+          "id": "e728166d-b749-495b-a01b-b60c5ccd0823",
+          "text": "You nailed the two defining properties—**linearity** (superposition: scaling and adding inputs scales and adds the outputs) and **time-invariance** (shifting the input in time shifts the output by the same amount)!\n\nThe only parts left out were the second half of the question:\n1. **Why they're so useful**: as you noted right before the check, those two properties let us predict a system's output for *any* input by breaking the input into simple, shifted building blocks and summing their individual responses.\n2. **Real-world examples**: LTI systems model things like electrical circuits, audio filters, and room acoustics (echoes).\n\nThat wraps up our orientation to LTI systems!"
+        },
+        {
+          "type": "summary",
+          "id": "c5dece52-0e06-4f53-b458-3cc516583bc1",
+          "text": "We reviewed complex exponentials and completed the orientation to LTI systems.\nThe learner recalled the core math and definitions well (unit-circle rotation for e^(jωt), Euler's formula, superposition, and time-shifting), and responded well when breaking down the literal meaning of \"time-invariant\" alongside a room-echo analogy.\nHowever, their responses often lagged a turn behind the conversation, and on both graded checks they gave only the mathematical definition while omitting purpose, utility, and real-world examples.\nThey also initially guessed LTI just means the output depends only on the input, and bypassed a question asking which property a distortion pedal and time-dependent speaker break.\nNext session, start by having them classify those concrete non-LTI examples and explicitly remind them to answer the \"why it's useful\" and example parts of multi-part prompts."
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}

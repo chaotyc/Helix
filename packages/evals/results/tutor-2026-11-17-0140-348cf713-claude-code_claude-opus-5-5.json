@@ -1,0 +1,271 @@
+{
+  "date": "2026-11-17T01:40:05.428Z",
+  "runs": [
+    {
+      "case": "signals-new-learner",
+      "tutorPromptVersion": "tutor@348cf713",
+      "judgePromptVersion": "judge-tutor@1d1292a7",
+      "tutorModel": "claude-code:claude-opus-5-5",
+      "judgeModel": "claude-code:claude-opus-5-5",
+      "ended": false,
+      "learnerTurnsUsed": 10,
+      "code": [
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "all 1 finished task(s) had one"
+        },
+        {
+          "rule": "one_question",
+          "verdict": "fail",
+          "evidence": "turn 8 asks 2: \"Yes, that's Euler's formula: the real part is cos θ and the imaginary part is si\""
+        }
+      ],
+      "judge": [
+        {
+          "rule": "predict_first",
+          "verdict": "fail",
+          "evidence": "Turn 34: the tutor explains both new tests first (\"Test 1, for linearity (zero in, zero out): A linear system must give an output of 0...\" and \"Test 2... Look for a bare t\"). Only after that does it ask \"Make a guess\"."
+        },
+        {
+          "rule": "one_question",
+          "verdict": "fail",
+          "evidence": "Turn 8 asks two questions: \"what does the first factor e^(σt) do to that rotating point over time? And what does the real part of the whole signal look like?\""
+        },
+        {
+          "rule": "hints_before_solution",
+          "verdict": "pass",
+          "evidence": "The learner got stuck at turns 9, 11 and 13. The tutor gave a hint at turn 10 (\"Here's a hint. Take σ = −1\") and a stronger one at turn 12 (\"here's a stronger hint\"). It only gave the answer at turn 14 (\"e^(−t) shrinks toward 0\")."
+        },
+        {
+          "rule": "asks_why",
+          "verdict": "fail",
+          "evidence": "The tutor never asks the learner why a step works. At turn 34 it gives the reason itself (\"Here's why. Scaling the input by 0 has to scale the output by 0 too\") and then asks only whether the system passes or fails."
+        },
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "The only finished task, the Review, ends with a graded question answered from memory. Turn 18 says \"Answer from memory\" and turn 19 is the graded card. The LTI task is still unfinished at turn 34."
+        },
+        {
+          "rule": "never_grades",
+          "verdict": "pass",
+          "evidence": "The tutor makes no comment on correctness before any grader verdict (turns 15–17, 19–21, 27–29, 31–33). It only refers to answers after the grader has given its verdict, e.g. turn 18: \"That's a correct definition of time invariance\"."
+        }
+      ],
+      "transcript": [
+        {
+          "type": "task",
+          "id": "66669f61-7a51-4dfc-be7f-44ed85839f81",
+          "label": "Review: Complex exponentials at depth 1"
+        },
+        {
+          "type": "tutor",
+          "id": "ec70bff7-b92a-43cc-840d-4d606b4a0f69",
+          "text": "Welcome! Let's start with a quick review of something you've seen before: complex exponentials. It's been a while, so let's see what you remember before we build on it. Answer from memory, and don't worry about being perfectly formal."
+        },
+        {
+          "type": "question",
+          "id": "602ec901-6633-494c-b25b-4a45729a8d23",
+          "itemId": "8b7baf9b-bce2-4d61-8582-abdeaa70eb5d",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "What does Euler's formula say? And in one or two sentences, what is a signal of the form e^(st) (with s complex), and what kinds of everyday signals does it cover?",
+          "step": "Recall Euler's formula and what e^(st) represents",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "d0c1b1ac-9790-4f8f-9a86-a4262b61c668",
+          "text": "I think it has something to do with e^(jωt) and rotating in the complex plane?",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "e2cc6dfa-0082-4295-b23a-be7c6e5e9b9d",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You're right that e^(jωt) traces a rotation around the unit circle in the complex plane, which is a good picture to keep. But the answer doesn't state Euler's formula, which is e^(jθ) = cos θ + j sin θ. It also doesn't describe e^(st) with s = σ + jω: σ sets growth or decay and ω sets how fast it oscillates. So one form covers constants (s = 0), real exponentials (s real), sinusoids (s purely imaginary), and damped or growing oscillations (general s)."
+        },
+        {
+          "type": "tutor",
+          "id": "375434cc-b0c4-4265-994e-18ce6f953ef0",
+          "text": "Your rotation picture is a good place to start, so let's build on it. Picture e^(jθ) as a point on the unit circle, at angle θ from the positive real axis.\n\nBefore I give you the formula, make a guess: what are the horizontal (real) and vertical (imaginary) coordinates of that point, in terms of θ?"
+        },
+        {
+          "type": "answer",
+          "id": "77cc5ceb-7d35-4583-8409-9466d62698c5",
+          "text": "e^(jθ) = cos θ + j sin θ"
+        },
+        {
+          "type": "tutor",
+          "id": "8292f510-fd4d-4af3-90ff-273e876d32e8",
+          "text": "Yes, that's Euler's formula: the real part is cos θ and the imaginary part is sin θ. That's exactly your rotation picture. As θ = ωt increases, the point goes around the unit circle, and ω sets how fast it spins.\n\nNow let s be a general complex number, s = σ + jω. Then e^(st) = e^(σt) · e^(jωt). The second factor is your rotating point.\n\nMake a guess: if σ is negative, what does the first factor e^(σt) do to that rotating point over time? And what does the real part of the whole signal look like?"
+        },
+        {
+          "type": "answer",
+          "id": "80ed6afe-4a9b-403b-ac8a-3673d41fc404",
+          "text": "I'm not sure. Maybe it means the output only depends on the input?"
+        },
+        {
+          "type": "tutor",
+          "id": "c81e99df-0a4b-4530-9196-67984d8921ba",
+          "text": "No problem. That idea, outputs and inputs, is about systems, and we'll get to it soon. For now we're only looking at the signal itself.\n\nHere's a hint. Take σ = −1, so the first factor is e^(−t). It's just an ordinary real number that multiplies the rotating point. What happens to e^(−t) as t gets bigger: does it grow, shrink, or stay the same?"
+        },
+        {
+          "type": "answer",
+          "id": "4a5ae9e7-609f-49f8-878f-2dcabe2465f4",
+          "text": "Can I get a hint?"
+        },
+        {
+          "type": "tutor",
+          "id": "387163b7-627a-4c07-9ca1-eb4489bd3ac1",
+          "text": "Sure, here's a stronger hint. Plug a few times into e^(−t):\n\n- t = 0: e^0 = 1\n- t = 1: e^(−1) ≈ 0.37\n- t = 2: e^(−2) ≈ 0.14\n\nLook at that pattern. As t gets bigger, what's happening to e^(−t)? And if you multiply the rotating point by that number, what happens to the circle it traces?"
+        },
+        {
+          "type": "answer",
+          "id": "c468e4e4-e444-45c8-afaa-951dc7ebc8a7",
+          "text": "Linear means scaling and adding inputs scales and adds the outputs?"
+        },
+        {
+          "type": "tutor",
+          "id": "5e7eaf22-6878-4fb2-8dba-25caee1a7540",
+          "text": "That's a good description of linearity, and you'll need it in the next part, when we get to systems. For now we're still looking at the signal on its own, so here's the answer to the hint question.\n\ne^(−t) shrinks toward 0: 1, then 0.37, then 0.14, and so on. When you multiply the rotating point by a number that keeps shrinking, its circle tightens into an **inward spiral**. The real part, e^(−t)·cos(ωt), is a **decaying oscillation**: a cosine whose swings fade away, like a plucked string going quiet. If σ > 0 instead, the spiral grows outward.\n\nSo one form, e^(st) with s = σ + jω, covers a lot of signals:\n- s = 0 gives a constant\n- s real (ω = 0) gives a pure exponential growth or decay\n- s purely imaginary (σ = 0) gives a steady sinusoid\n- general s gives a damped or growing oscillation\n\nNow a quick check from memory, with no hints for this one."
+        },
+        {
+          "type": "question",
+          "id": "30e9c903-b359-4c57-b45c-e0842c037945",
+          "itemId": "c05e8275-f15a-4e83-b770-f69b3d1f89cd",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "For the signal e^(st) with s = σ + jω: what kind of signal do you get when (a) s = 0, (b) σ = 0 but ω ≠ 0, and (c) σ < 0 and ω ≠ 0? Use Euler's formula to say what the real part looks like in case (b).",
+          "step": "Identify the signal cases covered by e^(st)",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "51dccdb2-22f3-44d5-91b9-a32842c8fb83",
+          "text": "Time-invariant means if you delay the input, the output is just delayed by the same amount.",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "f742fea2-b1fb-4a95-a480-46bd281a54af",
+          "correct": false,
+          "errorTag": "no_answer",
+          "explanation": "Your answer defines time invariance correctly, but this question is about the complex exponential e^(st), so it doesn't answer any of the three parts. Here are the answers. (a) When s = 0, e^(st) = 1, a constant. (b) When σ = 0, Euler's formula gives e^(jωt) = cos ωt + j sin ωt, so the real part is cos(ωt), an oscillation with constant amplitude. (c) When σ < 0, the factor e^(σt) shrinks over time, so you get a damped oscillation: the point spirals inward and the real part is a cosine that fades away."
+        },
+        {
+          "type": "tutor",
+          "id": "d2980c9b-5856-4d68-bedb-fd40bc83f13a",
+          "text": "That's a correct definition of time invariance, and it'll be useful in the next part. Several of your answers have been about systems, though, so you might be thinking ahead or answering a different card. For now we're still on the **signal** e^(st) by itself.\n\nQuick recap: Euler's formula says e^(jθ) = cos θ + j sin θ. With s = σ + jω, ω sets how fast the point rotates, and σ sets whether the spiral grows (σ > 0), shrinks (σ < 0), or stays on the circle (σ = 0).\n\nLet's try one more short question about the signal. Answer from memory."
+        },
+        {
+          "type": "question",
+          "id": "665e9571-8e9c-4d8d-81d1-672fb26e6bc3",
+          "itemId": "ae1f2ece-93e9-46a8-b170-3e864ad1e841",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "Consider the signal x(t) = e^(st) with s = 2 + j5. (a) Is the oscillation growing, decaying, or constant in size, and which part of s tells you? (b) Using Euler's formula, write the real part of x(t).",
+          "step": "Interpret σ and ω in e^(st) using Euler's formula",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "c1de6af8-9ef5-420d-ba8a-7b67fe06d758",
+          "text": "Because then you can build any input from pieces and add up the responses.",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "edf0f424-b155-442d-99e1-f8497e29f47f",
+          "correct": false,
+          "errorTag": "misread",
+          "explanation": "Your answer explains why superposition is useful: you build an input from pieces and add up the responses. That's true for linear systems, but it doesn't answer this question about the signal e^(st). (a) With s = 2 + j5, the real part σ = 2 is positive, so the e^(2t) factor makes the oscillation grow. (b) Euler's formula gives e^(st) = e^(2t)(cos 5t + j sin 5t), so the real part is e^(2t)·cos(5t). That's a cosine at frequency 5 whose amplitude grows exponentially."
+        },
+        {
+          "type": "tutor",
+          "id": "5fefcf43-cf30-462c-95c3-20e2b9f4ad20",
+          "text": "Here's the answer to that last card. With s = 2 + j5, the real part σ = 2 is positive, so the factor e^(2t) makes the oscillation **grow**. Euler's formula gives e^(st) = e^(2t)(cos 5t + j sin 5t), so the real part is **e^(2t)·cos(5t)**. That's a cosine whose swings keep getting bigger, which is an outward spiral in your rotation picture.\n\nI've noticed something: your last few answers have been good answers to questions about systems (linearity, time invariance, superposition), not the signal question on the card. You might be seeing a different card from me, or thinking ahead. Either way, it's worth checking that the question you're answering matches the one shown.\n\nHere's the one idea to hold on to. **e^(st) with s = σ + jω: ω sets how fast it rotates, and σ sets whether it grows (σ > 0), decays (σ < 0), or stays steady (σ = 0).** We'll come back to this in a later review. Next we move on to LTI systems, where your linearity and time-invariance answers will come in handy."
+        },
+        {
+          "type": "task",
+          "id": "50d10030-5564-464e-8a82-824a7086e98e",
+          "label": "Learn: LTI systems to depth 1 (Orient)"
+        },
+        {
+          "type": "tutor",
+          "id": "cc9b2483-dc41-4622-ab20-508f001f0d22",
+          "text": "Now we're on systems, so your earlier answers fit right here. You already said the two key ideas:\n\n- **Linear**: scaling and adding inputs scales and adds the outputs.\n- **Time-invariant**: delay the input and the output is delayed by the same amount.\n\nAn **LTI system** has both properties. A *system* is any rule that turns an input signal x(t) into an output signal y(t), like an amplifier, a filter, or a room's echo.\n\nLet's test the linearity half. Take the system y(t) = x(t)², which squares its input. Make a guess: if you **double** the input, what happens to the output? Does that make this system linear?"
+        },
+        {
+          "type": "answer",
+          "id": "62c96e99-e4cc-4950-84e7-b00d7c1f35e3",
+          "text": "A system is LTI if superposition holds and shifting the input shifts the output by the same amount."
+        },
+        {
+          "type": "tutor",
+          "id": "597f7a35-8124-40a8-8083-76e27edf408f",
+          "text": "That's a correct definition. **Superposition** (scale and add inputs, and the outputs scale and add) gives you the \"L\", and **shift in, same shift out** gives you the \"T\".\n\nThe reason we care: if a system is LTI, you can break any input into simple pieces, find the response to each piece, and add those responses up. That's how we'll reach the course goal of predicting the output for *any* input.\n\nNow let's see whether you can spot an LTI system. Please read the card carefully. It asks about three specific systems."
+        },
+        {
+          "type": "question",
+          "id": "9722e870-aa80-4766-8631-588917073e38",
+          "itemId": "7d6dbb72-d13d-4b83-947f-076150d4169a",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "Here are three systems: (a) y(t) = 5·x(t), (b) y(t) = x(t)², (c) y(t) = x(t − 2). For each one, say whether it is LTI. If it isn't, name which property fails. Then, in one sentence, say why being LTI is useful.",
+          "step": "Recognize LTI systems and state why LTI matters",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "db1befd7-76f0-4a86-8806-b9caaa8428e2",
+          "text": "ok",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "df096a94-43af-48f5-ac3d-a73baf50b44f",
+          "correct": false,
+          "errorTag": "no_answer",
+          "explanation": "Your answer \"ok\" doesn't respond to the question, so there's nothing here to grade. Here's what a full answer covers. (a) y = 5x is LTI. (b) y = x² is not LTI because it fails linearity: doubling the input makes the output four times bigger. (c) y = x(t − 2) is LTI, since a pure delay is both linear and time-invariant. LTI is useful because you can break any input into simple pieces, find the response to each piece, and add them up to get the output."
+        },
+        {
+          "type": "tutor",
+          "id": "2cae38b4-9bed-4827-949f-6b4c1836884b",
+          "text": "That \"ok\" didn't give me anything to go on. That's fine, but it's the third or fourth time your answer hasn't matched the card. Before you answer, please check that the card you're looking at is asking about the systems below.\n\nHere's what the last card was after, using the definition you gave yourself:\n- **y = 5x** scales the input, and a fixed scale doesn't care when the input happens, so it's **LTI**.\n- **y = x²** fails **linearity**. Double the input and the output gets 4× bigger.\n- **y = x(t − 2)** is a pure delay. It's **LTI**.\n\nAnd here's why it matters: with an LTI system, you can split any input into simple pieces and add up the responses to those pieces.\n\nNow try a fresh set of three, from memory. There's a trap in each of the first two."
+        },
+        {
+          "type": "question",
+          "id": "778ad0b9-d470-447a-9a38-3703c7a3a46b",
+          "itemId": "865f3ef3-c1cc-4ac3-90e9-3cba3c8a87b1",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "Three new systems: (a) y(t) = x(t) + 3, (b) y(t) = t·x(t), (c) y(t) = 0.5·x(t − 1). For each one, say whether it is LTI. If it isn't, name which property fails (linearity or time invariance). Then, in one sentence, say why being LTI is useful for predicting a system's output.",
+          "step": "Recognize LTI systems and why LTI matters",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "5d6ccb77-0930-4b88-a91f-71d283605daa",
+          "text": "I don't know",
+          "confidence": 1
+        },
+        {
+          "type": "feedback",
+          "id": "6c83f4cf-6809-4585-865d-2b6fc5c66ff3",
+          "correct": false,
+          "errorTag": "no_answer",
+          "explanation": "It's fine not to know yet, so here is how to work through it. (a) y = x + 3 isn't LTI because linearity fails: an input of zero gives an output of 3, and doubling x doesn't double y. (b) y = t·x(t) isn't LTI because time invariance fails: the gain t depends on the clock time, so delaying the input doesn't just delay the output. (c) y = 0.5·x(t − 1) is LTI, since it only scales and delays the input. LTI is useful because you can split an input into simple pieces, find the output for each piece, and add those outputs together to get the full output."
+        },
+        {
+          "type": "tutor",
+          "id": "3922d87b-f2f6-45ea-9f9f-d7e0b9d86180",
+          "text": "**Q:** That's fine. \"I don't know\" is an honest answer, and it's more useful to me than a guess. Let's slow down and use two quick tests you can run on any system.\n\n**Test 1, for linearity (zero in, zero out):** A linear system must give an output of 0 when the input is 0. Here's why. Scaling the input by 0 has to scale the output by 0 too.\n\n**Test 2, for time invariance:** Look for a bare **t** in the rule, outside of x(·). If the rule itself uses the clock, then delaying the input won't simply delay the output.\n\nLet's try Test 1 on system (a), y(t) = x(t) + 3. Make a guess: if the input is x(t) = 0 all the time, what does the output come out to? Does that pass or fail the zero-in, zero-out test?"
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}

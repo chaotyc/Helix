@@ -1,0 +1,165 @@
+{
+  "date": "2026-11-17T01:40:43.536Z",
+  "effort": "high",
+  "judgeEffort": "xhigh",
+  "runs": [
+    {
+      "case": "signals-demo",
+      "run": 1,
+      "extractPromptVersion": "extract-map@243b3b80",
+      "judgePromptVersion": "judge-map@5f8a2b9f",
+      "extractModel": "claude-code:claude-opus-5-5",
+      "judgeModel": "claude-code:claude-opus-5-5",
+      "score": {
+        "concepts": 64,
+        "arrows": 131,
+        "majors": 2,
+        "minors": 5,
+        "majorsPer10": 0.3125,
+        "byType": {
+          "wrong_arrow_depth": {
+            "major": 2,
+            "minor": 1
+          },
+          "wrong_arrow": {
+            "major": 0,
+            "minor": 2
+          },
+          "missing_prerequisite": {
+            "major": 0,
+            "minor": 1
+          },
+          "missing_concept": {
+            "major": 0,
+            "minor": 1
+          }
+        },
+        "warnings": 7
+      },
+      "problems": [
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "major",
+          "conceptIds": [
+            "stability-from-pole-locations",
+            "z-transform-region-of-convergence"
+          ],
+          "reason": "The arrow only applies at depth 4, so stability-from-pole-locations@3, which iir-filters@3 relies on, has no prerequisites at all; it should be stability-from-pole-locations@3 needs z-transform-region-of-convergence@3 (and through it poles and zeros)."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "stability-from-pole-locations",
+            "lti-properties-from-impulse-response"
+          ],
+          "reason": "The pole-location test rests on h being absolutely summable even at the apply level, so this arrow should start at stability-from-pole-locations@3, not @4."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "major",
+          "conceptIds": [
+            "frequency-response-from-pole-zero-plot",
+            "poles-and-zeros"
+          ],
+          "reason": "You can't estimate a response from distances to poles and zeros without knowing them, but at depth 3 nothing reaches poles-and-zeros (transfer-function@3 doesn't need it); the arrow should be @3 needs poles-and-zeros@3."
+        },
+        {
+          "type": "wrong_arrow",
+          "severity": "minor",
+          "conceptIds": [
+            "continuous-time-signals",
+            "function-graph-transformations"
+          ],
+          "reason": "Knowing that a signal is a function of t doesn't depend on graph shifting or flipping; signal-time-operations already carries that prerequisite, so this arrow should be dropped."
+        },
+        {
+          "type": "wrong_arrow",
+          "severity": "minor",
+          "conceptIds": [
+            "poles-and-zeros",
+            "partial-fraction-decomposition"
+          ],
+          "reason": "Poles and zeros are just the roots of the numerator and denominator; partial fractions uses those roots rather than being needed to understand them, so this arrow should be dropped."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "minor",
+          "conceptIds": [
+            "convolution-theorem",
+            "continuous-time-convolution"
+          ],
+          "reason": "The convolution theorem is stated for the continuous-time Fourier transform and uses the convolution integral, but it only reaches discrete-time convolution, and continuous-time-convolution feeds nothing; add convolution-theorem@3 needs continuous-time-convolution@3."
+        },
+        {
+          "type": "missing_concept",
+          "severity": "minor",
+          "conceptIds": [
+            "choosing-fir-vs-iir",
+            "digital-low-pass-filter-design"
+          ],
+          "reason": "The capstone includes the FIR-or-IIR choice, but windowing is the only design method in the map; add an IIR design method such as 'IIR low-pass design by pole-zero placement (e.g. a first-order recursive low-pass)' so the IIR choice can be carried out."
+        }
+      ],
+      "warnings": [
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "linear-differential-equations",
+            "difference-equations"
+          ],
+          "message": "\"Linear constant-coefficient differential equations\" and \"Linear constant-coefficient difference equations\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "fourier-series",
+            "discrete-time-fourier-series"
+          ],
+          "message": "\"Continuous-time Fourier series\" and \"Discrete-time Fourier series\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "fourier-series",
+            "continuous-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier series\" and \"Continuous-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "discrete-time-fourier-series",
+            "discrete-time-fourier-transform"
+          ],
+          "message": "\"Discrete-time Fourier series\" and \"Discrete-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform",
+            "discrete-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier transform\" and \"Discrete-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "z-transform",
+            "z-transform-properties"
+          ],
+          "message": "\"z-transform\" and \"z-transform properties\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "z-transform",
+            "inverse-z-transform"
+          ],
+          "message": "\"z-transform\" and \"Inverse z-transform\" share 67% of their words."
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}

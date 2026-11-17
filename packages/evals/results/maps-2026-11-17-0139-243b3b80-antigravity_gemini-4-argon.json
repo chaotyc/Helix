@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-17T01:39:55.842Z",
+  "effort": "high",
+  "judgeEffort": "xhigh",
+  "runs": [
+    {
+      "case": "signals-demo",
+      "run": 1,
+      "extractPromptVersion": "extract-map@243b3b80",
+      "judgePromptVersion": "judge-map@5f8a2b9f",
+      "extractModel": "antigravity:gemini-4-argon",
+      "judgeModel": "antigravity:gemini-4-argon",
+      "score": {
+        "concepts": 40,
+        "arrows": 78,
+        "majors": 0,
+        "minors": 0,
+        "majorsPer10": 0,
+        "byType": {},
+        "warnings": 5
+      },
+      "problems": [],
+      "warnings": [
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-series",
+            "discrete-time-fourier-series"
+          ],
+          "message": "\"Continuous-Time Fourier Series\" and \"Discrete-Time Fourier Series\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-series",
+            "continuous-time-fourier-transform"
+          ],
+          "message": "\"Continuous-Time Fourier Series\" and \"Continuous-Time Fourier Transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "discrete-time-fourier-series",
+            "discrete-time-fourier-transform"
+          ],
+          "message": "\"Discrete-Time Fourier Series\" and \"Discrete-Time Fourier Transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform",
+            "discrete-time-fourier-transform"
+          ],
+          "message": "\"Continuous-Time Fourier Transform\" and \"Discrete-Time Fourier Transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "laplace-region-of-convergence",
+            "z-transform-region-of-convergence"
+          ],
+          "message": "\"Laplace Transform Region of Convergence\" and \"Z-Transform Region of Convergence\" share 67% of their words."
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}

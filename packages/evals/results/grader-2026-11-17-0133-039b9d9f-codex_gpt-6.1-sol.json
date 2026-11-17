@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-17T01:33:43.368Z",
+  "promptVersion": "grader@039b9d9f",
+  "model": "codex:gpt-6.1-sol",
+  "effort": "medium",
+  "score": {
+    "cases": 8,
+    "accuracy": 1,
+    "falsePass": 0,
+    "falseFail": 0,
+    "tagAgreement": 1,
+    "meetsBar": true
+  },
+  "costUsd": 0,
+  "graded": [
+    {
+      "caseId": "lti-superposition-right",
+      "label": {
+        "correct": true,
+        "errorTag": null
+      },
+      "correct": true,
+      "errorTag": null
+    },
+    {
+      "caseId": "lti-names-convolution-only",
+      "label": {
+        "correct": false,
+        "errorTag": "incomplete"
+      },
+      "correct": false,
+      "errorTag": "incomplete"
+    },
+    {
+      "caseId": "rc-time-constant-equivalent-form",
+      "label": {
+        "correct": true,
+        "errorTag": null
+      },
+      "correct": true,
+      "errorTag": null
+    },
+    {
+      "caseId": "rc-time-constant-slip",
+      "label": {
+        "correct": false,
+        "errorTag": "slip"
+      },
+      "correct": false,
+      "errorTag": "slip"
+    },
+    {
+      "caseId": "stability-right-answer-wrong-reason",
+      "label": {
+        "correct": false,
+        "errorTag": "misconception"
+      },
+      "correct": false,
+      "errorTag": "misconception"
+    },
+    {
+      "caseId": "stability-dont-know",
+      "label": {
+        "correct": false,
+        "errorTag": "no_answer"
+      },
+      "correct": false,
+      "errorTag": "no_answer"
+    },
+    {
+      "caseId": "big-o-misread",
+      "label": {
+        "correct": false,
+        "errorTag": "misread"
+      },
+      "correct": false,
+      "errorTag": "misread"
+    },
+    {
+      "caseId": "treaty-orient-right",
+      "label": {
+        "correct": true,
+        "errorTag": null
+      },
+      "correct": true,
+      "errorTag": null
+    }
+  ]
+}
