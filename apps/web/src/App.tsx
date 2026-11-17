@@ -42,6 +42,8 @@ export function App() {
   const sharedWith = useAppStore((state) => state.sharedWith);
   const questions = useAppStore((state) => state.questions);
   const editErrors = useAppStore((state) => state.editErrors);
+  const nextUndo = useAppStore((state) => state.nextUndo);
+  const undone = useAppStore((state) => state.undone);
   const serverError = useAppStore((state) => state.serverError);
   const createdGoalId = useAppStore((state) => state.createdGoalId);
 
@@ -217,6 +219,10 @@ export function App() {
     sendOrWarn({ type: "map.edit", goalId, edits }, "the edit wasn't saved");
   }
 
+  function undoMapEdit(goalId: string): void {
+    sendOrWarn({ type: "map.undo", goalId }, "nothing was undone");
+  }
+
   // Sessions: the server runs them; the window sends what the learner does and shows what comes back.
   // Returns whether the request went out (false when not connected).
   function startSession(kind: SessionKind): boolean {
@@ -383,6 +389,9 @@ export function App() {
                   onAsk={(text) => askQuestions(selectedGoal.id, text)}
                   onBuild={(roundId, answers, effort) => buildMap(selectedGoal.id, roundId, answers, effort)}
                   onEdit={(edits) => editMap(selectedGoal.id, edits)}
+                  nextUndo={nextUndo[selectedGoal.id] ?? null}
+                  undone={undone[selectedGoal.id]}
+                  onUndo={() => undoMapEdit(selectedGoal.id)}
                   onDismissError={() => useAppStore.getState().setEditError(selectedGoal.id, null)}
                 />
               ) : selectedSession ? (

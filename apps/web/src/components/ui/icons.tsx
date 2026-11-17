@@ -95,6 +95,8 @@ export const RefreshIcon = icon(
   </>,
 );
 
+export const UndoIcon = icon(<path d="M9 14L4.5 9.5 9 5M4.5 9.5h10a5 5 0 010 10H11" />);
+
 export const PlayIcon = icon(<path d="M8 5.5v13l10-6.5z" />);
 export const StopIcon = icon(<rect x="6.5" y="6.5" width="11" height="11" rx="2" />);
 

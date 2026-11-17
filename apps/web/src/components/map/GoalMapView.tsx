@@ -2,12 +2,12 @@
 //   - questions waiting        → answer them
 //   - no map yet, or rebuilding → paste the source
 //   - otherwise                 → the drawn map, with an inspector for whatever is selected
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, ExtractionStage, GoalMap, MapEdit, SharedWith } from "@helix/contracts";
 import type { PendingQuestions } from "../../store.ts";
 import { Button } from "../ui/Button.tsx";
 import { Alert, Spinner } from "../ui/feedback.tsx";
-import { PlusIcon, RefreshIcon } from "../ui/icons.tsx";
+import { PlusIcon, RefreshIcon, UndoIcon } from "../ui/icons.tsx";
 import { AddArrowForm } from "./AddArrowForm.tsx";
 import { AddConceptForm } from "./AddConceptForm.tsx";
 import { ArrowInspector } from "./ArrowInspector.tsx";
@@ -16,6 +16,7 @@ import { ConceptInspector } from "./ConceptInspector.tsx";
 import { edgeKey, edgeLabel, edgeSharedWith } from "./edits.ts";
 import { Inspector } from "./Inspector.tsx";
 import { MapCanvas } from "./MapCanvas.tsx";
+import { MapNotice, type Notice } from "./MapNotice.tsx";
 import { MapProgress, STAGE_LABEL } from "./MapProgress.tsx";
 import { QuestionsCard } from "./QuestionsCard.tsx";
 
@@ -31,10 +32,14 @@ type Props = {
   onAsk: (sourceText: string | undefined) => void;
   onBuild: (roundId: string, answers: ClarifyAnswer[], effort: Effort) => void;
   onEdit: (edits: MapEdit[]) => void;
+  nextUndo: string | null; // what Undo would take back, in words; null when there's nothing
+  undone: { undid: string; n: number } | undefined; // the latest undo the server confirmed
+  onUndo: () => void;
   onDismissError: () => void;
 };
 
 const INSPECTOR_INSET = 340 + 12; // the inspector's width and its gap from the edge
+const UNDO_KEYS = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘Z" : "Ctrl+Z";
 
 type Selection =
   | { kind: "concept"; conceptId: string }
@@ -50,17 +55,63 @@ export function GoalMapView(props: Props) {
   const [selection, setSelection] = useState<Selection>(null);
   // What to select once the server confirms an edit. Until then the form stays open, so a
   // rejected edit loses nothing you typed.
-  const [afterSave, setAfterSave] = useState<{ next: Selection } | null>(null);
+  // `removed`: a concept just taken out of this goal, to offer Undo for once it's saved.
+  const [afterSave, setAfterSave] = useState<{ next: Selection; removed?: { id: string; name: string } } | null>(null);
+  // A note over the map; `restore` is the concept its Undo brings back (and selects again).
+  const [notice, setNotice] = useState<(Notice & { restore?: string }) | null>(null);
+  const [undoing, setUndoing] = useState(false); // whether the last request was an undo, for the error title
+  const dismissNotice = useCallback(() => setNotice(null), []);
+  const say = (message: string, restore?: string) =>
+    setNotice((old) => ({ message, undoable: restore !== undefined, restore, n: (old?.n ?? 0) + 1 }));
 
   useEffect(() => {
-    if (!afterSave) return;
-    setSelection(afterSave.next);
-    setAfterSave(null);
+    if (afterSave) {
+      setSelection(afterSave.next);
+      if (afterSave.removed) say(`Removed “${afterSave.removed.name}” from this goal.`, afterSave.removed.id);
+      setAfterSave(null);
+      return;
+    }
+    // Changed some other way (an undo, a rebuild): let go of anything that's no longer there.
+    if (map) setSelection((current) => (stillThere(current, map) ? current : null));
   }, [map]); // a new map from the server: the edit was saved
 
   useEffect(() => {
     if (props.editError) setAfterSave(null); // rejected: stay where you are
   }, [props.editError]);
+
+  // The server confirmed an undo: say what it took back. Not on opening the page with an old one.
+  const seenUndo = useRef(props.undone?.n);
+  useEffect(() => {
+    if (!props.undone || props.undone.n === seenUndo.current) return;
+    seenUndo.current = props.undone.n;
+    say(`Undid: ${props.undone.undid}`);
+  }, [props.undone?.n]);
+
+  // `restore`: the concept to select again once the undo is saved (undoing "Remove from goal").
+  function undo(restore?: string): void {
+    if (!props.nextUndo) return;
+    props.onDismissError();
+    setNotice(null);
+    props.onUndo();
+    setUndoing(true);
+    if (restore) setAfterSave({ next: { kind: "concept", conceptId: restore } });
+  }
+
+  // Cmd+Z (Ctrl+Z) undoes the last map edit, unless focus is in a text field (that's the field's
+  // own undo) or the inspector holds an unsaved edit (it would be thrown away).
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent): void {
+      if (event.key.toLowerCase() !== "z" || !(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) return;
+      if (event.defaultPrevented) return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest("input, textarea, select, [contenteditable]")) return;
+      if (document.querySelector("[data-inspector] [data-dirty]")) return;
+      event.preventDefault();
+      undo();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   // Esc closes the inspector, unless its form holds an unsaved edit (that would throw it away;
   // the close button still works). Each form marks itself with data-dirty while it differs.
@@ -84,7 +135,11 @@ export function GoalMapView(props: Props) {
   function edit(edits: MapEdit[]): void {
     props.onDismissError();
     props.onEdit(edits);
-    setAfterSave({ next: selectionAfter(selection, edits) });
+    setUndoing(false);
+    setNotice(null);
+    const id = edits.length === 1 && edits[0]!.op === "remove_view_entry" ? edits[0]!.conceptId : undefined;
+    const removed = id === undefined ? undefined : { id, name: map?.concepts.find((c) => c.id === id)?.name ?? id };
+    setAfterSave({ next: selectionAfter(selection, edits), removed });
   }
 
   const failure = failed && (
@@ -161,6 +216,18 @@ export function GoalMapView(props: Props) {
           <Button variant="ghost" size="sm" icon={<PlusIcon className="size-3.5" />} onClick={() => setSelection({ kind: "add-arrow" })}>
             Arrow
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<UndoIcon className="size-3.5" />}
+            disabled={!props.nextUndo}
+            aria-label={props.nextUndo ? `Undo: ${props.nextUndo}` : "Undo"}
+            aria-keyshortcuts="Meta+Z Control+Z"
+            title={props.nextUndo ? `Undo: ${props.nextUndo} (${UNDO_KEYS})` : "Nothing to undo"}
+            onClick={() => undo()}
+          >
+            Undo
+          </Button>
           <Button variant="ghost" size="sm" icon={<RefreshIcon className="size-3.5" />} onClick={() => setRebuilding(true)}>
             Rebuild
           </Button>
@@ -174,10 +241,11 @@ export function GoalMapView(props: Props) {
         )}
         {failure && <div className="pointer-events-auto w-96 max-w-full">{failure}</div>}
         {props.editError && (
-          <Alert tone="danger" title="Not saved" onDismiss={props.onDismissError} className="pointer-events-auto w-96 max-w-full bg-overlay">
+          <Alert tone="danger" title={undoing ? "Not undone" : "Not saved"} onDismiss={props.onDismissError} className="pointer-events-auto w-96 max-w-full bg-overlay">
             {props.editError}
           </Alert>
         )}
+        {notice && <MapNotice notice={notice} onUndo={() => undo(notice.restore)} onDismiss={dismissNotice} />}
       </div>
 
       {selection && (
@@ -197,6 +265,7 @@ export function GoalMapView(props: Props) {
           }
           subtitle={selection.kind === "concept" ? concept?.id : selection.kind === "edge" ? edgeLabel(selection.edge) : undefined}
           onClose={close}
+          returnFocus={() => drawnElement(selection)}
         >
           {concept && entry && (
             <ConceptInspector
@@ -215,6 +284,20 @@ export function GoalMapView(props: Props) {
       )}
     </div>
   );
+}
+
+// The drawn node or arrow for a selection, to give focus back to when the inspector closes.
+function drawnElement(selection: Selection): Element | null {
+  if (selection?.kind === "concept") return document.querySelector(`.react-flow__node[data-id="${CSS.escape(selection.conceptId)}"]`);
+  if (selection?.kind === "edge") return document.querySelector(`.react-flow__edge[data-id="${CSS.escape(edgeKey(selection.edge))}"]`);
+  return null;
+}
+
+// Whether a selection still points at something on the map (an undo can take it away).
+function stillThere(selection: Selection, map: GoalMap): boolean {
+  if (selection?.kind === "concept") return map.view.some((e) => e.conceptId === selection.conceptId);
+  if (selection?.kind === "edge") return map.edges.some((e) => edgeKey(e) === edgeKey(selection.edge));
+  return true;
 }
 
 // Where the inspector goes after a saved edit: a removed concept or deleted arrow is gone,

@@ -55,7 +55,10 @@ function handleMessage(raw: string): void {
       useAppStore.getState().setQuestions(msg.goalId, { roundId: msg.roundId, questions: msg.questions });
       return;
     case "map.updated":
-      useAppStore.getState().setMap(msg.map, msg.sharedWith);
+      useAppStore.getState().setMap(msg.map, msg.sharedWith, msg.nextUndo);
+      return;
+    case "map.undone":
+      useAppStore.getState().setUndone(msg.goalId, msg.undid);
       return;
     case "map.edit.rejected":
       useAppStore.getState().setEditError(msg.goalId, msg.reason);

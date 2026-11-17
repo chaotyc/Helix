@@ -41,6 +41,8 @@ type AppState = {
   sharedWith: Record<string, SharedWith>; // per goal: which other goals use each of its concepts
   questions: Record<string, PendingQuestions>; // per goal: clarifying questions waiting for answers
   editErrors: Record<string, string>; // per goal: why the last map edit was rejected
+  nextUndo: Record<string, string | null>; // per goal: what Undo would take back, in words
+  undone: Record<string, { undid: string; n: number }>; // per goal: the latest undo (n counts them, so a repeat still shows)
   serverError: string | null; // the latest error the server reported (e.g. a failed model call)
   createdGoalId: string | null; // the goal this window just created, to open it once it arrives
 
@@ -56,7 +58,8 @@ type AppState = {
   setSessionStatus: (sessionId: string, status: SessionStatus) => void;
   setKnowledge: (knowledge: ConceptKnowledge[]) => void;
   setLastPong: (pong: Pong) => void;
-  setMap: (map: GoalMap, sharedWith: SharedWith) => void;
+  setMap: (map: GoalMap, sharedWith: SharedWith, nextUndo: string | null) => void;
+  setUndone: (goalId: string, undid: string) => void;
   setQuestions: (goalId: string, pending: PendingQuestions | null) => void;
   setEditError: (goalId: string, reason: string | null) => void;
   setServerError: (message: string | null) => void;
@@ -88,6 +91,8 @@ export const useAppStore = create<AppState>()((set) => ({
   sharedWith: {},
   questions: {},
   editErrors: {},
+  nextUndo: {},
+  undone: {},
   serverError: null,
   createdGoalId: null,
 
@@ -115,12 +120,15 @@ export const useAppStore = create<AppState>()((set) => ({
   setKnowledge: (knowledge) => set({ knowledge: Object.fromEntries(knowledge.map((k) => [k.conceptId, k])) }),
   setLastPong: (pong) => set({ lastPong: pong }),
   // A fresh map from the server also clears that goal's last edit error.
-  setMap: (map, sharedWith) =>
+  setMap: (map, sharedWith, nextUndo) =>
     set((state) => ({
       maps: { ...state.maps, [map.goalId]: map },
       sharedWith: { ...state.sharedWith, [map.goalId]: sharedWith },
+      nextUndo: { ...state.nextUndo, [map.goalId]: nextUndo },
       editErrors: withoutKey(state.editErrors, map.goalId),
     })),
+  setUndone: (goalId, undid) =>
+    set((state) => ({ undone: { ...state.undone, [goalId]: { undid, n: (state.undone[goalId]?.n ?? 0) + 1 } } })),
   setQuestions: (goalId, pending) =>
     set((state) => ({ questions: pending ? { ...state.questions, [goalId]: pending } : withoutKey(state.questions, goalId) })),
   setEditError: (goalId, reason) =>
