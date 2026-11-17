@@ -34,6 +34,10 @@ export function ProvidersSection({ providers, signIns, onRefresh, onSignIn }: Pr
   const status = (c: Connection) => providers?.find((p) => p.connection === c);
   return (
     <div className="flex flex-col gap-5">
+      <p className="text-xs text-fg-muted">
+        Your sources, answers, and tutoring chats are sent to the provider you pick for each job, under that provider's terms. Everything else stays on this
+        computer; Helix only contacts GitHub to check for updates.
+      </p>
       <Group
         title="Subscriptions"
         action={
