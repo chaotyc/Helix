@@ -1,0 +1,4 @@
+# Check out text files with LF line endings on every OS (Git on Windows would otherwise convert
+# them to CRLF). Prompt versions hash the prompt and template files' bytes, so a Windows checkout
+# must see the same bytes as macOS and Linux to build an app with the same prompt versions.
+* text=auto eol=lf
