@@ -4,11 +4,13 @@
 //   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted with the macOS keychain
 //      (safeStorage), and hands them to the server when starting it. Keys never travel over the
 //      WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
+//   4. on launch, checks GitHub Releases for a newer version and offers the download (updates.ts).
 // Data lives in ~/Library/Application Support/Helix (HELIX_DATA_DIR overrides it, for testing).
 import { BrowserWindow, app, dialog, ipcMain, nativeTheme, safeStorage, shell, utilityProcess, type UtilityProcess } from "electron";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { RELEASES_REPO, isNewer, latestRelease, skipVersion, skippedVersion } from "./updates.ts";
 
 app.setName("Helix");
 const DATA_DIR = process.env.HELIX_DATA_DIR ?? app.getPath("userData");
@@ -200,6 +202,38 @@ ipcMain.handle("helix:clear-provider-key", async (event, provider: unknown) => {
   await clearKey(provider);
 });
 
+// ---- Updates ----
+
+// Once per launch, in the packaged app only. HELIX_UPDATE_REPO (owner/name) points the check at
+// another repository and turns it on under `pnpm start`, for testing.
+const UPDATE_REPO = process.env.HELIX_UPDATE_REPO;
+const NOTES_SHOWN = 600; // characters of release notes in the dialog
+
+async function checkForUpdates(): Promise<void> {
+  const current = app.getVersion();
+  const release = await latestRelease(UPDATE_REPO ?? RELEASES_REPO);
+  if (!release || !isNewer(release.version, current) || skippedVersion(DATA_DIR) === release.version) return;
+
+  const notes = release.notes.length > NOTES_SHOWN ? `${release.notes.slice(0, NOTES_SHOWN).trimEnd()}…` : release.notes;
+  const options: Electron.MessageBoxOptions = {
+    type: "info",
+    message: `Helix ${release.version} is available`,
+    detail: [
+      `You have ${current}.`,
+      notes,
+      "To update, download it, quit Helix, and drag the new Helix into Applications. Your goals and settings are kept. macOS may ask once whether the new version can use your saved API keys.",
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
+    buttons: ["Download", "Later", "Skip This Version"],
+    defaultId: 0,
+    cancelId: 1,
+  };
+  const { response } = window ? await dialog.showMessageBox(window, options) : await dialog.showMessageBox(options);
+  if (response === 0) await shell.openExternal(release.downloadUrl);
+  if (response === 2) skipVersion(DATA_DIR, release.version);
+}
+
 // ---- App lifecycle ----
 
 if (!app.requestSingleInstanceLock()) {
@@ -219,6 +253,11 @@ if (!app.requestSingleInstanceLock()) {
     } catch (err) {
       dialog.showErrorBox("Helix couldn't start", err instanceof Error ? err.message : String(err));
       app.quit();
+      return;
+    }
+    // Offline or GitHub unreachable: say nothing, note it in the log.
+    if (app.isPackaged || UPDATE_REPO) {
+      checkForUpdates().catch((err) => log(`update check failed: ${err instanceof Error ? err.message : String(err)}`));
     }
   });
 
