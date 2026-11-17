@@ -1,4 +1,5 @@
-// Builds everything the Mac app runs into apps/desktop/build/:
+// Builds everything the desktop app runs into apps/desktop/build/. Works on macOS, Windows, and
+// Linux alike: Node's own file APIs, no shell commands besides `pnpm`. It builds:
 //   main.mjs, preload.cjs   the Electron main process and the page's preload
 //   server/server.mjs       the Helix server as one JavaScript file
 //   helix-src/              server files read at runtime: migrations, prompts, and the source files
