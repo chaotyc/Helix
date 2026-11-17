@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { RELEASES_REPO, isNewer, latestRelease, skipVersion, skippedVersion } from "./updates.ts";
 
-app.setName("Helix");
+app.setName("Helix"); // also names the data folder, so it stays "Helix" whatever the app ID
 const DATA_DIR = process.env.HELIX_DATA_DIR ?? app.getPath("userData");
 // Each provider's key, encrypted; useless without this Mac's keychain. The Anthropic key keeps the
 // file name it had before other providers existed.

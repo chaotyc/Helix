@@ -17,7 +17,7 @@
     "esbuild": "0.28.2"
   },
   "build": {
-    "appId": "local.helix.app",
+    "appId": "io.github.chaotyc.helix",
     "productName": "Helix",
     "directories": {
       "output": "release",
