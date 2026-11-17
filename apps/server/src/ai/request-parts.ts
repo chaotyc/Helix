@@ -20,6 +20,8 @@ export function goalSection(goal: Goal): string {
     `Kind: ${goal.kind}`,
     `Capstone: ${goal.capstone || "not given"}`,
     `Exam date: ${goal.examDate ?? "none"}`,
+    // The learner's own words from the new-goal form; older goals have none.
+    ...(goal.prompt ? ["In the learner's words:", `<learner_prompt>\n${goal.prompt}\n</learner_prompt>`] : []),
   ].join("\n");
 }
 

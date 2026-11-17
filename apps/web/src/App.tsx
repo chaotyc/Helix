@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ClarifyAnswer, Confidence, Connection, Effort, GoalInput, MapEdit, Session, SessionKind, Settings, SourceKind } from "@helix/contracts";
+import type { ClarifyAnswer, Confidence, Connection, Effort, GoalInput, MapEdit, Session, SessionKind, Settings } from "@helix/contracts";
 import { send } from "./connection.ts";
 import { desktop } from "./desktop.ts";
 import { dayAndTime, SESSION_KIND_LABEL } from "./format.ts";
@@ -64,6 +64,11 @@ export function App() {
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [beforeNewGoal, setBeforeNewGoal] = useState<View>("session"); // where Cancel on New goal returns
+  // The documents from the New goal form, held until the server confirms the goal; then they go
+  // to the clarifier. null: no goal being created.
+  const [pendingSource, setPendingSource] = useState<{ text: string | undefined } | null>(null);
+  // Per goal, which build job runs: writing questions (1) or building the map (2).
+  const [buildStep, setBuildStep] = useState<Record<string, 1 | 2>>({});
 
   // ---- Values worked out from state (not stored separately, so they can't go stale). ----
   const selectedGoal = goals.find((g) => g.id === selectedGoalId);
@@ -134,11 +139,16 @@ export function App() {
     setView("session");
   }
 
-  // A goal this window created opens on its map page once the server confirms it.
+  // A goal this window created opens on its map page once the server confirms it, and the
+  // clarifier starts on the form's documents right away.
   useEffect(() => {
     if (!createdGoalId || !goals.some((g) => g.id === createdGoalId)) return;
     useAppStore.getState().setCreatedGoalId(null);
     selectGoal(createdGoalId, true);
+    if (pendingSource) {
+      askQuestions(createdGoalId, pendingSource.text);
+      setPendingSource(null);
+    }
   }, [createdGoalId, goals]);
 
   // A session this window started opens as soon as the server confirms it (under its own goal).
@@ -175,20 +185,32 @@ export function App() {
     sendOrWarn({ type: "provider.signIn", connection }, "the sign-in didn't start");
   }
 
-  function createGoal(goal: GoalInput): void {
-    sendOrWarn({ type: "goal.create", goal }, "the goal wasn't created");
+  function createGoal(goal: GoalInput, sourceText: string | undefined): void {
+    if (sendOrWarn({ type: "goal.create", goal }, "the goal wasn't created")) setPendingSource({ text: sourceText });
   }
 
-  // Building a map: the source goes to the clarifier first; the answers then build the map.
-  function askQuestions(goalId: string, sourceText: string | undefined, sourceKind: SourceKind): void {
+  // Building a map: the documents go to the clarifier first; the answers then build the map.
+  // Uploaded documents can be anything (and several at once), so the extractor works out what
+  // each one is from its text: kind "other".
+  function askQuestions(goalId: string, sourceText: string | undefined): void {
     useAppStore.getState().setServerError(null);
-    sendOrWarn({ type: "map.clarify", goalId, sourceText, sourceKind }, "the map wasn't started");
+    setBuildStep((steps) => ({ ...steps, [goalId]: 1 }));
+    if (sendOrWarn({ type: "map.clarify", goalId, sourceText, sourceKind: sourceText ? "other" : undefined }, "the map wasn't started")) {
+      showStarting(goalId);
+    }
   }
 
   function buildMap(goalId: string, roundId: string, answers: ClarifyAnswer[], effort: Effort): void {
     useAppStore.getState().setQuestions(goalId, null); // answered: the card closes, progress shows
+    setBuildStep((steps) => ({ ...steps, [goalId]: 2 }));
     useAppStore.getState().setServerError(null);
-    sendOrWarn({ type: "map.extract", goalId, roundId, answers, effort }, "the map wasn't built");
+    if (sendOrWarn({ type: "map.extract", goalId, roundId, answers, effort }, "the map wasn't built")) showStarting(goalId);
+  }
+
+  // Shown until the server's first progress update, so the page goes straight to "Starting…"
+  // instead of flashing the build form in between.
+  function showStarting(goalId: string): void {
+    useAppStore.getState().setProgress(goalId, { stage: "started", detail: "Sending to Helix…" });
   }
 
   function editMap(goalId: string, edits: MapEdit[]): void {
@@ -357,7 +379,8 @@ export function App() {
                   questions={questions[selectedGoal.id]}
                   editError={editErrors[selectedGoal.id]}
                   serverError={serverError}
-                  onAsk={(text, kind) => askQuestions(selectedGoal.id, text, kind)}
+                  step={buildStep[selectedGoal.id] ?? 2}
+                  onAsk={(text) => askQuestions(selectedGoal.id, text)}
                   onBuild={(roundId, answers, effort) => buildMap(selectedGoal.id, roundId, answers, effort)}
                   onEdit={(edits) => editMap(selectedGoal.id, edits)}
                   onDismissError={() => useAppStore.getState().setEditError(selectedGoal.id, null)}

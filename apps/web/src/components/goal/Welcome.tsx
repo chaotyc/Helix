@@ -13,7 +13,7 @@ type Props = {
 };
 
 const STEPS = [
-  { icon: <GraphIcon className="size-[18px]" />, title: "Map it", text: "Paste a syllabus. Helix lays out its concepts and what each one needs first." },
+  { icon: <GraphIcon className="size-[18px]" />, title: "Map it", text: "Add a syllabus, textbook, or posting. Helix lays out its concepts and what each one needs first." },
   { icon: <TargetIcon className="size-[18px]" />, title: "Find your level", text: "A short diagnostic measures how deep you already hold each concept." },
   { icon: <ChatIcon className="size-[18px]" />, title: "Learn the next thing", text: "Tutoring sessions teach what you're ready for, one step at a time." },
 ];
@@ -26,7 +26,7 @@ export function Welcome({ goals, sessions, onSelectGoal, onNewGoal }: Props) {
         <img src="/brand/helix-mark-on-dark.svg" alt="" className="mb-6 hidden size-10 dark:block" />
         <h1 className="text-3xl font-semibold tracking-tight text-fg">Learn anything, to the depth you need.</h1>
         <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-fg-muted">
-          Pick a goal, like a course you're taking. Helix turns its material into a map of concepts, finds what you already know, and tutors you
+          Pick a goal: a course you're taking, a job you're after, or a project. Helix turns its material into a map of concepts, finds what you already know, and tutors you
           through the rest.
         </p>
         <div className="mt-10 grid grid-cols-3 gap-3">
@@ -65,7 +65,7 @@ export function Welcome({ goals, sessions, onSelectGoal, onNewGoal }: Props) {
               className="flex min-h-32 flex-col rounded-xl border border-line bg-raised p-5 text-left shadow-xs transition-colors hover:border-line-strong hover:bg-fill"
             >
               <div className="text-sm font-semibold text-fg">{goal.title}</div>
-              {goal.capstone && <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-fg-muted">{goal.capstone}</p>}
+              {(goal.prompt || goal.capstone) && <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-fg-muted">{goal.prompt || goal.capstone}</p>}
               <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 pt-4 text-xs text-fg-subtle">
                 <span>
                   {goalSessions.length} {goalSessions.length === 1 ? "session" : "sessions"}

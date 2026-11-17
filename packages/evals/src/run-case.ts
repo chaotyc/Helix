@@ -38,7 +38,7 @@ export async function runCase(c: LoadedCase, options: RunOptions): Promise<CaseR
   const db = openDatabase(":memory:");
   try {
     // ---- 1. The case's fixed input ----
-    const goal = createGoal(db, { title: c.goal.title, kind: "course", capstone: c.goal.capstone, examDate: c.goal.examDate });
+    const goal = createGoal(db, { title: c.goal.title, kind: "course", prompt: c.goal.prompt, capstone: c.goal.capstone, examDate: c.goal.examDate });
     const sourceId = c.source && c.sourceText ? createSource(db, goal.id, c.sourceText, c.source.kind) : undefined;
     const round = createRound(db, {
       goalId: goal.id,

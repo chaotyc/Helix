@@ -8,6 +8,7 @@ const GoalRow = z.object({
   id: z.string(),
   title: z.string(),
   kind: z.string(),
+  prompt: z.string(),
   capstone: z.string(),
   exam_date: z.string().nullable(),
   created_at: z.string(),
@@ -20,7 +21,8 @@ function toGoal(row: unknown): Goal {
     id: r.id,
     title: r.title,
     kind: r.kind,
-    capstone: r.capstone,
+    prompt: r.prompt || undefined,
+    capstone: r.capstone || undefined,
     examDate: r.exam_date ?? undefined,
     createdAt: r.created_at,
   });
@@ -29,13 +31,14 @@ function toGoal(row: unknown): Goal {
 export function createGoal(db: DatabaseSync, input: GoalInput): Goal {
   const goal: Goal = { ...input, id: randomUUID(), createdAt: new Date().toISOString() };
   db.prepare(
-    `INSERT INTO goal (id, title, kind, capstone, exam_date, created_at)
-     VALUES ($id, $title, $kind, $capstone, $examDate, $createdAt)`,
+    `INSERT INTO goal (id, title, kind, prompt, capstone, exam_date, created_at)
+     VALUES ($id, $title, $kind, $prompt, $capstone, $examDate, $createdAt)`,
   ).run({
     id: goal.id,
     title: goal.title,
     kind: goal.kind,
-    capstone: goal.capstone,
+    prompt: goal.prompt ?? "",
+    capstone: goal.capstone ?? "",
     examDate: goal.examDate ?? null,
     createdAt: goal.createdAt,
   });
