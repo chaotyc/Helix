@@ -1,9 +1,14 @@
+import { SummaryIcon } from "../ui/icons.tsx";
+
 // The summary written when the session ended (K6).
 export function SummaryCard({ text }: { text: string }) {
   return (
-    <div className="max-w-2xl rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm">
-      <div className="mb-1 text-xs font-medium text-zinc-400">Session summary</div>
-      <div className="whitespace-pre-wrap text-zinc-300">{text}</div>
+    <div className="w-full rounded-xl border border-line bg-raised px-5 py-4 shadow-xs">
+      <div className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-fg">
+        <SummaryIcon className="size-4 text-fg-subtle" />
+        Session summary
+      </div>
+      <div className="text-[14px] leading-6 whitespace-pre-wrap text-fg-muted">{text}</div>
     </div>
   );
 }

@@ -1,1 +1,229 @@
 @import "tailwindcss";
+
+/* ---- Design tokens ----------------------------------------------------------------------
+   Every color the UI uses is a variable, set once for light mode and once for dark mode
+   (whichever the Mac is set to). Components write `bg-surface` or `text-fg-muted` and get the
+   right shade in both. The `--hx-` prefix keeps these apart from Tailwind's own variables. */
+
+:root {
+  color-scheme: light dark;
+
+  /* Backgrounds, from the window outward to raised things */
+  --hx-canvas: #f2f2f4; /* the window behind everything: the sidebar sits on it */
+  --hx-surface: #ffffff; /* the main panel */
+  --hx-raised: #ffffff; /* cards and inputs inside the panel */
+  --hx-sunken: #f7f7f9; /* wells: code-like text, the map's backdrop */
+  --hx-overlay: #ffffff; /* popovers: the command palette, the map inspector */
+  --hx-fill: rgb(15 15 30 / 0.045); /* hover */
+  --hx-fill-strong: rgb(15 15 30 / 0.08); /* selected */
+
+  --hx-line: rgb(15 15 30 / 0.08);
+  --hx-line-strong: rgb(15 15 30 / 0.14);
+
+  --hx-fg: #18181b;
+  --hx-fg-muted: #52525b;
+  --hx-fg-subtle: #6b6b75; /* the faintest color for text: at least 4.5:1 on every background */
+  --hx-fg-faint: #8e8e98; /* icons, dividers, and placeholders only, not text */
+
+  --hx-accent: #5b5bd6;
+  --hx-accent-hover: #4f4fc6;
+  --hx-accent-fg: #ffffff;
+  --hx-accent-text: #4c46d8;
+  --hx-accent-soft: rgb(91 91 214 / 0.09);
+
+  --hx-track: rgb(15 15 30 / 0.1); /* the empty part of a depth meter */
+
+  --hx-success: #15803d;
+  --hx-success-soft: rgb(22 163 74 / 0.08);
+  --hx-warning: #b45309;
+  --hx-warning-soft: rgb(217 119 6 / 0.09);
+  --hx-danger: #dc2626;
+  --hx-danger-soft: rgb(220 38 38 / 0.07);
+
+  --hx-edge: #8a8a94; /* arrows on the map: at least 3:1 against its background */
+  --hx-dots: rgb(15 15 30 / 0.13); /* the map's dot grid */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hx-canvas: #09090b;
+    --hx-surface: #111114;
+    --hx-raised: #18181c;
+    --hx-sunken: #0c0c0f;
+    --hx-overlay: #1a1a1f;
+    --hx-fill: rgb(255 255 255 / 0.05);
+    --hx-fill-strong: rgb(255 255 255 / 0.09);
+
+    --hx-line: rgb(255 255 255 / 0.07);
+    --hx-line-strong: rgb(255 255 255 / 0.12);
+
+    --hx-fg: #f4f4f5;
+    --hx-fg-muted: #a1a1aa;
+    --hx-fg-subtle: #86868f;
+    --hx-fg-faint: #686871;
+
+    --hx-accent: #5b5bd6;
+    --hx-accent-hover: #6a6ae2;
+    --hx-accent-fg: #ffffff;
+    --hx-accent-text: #a8abff;
+    --hx-accent-soft: rgb(110 110 240 / 0.15);
+
+    --hx-track: rgb(255 255 255 / 0.1);
+
+    --hx-success: #4ade80;
+    --hx-success-soft: rgb(74 222 128 / 0.08);
+    --hx-warning: #fbbf24;
+    --hx-warning-soft: rgb(251 191 36 / 0.08);
+    --hx-danger: #f87171;
+    --hx-danger-soft: rgb(248 113 113 / 0.09);
+
+    --hx-edge: #64646d;
+    --hx-dots: rgb(255 255 255 / 0.07);
+  }
+}
+
+/* Tailwind color names for the tokens: bg-surface, text-fg-muted, border-line, and so on.
+   `inline` makes each class use the variable itself, so it follows light/dark at runtime. */
+@theme inline {
+  --color-canvas: var(--hx-canvas);
+  --color-surface: var(--hx-surface);
+  --color-raised: var(--hx-raised);
+  --color-sunken: var(--hx-sunken);
+  --color-overlay: var(--hx-overlay);
+  --color-fill: var(--hx-fill);
+  --color-fill-strong: var(--hx-fill-strong);
+  --color-line: var(--hx-line);
+  --color-line-strong: var(--hx-line-strong);
+  --color-fg: var(--hx-fg);
+  --color-fg-muted: var(--hx-fg-muted);
+  --color-fg-subtle: var(--hx-fg-subtle);
+  --color-fg-faint: var(--hx-fg-faint);
+  --color-accent: var(--hx-accent);
+  --color-accent-hover: var(--hx-accent-hover);
+  --color-accent-fg: var(--hx-accent-fg);
+  --color-accent-text: var(--hx-accent-text);
+  --color-accent-soft: var(--hx-accent-soft);
+  --color-track: var(--hx-track);
+  --color-success: var(--hx-success);
+  --color-success-soft: var(--hx-success-soft);
+  --color-warning: var(--hx-warning);
+  --color-warning-soft: var(--hx-warning-soft);
+  --color-danger: var(--hx-danger);
+  --color-danger-soft: var(--hx-danger-soft);
+}
+
+/* `desktop:` classes apply only inside the Mac app (main.tsx marks <html> with data-desktop);
+   `windowed:` only there and not in full screen, where the window buttons are hidden. */
+@custom-variant desktop (&:where([data-desktop] *));
+@custom-variant windowed (&:where([data-desktop]:not([data-full-screen]) *));
+
+@theme {
+  /* The Mac's own typeface (San Francisco), with fallbacks elsewhere. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+
+  --animate-fade-in: hx-fade-in 180ms ease-out both;
+  --animate-pop-in: hx-pop-in 140ms ease-out both;
+  --animate-slide: hx-slide 1.4s ease-in-out infinite; /* an indeterminate progress bar */
+
+  @keyframes hx-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+  @keyframes hx-slide {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+  @keyframes hx-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.985);
+    }
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background: var(--hx-canvas);
+    color: var(--hx-fg);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--hx-accent) 30%, transparent);
+  }
+
+  /* A visible ring for keyboard focus only (not for mouse clicks). */
+  :focus-visible {
+    outline: 2px solid var(--hx-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---- The Mac app's window ----
+   It has no title bar (apps/desktop/src/main.ts): the red/yellow/green buttons sit in the
+   sidebar's top row, and the strips marked `app-drag` move the window. Controls in them stay clickable. */
+[data-desktop] .app-drag {
+  -webkit-app-region: drag;
+}
+[data-desktop] .app-drag :is(button, a, input, select, textarea) {
+  -webkit-app-region: no-drag;
+}
+
+/* ---- React Flow (the drawn map), matched to the tokens ---- */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-label-background-color: var(--hx-surface);
+  --xy-edge-label-color: var(--hx-fg-muted);
+}
+.react-flow__edge-text {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+/* Keyboard focus (Tab) on the map: a ring around the concept, the accent color on an arrow. */
+.react-flow__node:focus-visible {
+  outline: none;
+}
+.react-flow__node:focus-visible > div {
+  outline: 2px solid var(--hx-accent);
+  outline-offset: 3px;
+}
+.react-flow__edge:focus-visible {
+  outline: none;
+}
+.react-flow__edge:focus-visible .react-flow__edge-path {
+  stroke: var(--hx-accent) !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Respect "Reduce motion" in macOS accessibility settings. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* A spinner still spins: it's the only sign that Helix is working. */
+  .animate-spin {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

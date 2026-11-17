@@ -2,12 +2,14 @@
 // with the macOS keychain and restarts the server with it; it's never sent to the server as a message.
 import { useEffect, useState } from "react";
 import type { DesktopBridge, KeyProvider } from "../desktop.ts";
-import { BUTTON, INPUT, QUIET_BUTTON } from "./ui.tsx";
+import { Button } from "./ui/Button.tsx";
+import { Alert, Spinner } from "./ui/feedback.tsx";
+import { INPUT } from "./ui/form.tsx";
 
 type Props = { desktop: DesktopBridge; provider: KeyProvider; placeholder: string };
 
 export function ApiKeyField({ desktop, provider, placeholder }: Props) {
-  const [saved, setSaved] = useState<boolean | null>(null);
+  const [saved, setSaved] = useState(false);
   const [canEncrypt, setCanEncrypt] = useState(true);
   const [key, setKey] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,24 +36,39 @@ export function ApiKeyField({ desktop, provider, placeholder }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs text-zinc-500">
-        {saved === null ? "Checking…" : saved ? "A key is saved, encrypted with your Mac's keychain. Enter a new one to replace it." : "No key saved."}
-      </span>
-      {!canEncrypt && <span className="text-xs text-red-300">The macOS keychain isn't available, so a key can't be saved.</span>}
-      <div className="flex gap-2">
-        <input type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder={placeholder} autoComplete="off" className={INPUT} />
-        <button disabled={saving || key.trim() === ""} onClick={() => run(() => desktop.setProviderKey(provider, key))} className={BUTTON}>
+    <div className="flex flex-col gap-2">
+      {!canEncrypt && <Alert tone="danger">The macOS keychain isn't available, so a key can't be saved.</Alert>}
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (key.trim()) run(() => desktop.setProviderKey(provider, key));
+        }}
+      >
+        <input
+          type="password"
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          placeholder={saved ? "A key is saved in your keychain; enter one to replace it" : placeholder}
+          autoComplete="off"
+          aria-label="API key"
+          className={`${INPUT} h-8 py-0 font-mono text-[13px]`}
+        />
+        <Button type="submit" variant="primary" disabled={saving || key.trim() === ""}>
           Save
-        </button>
+        </Button>
         {saved && (
-          <button disabled={saving} onClick={() => run(() => desktop.clearProviderKey(provider))} className={QUIET_BUTTON}>
+          <Button variant="danger" disabled={saving} onClick={() => run(() => desktop.clearProviderKey(provider))}>
             Remove
-          </button>
+          </Button>
         )}
-      </div>
-      {saving && <span className="text-xs text-zinc-500">Restarting Helix with the new key…</span>}
-      {error && <span className="text-xs text-red-300">{error}</span>}
+      </form>
+      {saving && (
+        <p className="flex items-center gap-2 text-xs text-fg-subtle">
+          <Spinner className="size-3.5" /> Restarting Helix with the new key…
+        </p>
+      )}
+      {error && <Alert tone="danger">{error}</Alert>}
     </div>
   );
 }
