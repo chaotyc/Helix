@@ -9,8 +9,9 @@ import { join } from "node:path";
 import { modelIdFor, parseModelId } from "@helix/contracts";
 import type { ModelCall, ModelResult } from "../../model-call.ts";
 import { effortFor } from "../effort.ts";
+import { QUIET_LIMITS, timeoutMessage } from "./deadline.ts";
 import { oneShotPrompt } from "./prompt.ts";
-import { TOOL_TIMEOUT_MS, failureDetail, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
+import { failureDetail, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
 
 type CodexEvent = {
   type?: string;
@@ -48,10 +49,11 @@ export const callCodex: ModelCall = async (request) => {
       cwd: work,
       env: toolEnv(command),
       stdin: oneShotPrompt(request.system, request.messages),
-      timeoutMs: TOOL_TIMEOUT_MS,
+      timeoutMs: QUIET_LIMITS.totalMs,
+      idleTimeoutMs: QUIET_LIMITS.idleMs,
     });
   });
-  if (result.timedOut) throw new Error("Codex took too long and was stopped.");
+  if (result.timedOutBy) throw new Error(timeoutMessage("Codex", result.timedOutBy, QUIET_LIMITS));
   const parsed = parseCodexEvents(result.stdout, model);
   if (!parsed) throw new Error(`Codex failed: ${failureDetail(result)}`);
   request.onText?.(parsed.text);

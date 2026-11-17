@@ -10,6 +10,7 @@ import { accessSync, constants } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
+import { startDeadline, type TimeoutKind } from "./deadline.ts";
 import { launchCommand, type Launch } from "./windows-shim.ts";
 
 const HOME = homedir();
@@ -118,12 +119,19 @@ export type ToolRun = {
   cwd: string;
   env: NodeJS.ProcessEnv;
   stdin?: string;
-  timeoutMs: number;
+  timeoutMs: number; // the ceiling for the whole run
+  idleTimeoutMs?: number; // stop sooner if the tool prints nothing for this long (deadline.ts)
   onLine?: (line: string) => void; // each line of stdout, as it arrives
   onOutput?: (text: string) => void; // stdout and stderr as they arrive (sign-in shows this)
 };
 
-export type ToolResult = { code: number | null; stdout: string; stderr: string; timedOut: boolean };
+export type ToolResult = {
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  timedOut: boolean;
+  timedOutBy: TimeoutKind | null; // which clock stopped it
+};
 
 export function runTool(run: ToolRun): Promise<ToolResult> {
   return new Promise((resolve, reject) => {
@@ -132,16 +140,17 @@ export function runTool(run: ToolRun): Promise<ToolResult> {
     let stdout = "";
     let stderr = "";
     let partial = "";
-    let timedOut = false;
-    const timer = setTimeout(() => {
-      timedOut = true;
+    let timedOutBy: TimeoutKind | null = null;
+    const deadline = startDeadline({ idleMs: run.idleTimeoutMs ?? run.timeoutMs, totalMs: run.timeoutMs }, (kind) => {
+      timedOutBy = kind;
       child.kill("SIGTERM");
       setTimeout(() => child.kill("SIGKILL"), 2000).unref();
-    }, run.timeoutMs);
+    });
 
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
     child.stdout.on("data", (text: string) => {
+      deadline.touch();
       stdout += text;
       run.onOutput?.(text);
       if (!run.onLine) return;
@@ -151,17 +160,18 @@ export function runTool(run: ToolRun): Promise<ToolResult> {
       for (const line of lines) if (line.trim()) run.onLine(line);
     });
     child.stderr.on("data", (text: string) => {
+      deadline.touch();
       stderr += text;
       run.onOutput?.(text);
     });
     child.on("error", (err) => {
-      clearTimeout(timer);
+      deadline.clear();
       reject(err);
     });
     child.on("close", (code) => {
-      clearTimeout(timer);
+      deadline.clear();
       if (partial.trim()) run.onLine?.(partial);
-      resolve({ code, stdout, stderr, timedOut });
+      resolve({ code, stdout, stderr, timedOut: timedOutBy !== null, timedOutBy });
     });
     child.stdin.on("error", () => {}); // a tool that exits early closes its stdin: not our error
     child.stdin.end(run.stdin ?? "");
@@ -179,5 +189,3 @@ export function requireCommand(name: string, label: string): string {
   if (!command) throw new Error(`${label}: \`${name}\` isn't installed (or isn't on PATH). See Settings → Connections.`);
   return command;
 }
-
-export const TOOL_TIMEOUT_MS = 15 * 60_000; // a whole-syllabus extraction at high effort can take minutes

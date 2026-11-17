@@ -6,8 +6,9 @@
 import { modelIdFor, parseModelId } from "@helix/contracts";
 import type { ModelCall, ModelResult } from "../../model-call.ts";
 import { effortFor } from "../effort.ts";
+import { QUIET_LIMITS, timeoutMessage } from "./deadline.ts";
 import { oneShotPrompt } from "./prompt.ts";
-import { TOOL_TIMEOUT_MS, failureDetail, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
+import { failureDetail, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
 
 type ClaudeResult = {
   type?: string;
@@ -37,9 +38,17 @@ export const callClaudeCode: ModelCall = async (request) => {
     "--no-session-persistence",
   ];
   const result = await withTempDir((cwd) =>
-    runTool({ command, args, cwd, env: toolEnv(command), stdin: oneShotPrompt(null, request.messages), timeoutMs: TOOL_TIMEOUT_MS }),
+    runTool({
+      command,
+      args,
+      cwd,
+      env: toolEnv(command),
+      stdin: oneShotPrompt(null, request.messages),
+      timeoutMs: QUIET_LIMITS.totalMs,
+      idleTimeoutMs: QUIET_LIMITS.idleMs,
+    }),
   );
-  if (result.timedOut) throw new Error("Claude Code took too long and was stopped.");
+  if (result.timedOutBy) throw new Error(timeoutMessage("Claude Code", result.timedOutBy, QUIET_LIMITS));
   const parsed = parseClaudeOutput(result.stdout, model);
   if (!parsed) throw new Error(`Claude Code failed: ${failureDetail(result)}`);
   request.onText?.(parsed.text);
