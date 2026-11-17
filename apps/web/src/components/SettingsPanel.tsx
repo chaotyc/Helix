@@ -82,15 +82,18 @@ export function SettingsPanel({ settings, providers, signIns, onChange, onRefres
                     className="w-64 shrink-0"
                   >
                     {Connection.options.map((connection) => {
-                      const list = options.get(connection) ?? [];
-                      // Keep the saved choice visible even when its connection no longer lists it.
-                      const missing = parseModelId(current).connection === connection && !list.some((o) => o.id === current);
-                      const withCurrent = missing ? [{ id: current, label: modelLabel(current) }, ...list] : list;
-                      if (withCurrent.length === 0) return null;
                       const s = state(connection);
                       const setUp = s === "ready" || s === "unchecked";
+                      const holdsCurrent = parseModelId(current).connection === connection;
+                      // Only connections that are set up offer models. The saved choice stays
+                      // visible (alone, marked) when its connection isn't, so the selector never
+                      // shows a model other than the one Helix will call.
+                      const list = setUp ? (options.get(connection) ?? []) : [];
+                      const missing = holdsCurrent && !list.some((o) => o.id === current);
+                      const withCurrent = missing ? [{ id: current, label: modelLabel(current) }, ...list] : list;
+                      if (withCurrent.length === 0) return null;
                       return (
-                        <optgroup key={connection} label={`${CONNECTIONS[connection].label}${s && !setUp ? " (not set up)" : ""}`}>
+                        <optgroup key={connection} label={`${CONNECTIONS[connection].label}${setUp || !providers ? "" : " (not set up)"}`}>
                           {withCurrent.map((o) => (
                             <option key={o.id} value={o.id}>
                               {optionLabel(o)}
