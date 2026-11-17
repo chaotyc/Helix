@@ -9,6 +9,7 @@ import { FitIcon, MinusIcon, PlusIcon } from "../ui/icons.tsx";
 import { ConceptNode, type ConceptNodeType } from "./ConceptNode.tsx";
 import { edgeKey } from "./edits.ts";
 import { layoutMap, NODE_HEIGHT, NODE_WIDTH, type Positions } from "./layout.ts";
+import { arrowSides, sourceHandle, targetHandle } from "./routing.ts";
 
 type Props = {
   map: GoalMap;
@@ -48,10 +49,13 @@ export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selec
     const key = edgeKey(e);
     const selected = key === selectedEdgeKey;
     const color = selected ? SELECTED : EDGE;
+    const sides = arrowSides(e.type, positions[e.src] ?? { x: 0, y: 0 }, positions[e.dst] ?? { x: 0, y: 0 });
     return {
       id: key,
       source: e.src,
       target: e.dst,
+      sourceHandle: sourceHandle(sides.from),
+      targetHandle: targetHandle(sides.to),
       ariaLabel:
         e.type === "prereq"
           ? `${name(e.src)} at depth ${e.srcDepth} is needed for ${name(e.dst)} at depth ${e.dstDepth}`

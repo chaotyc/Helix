@@ -6,6 +6,7 @@ import { masteryLine, nextDepthChance } from "../../depth.ts";
 import { DepthMeter } from "../DepthMeter.tsx";
 import { ConceptKindIcon, DecisionKindIcon, SkillKindIcon } from "../ui/icons.tsx";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout.ts";
+import { sourceHandle, targetHandle, type Side } from "./routing.ts";
 
 export type ConceptNodeData = { name: string; kind: Concept["kind"]; entry: ViewEntry; shared: boolean; knowledge: ConceptKnowledge | undefined };
 export type ConceptNodeType = Node<ConceptNodeData, "concept">;
@@ -13,7 +14,21 @@ export type ConceptNodeType = Node<ConceptNodeData, "concept">;
 const KIND_ICON = { concept: ConceptKindIcon, skill: SkillKindIcon, decision: DecisionKindIcon } as const;
 
 // The handles are where arrows attach. Nothing is connected by dragging, so they stay invisible.
+// One to leave from and one to arrive at on every side; the canvas picks the facing sides.
 const HANDLE = "!h-1 !w-1 !min-w-0 !border-0 !bg-transparent";
+const SIDES: [Side, Position][] = [
+  ["top", Position.Top],
+  ["bottom", Position.Bottom],
+  ["left", Position.Left],
+  ["right", Position.Right],
+];
+
+function Handles() {
+  return SIDES.flatMap(([side, position]) => [
+    <Handle key={`t-${side}`} id={targetHandle(side)} type="target" position={position} isConnectable={false} className={HANDLE} />,
+    <Handle key={`s-${side}`} id={sourceHandle(side)} type="source" position={position} isConnectable={false} className={HANDLE} />,
+  ]);
+}
 
 export function ConceptNode({ data, selected }: NodeProps<ConceptNodeType>) {
   const held = data.knowledge?.depthHeld ?? 0;
@@ -34,7 +49,6 @@ export function ConceptNode({ data, selected }: NodeProps<ConceptNodeType>) {
             : "border-line-strong bg-raised hover:border-fg-faint"
       }`}
     >
-      <Handle type="target" position={Position.Top} className={HANDLE} />
       <div className="flex min-w-0 items-center gap-1.5">
         <span className="text-fg-subtle" title={data.kind}>
           <Kind className="size-3.5" />
@@ -45,7 +59,7 @@ export function ConceptNode({ data, selected }: NodeProps<ConceptNodeType>) {
         <DepthMeter held={held} target={data.entry.targetDepth} next={nextDepthChance(data.knowledge, data.entry.targetDepth)} />
         {tags && <span className="ml-auto truncate text-[11px] text-fg-subtle">{tags}</span>}
       </div>
-      <Handle type="source" position={Position.Bottom} className={HANDLE} />
+      <Handles />
     </div>
   );
 }
