@@ -283,11 +283,11 @@ export type GraphDiff = {
   isEmpty: boolean;
 };
 
-function sameConcept(a: Concept, b: Concept): boolean {
+export function sameConcept(a: Concept, b: Concept): boolean {
   return a.name === b.name && a.description === b.description && a.kind === b.kind;
 }
 
-function sameEntry(a: ViewEntry, b: ViewEntry): boolean {
+export function sameEntry(a: ViewEntry, b: ViewEntry): boolean {
   return a.targetDepth === b.targetDepth && a.role === b.role;
 }
 
