@@ -4,10 +4,11 @@
 //   pnpm --filter @helix/evals maps --case signals-demo --runs 3
 //   pnpm --filter @helix/evals maps --table                  just the table: no calls, no cost
 // Models come from the settings tab (generation builds, evaluation judges); --model and
-// --judge-model override them for one run. Needs ANTHROPIC_API_KEY in apps/server/.env.
+// --judge-model override them for one run. Each model needs its key in apps/server/.env, or its
+// subscription tool installed and signed in (see the settings tab).
 import { parseArgs } from "node:util";
 import { Effort, ModelId } from "@helix/contracts";
-import { callClaude, getSettings, openDatabase } from "@helix/server";
+import { callModel, getSettings, missingSetup, openDatabase } from "@helix/server";
 import { loadCases } from "./cases.ts";
 import { comparisonTable, loadResults, saveResults } from "./results.ts";
 import { runCase, type CaseRun } from "./run-case.ts";
@@ -45,9 +46,12 @@ if (!effort.success || !judgeEffort.success) fail(`--effort and --judge-effort m
 const settings = getSettings(openDatabase()); // your settings tab's choices
 const model = ModelId.safeParse(values.model ?? settings.models.generation);
 const judgeModel = ModelId.safeParse(values["judge-model"] ?? settings.models.evaluation);
-if (!model.success || !judgeModel.success) fail(`--model and --judge-model must be one of: ${ModelId.options.join(", ")}`);
+if (!model.success || !judgeModel.success) fail("--model and --judge-model take a model id: claude-opus-5-5, or <connection>:<model> such as codex:gpt-6.1-sol.");
 
-if (!process.env.ANTHROPIC_API_KEY) fail("No ANTHROPIC_API_KEY found. Copy apps/server/.env.example to apps/server/.env and add your key.");
+for (const id of [model.data, judgeModel.data]) {
+  const missing = missingSetup(id);
+  if (missing) fail(missing);
+}
 
 let cases;
 try {
@@ -67,7 +71,7 @@ for (const c of cases) {
     const label = `[${c.name} ${run}/${runs}]`;
     try {
       const result = await runCase(c, {
-        callModel: callClaude,
+        callModel,
         model: model.data,
         judgeModel: judgeModel.data,
         effort: effort.data,

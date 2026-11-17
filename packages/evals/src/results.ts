@@ -31,12 +31,13 @@ const SavedRun = z.looseObject({
 const SavedFile = z.object({ date: z.string(), effort: z.string(), judgeEffort: z.string(), runs: z.array(SavedRun) });
 type SavedFile = z.infer<typeof SavedFile>;
 
-// maps-2026-11-11-1402-776cb030.json: when, and which extraction prompt version.
+// maps-2026-11-11-1402-776cb030-opus-5-5.json: when, which extraction prompt version, which model.
 export function saveResults(results: ResultsFile, dir = RESULTS_DIR): string {
   mkdirSync(dir, { recursive: true });
   const stamp = results.date.slice(0, 16).replace("T", "-").replace(":", "");
   const version = results.runs[0]?.extractPromptVersion.split("@")[1] ?? "none";
-  const file = join(dir, `maps-${stamp}-${version}.json`);
+  const model = fileTag(short(results.runs[0]?.extractModel ?? "none"));
+  const file = join(dir, `maps-${stamp}-${version}-${model}.json`);
   writeFileSync(file, `${JSON.stringify(results, null, 2)}\n`);
   return file;
 }
@@ -58,8 +59,14 @@ export function loadResults(dir = RESULTS_DIR): SavedFile[] {
   });
 }
 
-function short(model: string): string {
-  return model.replace(/^claude-/, "");
+// "opus-5-5" for Claude by API key (a bare id); any other route keeps its prefix ("codex:gpt-6-luna").
+export function short(model: string): string {
+  return model.includes(":") ? model : model.replace(/^claude-/, "");
+}
+
+// A model id as part of a file name: runs of different models in the same minute get their own files.
+export function fileTag(model: string): string {
+  return model.replace(/[^\w.-]+/g, "_");
 }
 
 function pad(cells: string[], widths: number[]): string {

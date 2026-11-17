@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ClarifyAnswer, ClarifyQuestion } from "./clarification.ts";
 import { Effort, ExtractionStage, SourceKind } from "./extraction.ts";
 import { Settings } from "./settings.ts";
+import { Connection, ProviderStatus } from "./providers.ts";
 import { GoalMap } from "./map.ts";
 import { MapEdit, SharedWith } from "./map-edit.ts";
 import { ConceptKnowledge } from "./learner.ts";
@@ -12,6 +13,7 @@ export * from "./map-edit.ts";
 export * from "./extraction.ts";
 export * from "./clarification.ts";
 export * from "./settings.ts";
+export * from "./providers.ts";
 export * from "./judge.ts";
 export * from "./learner.ts";
 export * from "./session.ts";
@@ -64,6 +66,11 @@ export const ClientMsg = z.discriminatedUnion("type", [
   // Which model does each job (J1). Both reply with `settings`.
   z.object({ type: z.literal("settings.get") }),
   z.object({ type: z.literal("settings.set"), settings: Settings }),
+  // How each connection stands: key set, tool installed and signed in (reply: providers).
+  z.object({ type: z.literal("providers.get") }),
+  // Sign a subscription tool in (Codex, Claude Code, Grok). Replies: provider.signIn.output as the
+  // tool prints (a link to open), provider.signIn.done, then providers.
+  z.object({ type: z.literal("provider.signIn"), connection: Connection }),
   // Sessions (Steps 12–13). Every session step replies with session.item / session.status messages.
   z.object({ type: z.literal("session.list") }),
   z.object({ type: z.literal("session.start"), goalId: z.string(), kind: SessionKind }),
@@ -89,6 +96,9 @@ export const ServerMsg = z.discriminatedUnion("type", [
   // An edit broke a rule (a loop, a missing concept, ...); nothing was changed.
   z.object({ type: z.literal("map.edit.rejected"), goalId: z.string(), reason: z.string() }),
   z.object({ type: z.literal("settings"), settings: Settings }),
+  z.object({ type: z.literal("providers"), providers: z.array(ProviderStatus) }),
+  z.object({ type: z.literal("provider.signIn.output"), connection: Connection, text: z.string() }),
+  z.object({ type: z.literal("provider.signIn.done"), connection: Connection, ok: z.boolean(), detail: z.string() }),
   z.object({ type: z.literal("sessions"), sessions: z.array(Session) }),
   z.object({ type: z.literal("session.started"), session: Session }),
   z.object({ type: z.literal("session.timeline"), sessionId: z.string(), items: z.array(TimelineItem) }),

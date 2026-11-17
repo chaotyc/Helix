@@ -40,12 +40,12 @@ Every step in `docs/build-plan.md` is tagged **[delegate]** or **[own]**. The de
 | Storage | SQLite through the built-in `node:sqlite` |
 | UI | React + Vite + Tailwind in `apps/web` |
 | Mac app | Electron in `apps/desktop` |
-| AI | `@anthropic-ai/sdk`, called only from the server |
+| AI | Called only from the server, through `apps/server/src/ai/call-model.ts`: API keys (Anthropic SDK; OpenAI, xAI, Meta Responses API; Gemini API) or subscription CLIs run headless (Claude Code, Codex, Antigravity, Grok, Muse) |
 
 ## Layout
 
 ```
-apps/server         WebSocket API, database, Claude calls, session runner
+apps/server         WebSocket API, database, model calls (any provider), session runner
 apps/server/src/ai/prompts/   versioned prompt files, one per agent
 apps/web            React UI
 apps/desktop        Electron shell

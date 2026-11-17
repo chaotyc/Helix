@@ -2,7 +2,10 @@
 // an extraction sends progress updates before its result.
 import type { DatabaseSync } from "node:sqlite";
 import type { ClientMsg, ExtractionStage, ServerMsg } from "@helix/contracts";
-import { callClaude, type ModelCall } from "./ai/claude.ts";
+import { callModel as callAnyModel } from "./ai/call-model.ts";
+import type { ModelCall } from "./ai/model-call.ts";
+import { signIn } from "./ai/providers/sign-in.ts";
+import { providerStatuses } from "./ai/providers/status.ts";
 import { clarifyMap } from "./ai/clarification/clarify-map.ts";
 import { extractMap } from "./ai/extraction/extract-map.ts";
 import { createGoal, getGoal, listGoals } from "./db/goals.ts";
@@ -13,12 +16,12 @@ import { listSessions } from "./db/sessions.ts";
 import { learnerStateMsg } from "./sessions/context.ts";
 import { endSessionNow, replyToSession, resumeSession, startSession, timelineMsg } from "./sessions/runner.ts";
 
-// `callModel`: the real Claude by default; tests pass a fake.
+// `callModel`: the real models by default; tests pass a fake.
 export async function handle(
   db: DatabaseSync,
   msg: ClientMsg,
   reply: (msg: ServerMsg) => void,
-  callModel: ModelCall = callClaude,
+  callModel: ModelCall = callAnyModel,
 ): Promise<void> {
   const deps = { callModel, emit: reply };
   switch (msg.type) {
@@ -41,6 +44,17 @@ export async function handle(
     case "settings.set":
       reply({ type: "settings", settings: saveSettings(db, msg.settings) });
       return;
+
+    case "providers.get":
+      reply({ type: "providers", providers: await providerStatuses() });
+      return;
+
+    case "provider.signIn": {
+      const { ok, detail } = await signIn(msg.connection, (text) => reply({ type: "provider.signIn.output", connection: msg.connection, text }));
+      reply({ type: "provider.signIn.done", connection: msg.connection, ok, detail });
+      reply({ type: "providers", providers: await providerStatuses() });
+      return;
+    }
 
     case "map.get":
       reply(mapUpdate(db, msg.goalId));

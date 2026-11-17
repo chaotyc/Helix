@@ -2,7 +2,7 @@
 // model answer for the grader. Used by the diagnostic; the tutor writes its own questions.
 import type { DatabaseSync } from "node:sqlite";
 import { WrittenItem, type Concept, type Effort, type Goal, type ModelId } from "@helix/contracts";
-import type { ModelCall } from "../claude.ts";
+import type { ModelCall } from "../model-call.ts";
 import { LEARNER_PARTS_FILE, conceptSection } from "../learner-parts.ts";
 import { outputSchema, parseAnswer, retryWith } from "../parse.ts";
 import { loadPrompt } from "../prompts.ts";

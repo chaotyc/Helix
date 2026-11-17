@@ -5,7 +5,7 @@
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
 import { ClarifyProposal, type ClarifyQuestion, type ExtractionStage, type ModelId, type SourceKind } from "@helix/contracts";
-import type { ModelCall } from "../claude.ts";
+import type { ModelCall } from "../model-call.ts";
 import { loadPrompt } from "../prompts.ts";
 import { REQUEST_PARTS_FILE } from "../request-parts.ts";
 import { structuredCall } from "../structured-call.ts";

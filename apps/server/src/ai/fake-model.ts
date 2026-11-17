@@ -1,6 +1,6 @@
-// For tests only: a fake Claude that returns scripted answers in order and remembers every
+// For tests only: a fake model that returns scripted answers in order and remembers every
 // request it was sent. Objects are sent back as JSON; { stopReason } fakes a refusal or cut-off.
-import type { ModelCall, ModelRequest, ModelResult } from "./claude.ts";
+import type { ModelCall, ModelRequest, ModelResult } from "./model-call.ts";
 
 export type FakeAnswer = object | string | { stopReason: string };
 
@@ -17,7 +17,7 @@ export function fakeModel(answers: FakeAnswer[]) {
     const result: ModelResult = {
       stopReason,
       text,
-      content: [{ type: "text", text }],
+      native: [{ type: "text", text }],
       model: "claude-opus-5-5",
       inputTokens: 1000,
       outputTokens: 2000,

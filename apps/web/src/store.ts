@@ -1,6 +1,18 @@
 // App-wide state, shared by components and by code outside React (the connection module).
 import { create } from "zustand";
-import type { ClarifyQuestion, ConceptKnowledge, ExtractionStage, Goal, GoalMap, Session, Settings, SharedWith, TimelineItem } from "@helix/contracts";
+import type {
+  ClarifyQuestion,
+  ConceptKnowledge,
+  Connection,
+  ExtractionStage,
+  Goal,
+  GoalMap,
+  ProviderStatus,
+  Session,
+  Settings,
+  SharedWith,
+  TimelineItem,
+} from "@helix/contracts";
 
 export type ConnectionStatus = "connecting" | "connected" | "reconnecting";
 
@@ -8,6 +20,8 @@ type Pong = { text: string; receivedAt: string };
 type Progress = { stage: ExtractionStage; detail: string };
 export type PendingQuestions = { roundId: string; questions: ClarifyQuestion[] };
 export type SessionStatus = { busy: boolean; detail: string };
+// A sign-in running from the settings tab: what the tool printed, and how it ended.
+export type SignIn = { output: string; done: { ok: boolean; detail: string } | null };
 
 type AppState = {
   // ---- Data ----
@@ -22,6 +36,8 @@ type AppState = {
   maps: Record<string, GoalMap>; // each goal's slice of the global graph, from the server
   extraction: Record<string, Progress>; // the latest extraction update per goal
   settings: Settings | null; // null until the server sends them
+  providers: ProviderStatus[] | null; // each connection's state, asked for when settings open
+  signIns: Partial<Record<Connection, SignIn>>;
   sharedWith: Record<string, SharedWith>; // per goal: which other goals use each of its concepts
   questions: Record<string, PendingQuestions>; // per goal: clarifying questions waiting for answers
   editErrors: Record<string, string>; // per goal: why the last map edit was rejected
@@ -47,6 +63,10 @@ type AppState = {
   setCreatedGoalId: (goalId: string | null) => void;
   setProgress: (goalId: string, progress: Progress) => void;
   setSettings: (settings: Settings) => void;
+  setProviders: (providers: ProviderStatus[]) => void;
+  startSignIn: (connection: Connection) => void;
+  addSignInOutput: (connection: Connection, text: string) => void;
+  finishSignIn: (connection: Connection, ok: boolean, detail: string) => void;
 };
 
 // `create` builds the store. `set` merges the object you give it into the current state,
@@ -63,6 +83,8 @@ export const useAppStore = create<AppState>()((set) => ({
   maps: {},
   extraction: {},
   settings: null,
+  providers: null,
+  signIns: {},
   sharedWith: {},
   questions: {},
   editErrors: {},
@@ -107,6 +129,18 @@ export const useAppStore = create<AppState>()((set) => ({
   setCreatedGoalId: (goalId) => set({ createdGoalId: goalId }),
   setProgress: (goalId, progress) => set((state) => ({ extraction: { ...state.extraction, [goalId]: progress } })),
   setSettings: (settings) => set({ settings }),
+  setProviders: (providers) => set({ providers }),
+  startSignIn: (connection) => set((state) => ({ signIns: { ...state.signIns, [connection]: { output: "", done: null } } })),
+  addSignInOutput: (connection, text) =>
+    set((state) => {
+      const current = state.signIns[connection] ?? { output: "", done: null };
+      return { signIns: { ...state.signIns, [connection]: { ...current, output: current.output + text } } };
+    }),
+  finishSignIn: (connection, ok, detail) =>
+    set((state) => {
+      const current = state.signIns[connection] ?? { output: "", done: null };
+      return { signIns: { ...state.signIns, [connection]: { ...current, done: { ok, detail } } } };
+    }),
 }));
 
 // A copy of `record` without `key`.
