@@ -97,7 +97,9 @@ export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("goal.created"), goal: Goal }),
   z.object({ type: z.literal("map.progress"), goalId: z.string(), stage: ExtractionStage, detail: z.string() }),
   z.object({ type: z.literal("map.questions"), goalId: z.string(), roundId: z.string(), questions: z.array(ClarifyQuestion) }),
-  z.object({ type: z.literal("map.updated"), map: GoalMap, sharedWith: SharedWith }),
+  // `nextUndo`: what Undo would take back, in words ("Remove “LTI systems” from this goal"),
+  // or null when there's nothing to undo.
+  z.object({ type: z.literal("map.updated"), map: GoalMap, sharedWith: SharedWith, nextUndo: z.string().nullable() }),
   // An edit was undone; `undid` names it in the same words `nextUndo` used.
   z.object({ type: z.literal("map.undone"), goalId: z.string(), undid: z.string() }),
   // An edit broke a rule (a loop, a missing concept, ...); nothing was changed.

@@ -10,6 +10,7 @@ import { clarifyMap } from "./ai/clarification/clarify-map.ts";
 import { extractMap } from "./ai/extraction/extract-map.ts";
 import { createGoal, getGoal, listGoals } from "./db/goals.ts";
 import { applyEdits, mapUpdate } from "./db/map-edits.ts";
+import { undoLastEdit } from "./db/map-undo.ts";
 import { rebuildConceptState } from "./db/learner.ts";
 import { getSettings, saveSettings } from "./db/settings.ts";
 import { listSessions } from "./db/sessions.ts";
@@ -68,6 +69,21 @@ export async function handle(
         reply({ type: "map.edit.rejected", goalId: msg.goalId, reason: err instanceof Error ? err.message : String(err) });
         return;
       }
+      afterMapChange(db, reply);
+      reply(mapUpdate(db, msg.goalId));
+      return;
+    }
+
+    case "map.undo": {
+      if (!getGoal(db, msg.goalId)) throw new Error(`No goal with id ${msg.goalId}`);
+      let undid: string;
+      try {
+        undid = undoLastEdit(db, msg.goalId);
+      } catch (err) {
+        reply({ type: "map.edit.rejected", goalId: msg.goalId, reason: err instanceof Error ? err.message : String(err) });
+        return;
+      }
+      reply({ type: "map.undone", goalId: msg.goalId, undid });
       afterMapChange(db, reply);
       reply(mapUpdate(db, msg.goalId));
       return;
