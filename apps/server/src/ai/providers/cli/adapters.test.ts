@@ -109,7 +109,9 @@ function request(model: string, effort: ModelRequest["effort"] = "medium"): Mode
 
 describe("Codex", () => {
   it("runs exec read-only with the schema file, the model, and the effort; prompt on stdin", async () => {
-    const result = await callCodex(request("codex:gpt-6-luna", "high"));
+    let thinking = false;
+    const activities: string[] = [];
+    const result = await callCodex({ ...request("codex:gpt-6-luna", "high"), onThinking: () => (thinking = true), onActivity: (a) => activities.push(a) });
     expect(result).toMatchObject({ text: '{"answer":"hi","n":3}', model: "codex:gpt-6-luna", inputTokens: 16872, outputTokens: 19 });
     const a = args("codex");
     expect(a.slice(0, 2)).toEqual(["exec", "--json"]);
@@ -117,6 +119,9 @@ describe("Codex", () => {
     expect(a.slice(a.indexOf("-s"), a.indexOf("-s") + 2)).toEqual(["-s", "read-only"]);
     expect(a.slice(a.indexOf("-m"), a.indexOf("-m") + 2)).toEqual(["-m", "gpt-6-luna"]);
     expect(a).toContain('model_reasoning_effort="high"');
+    expect(a).toContain('model_reasoning_summary="auto"'); // the summaries are its only progress
+    expect(thinking).toBe(true);
+    expect(activities).toEqual(["Checking primes below 250"]);
     expect(a[a.indexOf("--output-schema") + 1]).toMatch(/schema\.json$/);
     expect(a.at(-1)).toBe("-");
     expect(read("codex.stdin")).toMatch(/^<instructions>\nYou check things\.\n<\/instructions>\n\nCheck this\./);

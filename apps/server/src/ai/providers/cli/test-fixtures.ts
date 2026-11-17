@@ -4,7 +4,9 @@
 export const CODEX_OUTPUT = [
   '{"type":"thread.started","thread_id":"01a1e707-f2b0-71c0-a1cb-0ffb3c9ef0b2"}',
   '{"type":"turn.started"}',
-  '{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\\"answer\\":\\"hi\\",\\"n\\":3}"}}',
+  // with -c model_reasoning_summary="auto": one item per reasoning summary
+  '{"type":"item.completed","item":{"id":"item_0","type":"reasoning","text":"**Checking primes below 250**"}}',
+  '{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"{\\"answer\\":\\"hi\\",\\"n\\":3}"}}',
   '{"type":"turn.completed","usage":{"input_tokens":16872,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":19,"reasoning_output_tokens":0}}',
 ].join("\n");
 

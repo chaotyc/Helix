@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { geminiSafeSchema, groupAgyModels, parseAgyEvents } from "./antigravity.ts";
 import { followClaudeStream, parseClaudeStream, readClaudeLine } from "./claude-stream.ts";
-import { parseCodexEvents, readCodexLine } from "./codex.ts";
+import { parseCodexEvents, readCodexLine, summaryTitle } from "./codex.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
 import { AGY_OUTPUT, CLAUDE_OUTPUT, CODEX_OUTPUT } from "./test-fixtures.ts";
 
@@ -45,6 +45,11 @@ describe("Codex output", () => {
     expect(readCodexLine('{"no":"type"}')).toBeNull();
     // An odd field is dropped, the event kept.
     expect(readCodexLine('{"type":"turn.completed","usage":"lots"}')).toEqual({ type: "turn.completed" });
+  });
+
+  it("turns a reasoning summary into a short title", () => {
+    expect(summaryTitle("**Checking primes below 250**")).toBe("Checking primes below 250");
+    expect(summaryTitle("**Grouping transforms**\n\nI'm putting the Laplace and Fourier...")).toBe("Grouping transforms");
   });
 });
 

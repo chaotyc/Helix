@@ -4,6 +4,9 @@
 // its own agent instructions (about 17K tokens per call, counted against the plan, not billed).
 // The schema is enforced. --ignore-user-config skips your Codex config (MCP servers, plugins);
 // the ChatGPT login still comes from ~/.codex.
+// Progress: `codex exec --json` prints whole items only (no text deltas: the answer arrives in one
+// piece at the end), so nothing can stream. It does print reasoning summaries as it thinks
+// (model_reasoning_summary="auto"), which become `onActivity` updates ("Grouping the transforms").
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
@@ -38,6 +41,12 @@ export function readCodexLine(line: string): CodexEvent | null {
   return event.success ? event.data : null;
 }
 
+// A reasoning summary's first line, without its markdown: "**Checking primes**\n..." → "Checking primes".
+export function summaryTitle(text: string): string {
+  const first = text.trim().split("\n")[0] ?? "";
+  return first.replace(/\*\*/g, "").trim().slice(0, 160);
+}
+
 export const callCodex: ModelCall = async (request) => {
   const command = requireCommand("codex", "Codex");
   const { model } = parseModelId(request.model);
@@ -60,6 +69,7 @@ export const callCodex: ModelCall = async (request) => {
         "-C", work,
         "-m", model,
         ...(effort ? ["-c", `model_reasoning_effort="${effort}"`] : []),
+        "-c", 'model_reasoning_summary="auto"', // reasoning summaries, shown as progress
         "--output-schema", schemaFile,
         "-",
       ],
@@ -68,6 +78,14 @@ export const callCodex: ModelCall = async (request) => {
       stdin: oneShotPrompt(request.system, request.messages),
       timeoutMs: QUIET_LIMITS.totalMs,
       idleTimeoutMs: QUIET_LIMITS.idleMs,
+      onLine: (line) => {
+        const event = readCodexLine(line);
+        if (event?.type === "turn.started") request.onThinking?.();
+        else if (event?.type === "item.completed" && event.item?.type === "reasoning" && event.item.text) {
+          const title = summaryTitle(event.item.text);
+          if (title) request.onActivity?.(title);
+        }
+      },
     });
   });
   if (result.timedOutBy) throw new Error(timeoutMessage("Codex", result.timedOutBy, QUIET_LIMITS));
