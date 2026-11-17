@@ -4,6 +4,9 @@
 // command-line argument), and the answer streams back as text deltas. The schema is enforced.
 // Antigravity names one model per effort ("gemini-4-argon-high"); Helix stores "gemini-4-argon"
 // and picks the variant for the effort asked.
+// Antigravity hands the schema to Gemini as a function declaration, which allows only string
+// enums, so number enums are rewritten first (geminiSafeSchema). Helix's checker still holds the
+// answer to the exact schema.
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Effort, MODELS, modelIdFor, parseModelId, type ModelId } from "@helix/contracts";
@@ -35,7 +38,7 @@ export const callAntigravity: ModelCall = async (request) => {
   const result = await withTempDir(async (dir) => {
     const work = join(dir, "work");
     const schemaFile = join(dir, "schema.json");
-    await writeFile(schemaFile, JSON.stringify(request.schema));
+    await writeFile(schemaFile, JSON.stringify(geminiSafeSchema(request.schema)));
     await mkdir(work);
     const prompt = oneShotPrompt(request.system, request.messages);
     return runTool({
@@ -90,6 +93,29 @@ export function parseAgyEvents(stdout: string, model: string): ModelResult | nul
     inputTokens: usage.input_tokens ?? 0,
     outputTokens: (usage.output_tokens ?? 0) + (usage.thinking_tokens ?? 0),
   };
+}
+
+// A number enum of whole numbers in a row (depths 1–5) becomes the same range as minimum and
+// maximum; any other non-string enum moves into the description. Gemini's function declarations
+// reject number enums ("enum[0]: cannot be empty"), found on the first real map build.
+export function geminiSafeSchema(schema: unknown): Record<string, unknown> {
+  return rewrite(schema) as Record<string, unknown>;
+}
+
+function rewrite(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(rewrite);
+  if (!node || typeof node !== "object") return node;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(node)) out[key] = rewrite(value);
+  const values = out.enum;
+  if (!Array.isArray(values) || values.every((v) => typeof v === "string")) return out;
+  const { enum: _numbers, ...rest } = out;
+  const ints = values.every((v) => Number.isInteger(v)) ? [...(values as number[])].sort((a, b) => a - b) : null;
+  if (ints && ints.length > 0 && ints.every((v, i) => i === 0 || v === ints[i - 1]! + 1)) {
+    return { ...rest, type: "integer", minimum: ints[0], maximum: ints.at(-1) };
+  }
+  const note = `One of: ${values.map((v) => JSON.stringify(v)).join(", ")}.`;
+  return { ...rest, description: typeof rest.description === "string" ? `${rest.description} ${note}` : note };
 }
 
 // ---- Models: `agy models` lists one line per model, "id<TAB>label" ----
