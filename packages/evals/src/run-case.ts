@@ -4,8 +4,8 @@
 //   1. Set up the goal, the source, and the fixed clarifying answers (M5: no clarifier call).
 //   2. Build the map through the same code the app uses (extractMap).
 //   3. Judge it (judgeMap) and run the rule checks (lintMap).
-//   4. Score it, and total the cost of every call.
-import type { Effort, ExtractionStage, JudgedProblem, ModelId } from "@helix/contracts";
+//   4. Score it, total the cost of every call, and keep the map.
+import type { Effort, ExtractionStage, GoalMap, JudgedProblem, ModelId } from "@helix/contracts";
 import { createGoal, createRound, createSource, extractMap, judgeMap, openDatabase, type ModelCall } from "@helix/server";
 import type { LoadedCase } from "./cases.ts";
 import { lintMap, type Warning } from "./lint.ts";
@@ -32,6 +32,7 @@ export type CaseRun = {
   problems: JudgedProblem[];
   warnings: Warning[];
   costUsd: number;
+  map: GoalMap; // the map as built, so later evals (the grader's) can draw concepts from it
 };
 
 export async function runCase(c: LoadedCase, options: RunOptions): Promise<CaseRun> {
@@ -85,6 +86,7 @@ export async function runCase(c: LoadedCase, options: RunOptions): Promise<CaseR
       problems: judged.report.problems,
       warnings,
       costUsd: Number(cost?.cost ?? 0),
+      map: judged.map,
     };
   } finally {
     db.close();

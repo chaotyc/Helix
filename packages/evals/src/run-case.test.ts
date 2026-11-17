@@ -45,6 +45,7 @@ describe("runCase", () => {
     expect(result.extractPromptVersion).toMatch(/^extract-map@/);
     expect(result.judgePromptVersion).toMatch(/^judge-map@/);
     expect(result.costUsd).toBeCloseTo(2 * ((1000 * 4 + 2000 * 20) / 1e6)); // two calls at the fake's token counts
+    expect(result.map.view.map((v) => v.conceptId).sort()).toEqual(["complex-numbers", "lti"]); // kept for the grader eval
   });
 
   it("gives every run its own empty graph", async () => {
