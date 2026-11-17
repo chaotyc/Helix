@@ -7,6 +7,7 @@ import { extname, join, normalize, sep } from "node:path";
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8", // the PDF reader's worker; browsers refuse modules sent as anything else
   ".css": "text/css; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",

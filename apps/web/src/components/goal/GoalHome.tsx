@@ -55,10 +55,10 @@ export function GoalHome({ goal, map, knowledge, sessions, error, onStart, onOpe
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-fg">{goal.title}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px] text-fg-muted">
-          {goal.capstone && (
+          {(goal.prompt || goal.capstone) && (
             <span className="flex min-w-0 items-center gap-1.5">
               <FlagIcon className="size-3.5 text-fg-subtle" />
-              <span className="min-w-0">{goal.capstone}</span>
+              <span className="line-clamp-2 min-w-0">{goal.prompt || goal.capstone}</span>
             </span>
           )}
           {goal.examDate && (
@@ -83,7 +83,7 @@ export function GoalHome({ goal, map, knowledge, sessions, error, onStart, onOpe
               </Button>
             }
           >
-            Paste a syllabus or table of contents, answer a few questions, and Helix lays out the concepts and what each one needs first. Sessions
+            Add your documents (a syllabus, textbook, notes), answer a few questions, and Helix lays out the concepts and what each one needs first. Sessions
             start once there's a map.
           </EmptyState>
         </div>

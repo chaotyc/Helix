@@ -21,7 +21,12 @@ export function caseFromGoal(
   return {
     case: {
       name,
-      goal: { title: goal.title, capstone: goal.capstone, ...(goal.examDate ? { examDate: goal.examDate } : {}) },
+      goal: {
+        title: goal.title,
+        ...(goal.prompt ? { prompt: goal.prompt } : {}),
+        ...(goal.capstone ? { capstone: goal.capstone } : {}),
+        ...(goal.examDate ? { examDate: goal.examDate } : {}),
+      },
       source: sourceFile && source ? { file: sourceFile.name, kind: source.kind } : null,
       answers: answered.map((q) => ({ about: q.about, question: q.question, answer: q.answer ?? "" })),
     },

@@ -134,6 +134,15 @@ export const CalendarIcon = icon(
 );
 
 // The capstone: a flag at the finish.
+// A page with a folded corner: an uploaded document.
+export const FileIcon = icon(
+  <>
+    <path d="M14 3.5H7.5A1.5 1.5 0 006 5v14a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0018 19V7.5z" />
+    <path d="M14 3.5v4h4M9 12.5h6M9 16h4" />
+  </>,
+);
+// An arrow rising out of a tray: add files.
+export const UploadIcon = icon(<path d="M12 15V4.5M7.5 9L12 4.5 16.5 9M5 14.5v3A2.5 2.5 0 007.5 20h9a2.5 2.5 0 002.5-2.5v-3" />);
 export const FlagIcon = icon(<path d="M5 21V4M5 4h11l-2 4 2 4H5" />);
 
 export const KeyIcon = icon(

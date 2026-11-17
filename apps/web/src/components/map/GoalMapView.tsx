@@ -3,7 +3,7 @@
 //   - no map yet, or rebuilding → paste the source
 //   - otherwise                 → the drawn map, with an inspector for whatever is selected
 import { useEffect, useState } from "react";
-import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, ExtractionStage, GoalMap, MapEdit, SharedWith, SourceKind } from "@helix/contracts";
+import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, ExtractionStage, GoalMap, MapEdit, SharedWith } from "@helix/contracts";
 import type { PendingQuestions } from "../../store.ts";
 import { Button } from "../ui/Button.tsx";
 import { Alert, Spinner } from "../ui/feedback.tsx";
@@ -27,7 +27,8 @@ type Props = {
   questions: PendingQuestions | undefined;
   editError: string | undefined;
   serverError: string | null;
-  onAsk: (sourceText: string | undefined, sourceKind: SourceKind) => void;
+  step: 1 | 2; // which job is running: writing questions (1) or building the map (2)
+  onAsk: (sourceText: string | undefined) => void;
   onBuild: (roundId: string, answers: ClarifyAnswer[], effort: Effort) => void;
   onEdit: (edits: MapEdit[]) => void;
   onDismissError: () => void;
@@ -46,8 +47,6 @@ export function GoalMapView(props: Props) {
   const { map, sharedWith, progress, questions } = props;
   const [rebuilding, setRebuilding] = useState(false);
   const [effort, setEffort] = useState<Effort>("high"); // chosen with the source, used when building
-  // Which step a running job is on, for the progress page: writing questions, or building the map.
-  const [step, setStep] = useState<1 | 2>(2);
   const [selection, setSelection] = useState<Selection>(null);
   // What to select once the server confirms an edit. Until then the form stays open, so a
   // rejected edit loses nothing you typed.
@@ -100,25 +99,21 @@ export function GoalMapView(props: Props) {
     return (
       <QuestionsCard
         questions={questions.questions}
-        onBuild={(answers) => {
-          setStep(2);
-          props.onBuild(questions.roundId, answers, effort);
-        }}
+        onBuild={(answers) => props.onBuild(questions.roundId, answers, effort)}
       />
     );
   }
-  if (running && !hasMap) return <MapProgress stage={progress.stage} detail={progress.detail} step={step} />;
+  if (running && !hasMap) return <MapProgress stage={progress.stage} detail={progress.detail} step={props.step} />;
   if (!hasMap || rebuilding) {
     return (
       <>
         {failure && <div className="mx-auto w-full max-w-2xl px-8 pt-8">{failure}</div>}
         <BuildMapPanel
           hasMap={hasMap}
-          onAsk={(text, kind, chosenEffort) => {
+          onAsk={(text, chosenEffort) => {
             setEffort(chosenEffort);
-            setStep(1);
             setRebuilding(false);
-            props.onAsk(text, kind);
+            props.onAsk(text);
           }}
           onCancel={hasMap ? () => setRebuilding(false) : undefined}
         />
