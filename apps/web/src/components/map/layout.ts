@@ -8,6 +8,12 @@ export const NODE_HEIGHT = 62;
 
 export type Positions = Record<string, { x: number; y: number }>;
 
+// What the layout depends on: which concepts, and which arrows between them. Renaming a concept
+// or changing a depth gives the same key, so the drawing (and anything dragged) stays put.
+export function layoutKey(map: GoalMap): string {
+  return JSON.stringify([map.view.map((e) => e.conceptId), map.edges.map((e) => [e.type, e.src, e.dst])]);
+}
+
 export function layoutMap(map: GoalMap): Positions {
   const g = new Graph();
   g.setGraph({ rankdir: "TB", nodesep: 36, ranksep: 76 });
