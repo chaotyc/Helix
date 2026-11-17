@@ -12,7 +12,7 @@ import { BrowserWindow, app, dialog, ipcMain, nativeTheme, safeStorage, shell, u
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { RELEASES_REPO, isNewer, latestRelease, skipVersion, skippedVersion } from "./updates.ts";
+import { RELEASES_REPO, currentInstall, isNewer, latestRelease, skipVersion, skippedVersion, updateSteps } from "./updates.ts";
 
 app.setName("Helix"); // also names the data folder, so it stays "Helix" whatever the app ID
 const MAC = process.platform === "darwin";
@@ -239,7 +239,7 @@ async function checkForUpdates(): Promise<void> {
     detail: [
       `You have ${current}.`,
       notes,
-      "To update, download it, quit Helix, and drag the new Helix into Applications. Your goals and settings are kept. macOS may ask once whether the new version can use your saved API keys.",
+      updateSteps(currentInstall()),
     ]
       .filter(Boolean)
       .join("\n\n"),

@@ -52,23 +52,51 @@ export function plainNotes(markdown: string): string {
 
 const isGitHubUrl =(value: unknown): value is string => typeof value === "string" && value.startsWith("https://github.com/");
 
+// How this copy of Helix was installed, which decides the release file to offer. The names match
+// `artifactName` in electron-builder.config.mjs. A .deb install gets the release page, since
+// the user picks how to install it; an AppImage sets $APPIMAGE when it runs.
+export type Install = { platform: NodeJS.Platform; arch: string; appImage: boolean };
+
+export function assetSuffix({ platform, arch, appImage }: Install): string | null {
+  if (platform === "darwin") return arch === "arm64" ? "-arm64.dmg" : arch === "x64" ? "-x64.dmg" : null;
+  if (platform === "win32") return arch === "x64" ? "-x64.exe" : null;
+  if (platform === "linux") return appImage && arch === "x64" ? "-x86_64.AppImage" : null;
+  return null;
+}
+
+export function currentInstall(): Install {
+  return { platform: process.platform, arch: process.arch, appImage: Boolean(process.env.APPIMAGE) };
+}
+
+// What to tell the user after they download, per OS.
+export function updateSteps(install: Install): string {
+  if (install.platform === "darwin") {
+    return "To update, download it, quit Helix, and drag the new Helix into Applications. Your goals and settings are kept. macOS may ask once whether the new version can use your saved API keys.";
+  }
+  if (install.platform === "win32") return "To update, download the installer, quit Helix, and run it. Your goals and settings are kept.";
+  if (install.appImage) return "To update, download the new AppImage, quit Helix, make the new file executable, and use it in place of the old one. Your goals and settings are kept.";
+  return "To update, download the new package for your system, quit Helix, and install it over this one. Your goals and settings are kept.";
+}
+
 // Checks GitHub's answer before use: only github.com links are ever handed to the browser.
-export function readRelease(body: unknown): Release | null {
+export function readRelease(body: unknown, install: Install = currentInstall()): Release | null {
   if (typeof body !== "object" || body === null) return null;
   const { tag_name, html_url, body: notes, assets } = body as Record<string, unknown>;
   const version = typeof tag_name === "string" ? parseVersion(tag_name)?.join(".") : undefined;
   if (!version || !isGitHubUrl(html_url)) return null;
 
-  const dmg = Array.isArray(assets)
-    ? assets.find((a: unknown) => {
-        const { name, browser_download_url } = (a ?? {}) as Record<string, unknown>;
-        return typeof name === "string" && name.endsWith("-arm64.dmg") && isGitHubUrl(browser_download_url);
-      })
-    : undefined;
+  const suffix = assetSuffix(install);
+  const file =
+    suffix && Array.isArray(assets)
+      ? assets.find((a: unknown) => {
+          const { name, browser_download_url } = (a ?? {}) as Record<string, unknown>;
+          return typeof name === "string" && name.endsWith(suffix) && isGitHubUrl(browser_download_url);
+        })
+      : undefined;
   return {
     version,
     notes: typeof notes === "string" ? plainNotes(notes) : "",
-    downloadUrl: (dmg as { browser_download_url: string } | undefined)?.browser_download_url ?? html_url,
+    downloadUrl: (file as { browser_download_url: string } | undefined)?.browser_download_url ?? html_url,
   };
 }
 
