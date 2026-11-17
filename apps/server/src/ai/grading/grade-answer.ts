@@ -6,6 +6,7 @@ import type { AgentDeps } from "../items/write-item.ts";
 import { LEARNER_PARTS_FILE, conceptSection } from "../learner-parts.ts";
 import { outputSchema, parseAnswer, retryWith } from "../parse.ts";
 import { loadPrompt } from "../prompts.ts";
+import { REQUEST_PARTS_FILE, fenced } from "../request-parts.ts";
 import { structuredCall, type Check } from "../structured-call.ts";
 
 const AGENT = "grader";
@@ -25,7 +26,7 @@ export type GradeInput = {
 export type GradeResult = { grade: Grade; promptVersion: string; model: string };
 
 export async function gradeAnswer(db: DatabaseSync, input: GradeInput, deps: AgentDeps): Promise<GradeResult> {
-  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, LEARNER_PARTS_FILE], ["depth-levels"]);
+  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE, LEARNER_PARTS_FILE], ["depth-levels"]);
   const { value, result } = await structuredCall(db, {
     agent: AGENT,
     goalId: input.goalId,
@@ -75,7 +76,7 @@ function firstMessage(input: GradeInput): string {
     [
       "# The learner's answer",
       `Confidence, rated before feedback: ${input.confidence ? `${input.confidence}/5` : "not given"}`,
-      `<answer>\n${input.answer}\n</answer>`,
+      fenced("answer", input.answer),
     ].join("\n"),
   ].join("\n\n");
 }
