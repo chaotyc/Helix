@@ -1,0 +1,230 @@
+{
+  "date": "2026-11-17T01:57:56.822Z",
+  "effort": "high",
+  "judgeEffort": "xhigh",
+  "runs": [
+    {
+      "case": "signals-demo",
+      "run": 1,
+      "extractPromptVersion": "extract-map@243b3b80",
+      "judgePromptVersion": "judge-map@5f8a2b9f",
+      "extractModel": "codex:gpt-6.1-sol",
+      "judgeModel": "codex:gpt-6.1-sol",
+      "score": {
+        "concepts": 83,
+        "arrows": 167,
+        "majors": 4,
+        "minors": 1,
+        "majorsPer10": 0.4819277108433735,
+        "byType": {
+          "missing_concept": {
+            "major": 2,
+            "minor": 0
+          },
+          "missing_prerequisite": {
+            "major": 2,
+            "minor": 0
+          },
+          "wrong_arrow_depth": {
+            "major": 0,
+            "minor": 1
+          }
+        },
+        "warnings": 18
+      },
+      "problems": [
+        {
+          "type": "missing_concept",
+          "severity": "major",
+          "conceptIds": [
+            "continuous-time-convolution",
+            "laplace-transform"
+          ],
+          "reason": "Add continuous-time unit steps u(t) and sided-signal representations; the existing step concept explicitly covers only discrete-time sequences."
+        },
+        {
+          "type": "missing_concept",
+          "severity": "major",
+          "conceptIds": [
+            "continuous-time-pole-zero-analysis"
+          ],
+          "reason": "Add the Laplace–CTFT relationship: evaluating a Laplace transform on the imaginary axis gives the CTFT only when that axis lies in the ROC."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "major",
+          "conceptIds": [
+            "continuous-time-pole-zero-analysis",
+            "transfer-functions"
+          ],
+          "reason": "System pole-zero analysis requires identifying the system transfer function H(s), rather than analyzing an arbitrary signal's Laplace transform; require transfer-functions at depth 3."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "major",
+          "conceptIds": [
+            "magnitude-and-phase-response",
+            "complex-arithmetic"
+          ],
+          "reason": "Computing magnitude and phase requires rectangular/polar complex arithmetic at depth 3; existing prerequisite paths require complex arithmetic only at depth 2."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "phase-and-group-delay",
+            "differentiation"
+          ],
+          "reason": "Applying group-delay calculations requires applying differentiation at depth 3; raise both the prerequisite depth and differentiation's target from 2 to 3."
+        }
+      ],
+      "warnings": [
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-series",
+            "discrete-time-fourier-series"
+          ],
+          "message": "\"Continuous-time Fourier series\" and \"Discrete-time Fourier series\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-series",
+            "continuous-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier series\" and \"Continuous-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "discrete-time-fourier-series",
+            "discrete-time-fourier-transform"
+          ],
+          "message": "\"Discrete-time Fourier series\" and \"Discrete-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform",
+            "continuous-time-fourier-transform-properties"
+          ],
+          "message": "\"Continuous-time Fourier transform\" and \"Continuous-time Fourier transform properties\" share 80% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform",
+            "inverse-continuous-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier transform\" and \"Inverse continuous-time Fourier transform\" share 80% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform",
+            "discrete-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier transform\" and \"Discrete-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform-properties",
+            "inverse-continuous-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier transform properties\" and \"Inverse continuous-time Fourier transform\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-transform-properties",
+            "discrete-time-fourier-transform-properties"
+          ],
+          "message": "\"Continuous-time Fourier transform properties\" and \"Discrete-time Fourier transform properties\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "inverse-continuous-time-fourier-transform",
+            "inverse-discrete-time-fourier-transform"
+          ],
+          "message": "\"Inverse continuous-time Fourier transform\" and \"Inverse discrete-time Fourier transform\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "discrete-time-fourier-transform",
+            "discrete-time-fourier-transform-properties"
+          ],
+          "message": "\"Discrete-time Fourier transform\" and \"Discrete-time Fourier transform properties\" share 80% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "discrete-time-fourier-transform",
+            "inverse-discrete-time-fourier-transform"
+          ],
+          "message": "\"Discrete-time Fourier transform\" and \"Inverse discrete-time Fourier transform\" share 80% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "discrete-time-fourier-transform-properties",
+            "inverse-discrete-time-fourier-transform"
+          ],
+          "message": "\"Discrete-time Fourier transform properties\" and \"Inverse discrete-time Fourier transform\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "filter-specifications",
+            "ideal-frequency-selective-filters"
+          ],
+          "message": "\"Frequency-selective filter specifications\" and \"Ideal frequency-selective filters\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "laplace-transform",
+            "laplace-transform-properties"
+          ],
+          "message": "\"Laplace transform\" and \"Laplace transform properties\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "laplace-transform",
+            "inverse-laplace-transform"
+          ],
+          "message": "\"Laplace transform\" and \"Inverse Laplace transform\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-pole-zero-analysis",
+            "discrete-time-pole-zero-analysis"
+          ],
+          "message": "\"Continuous-time pole-zero analysis\" and \"Discrete-time pole-zero analysis\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "z-transform",
+            "z-transform-properties"
+          ],
+          "message": "\"Z-transform\" and \"Z-transform properties\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "z-transform",
+            "inverse-z-transform"
+          ],
+          "message": "\"Z-transform\" and \"Inverse z-transform\" share 67% of their words."
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}

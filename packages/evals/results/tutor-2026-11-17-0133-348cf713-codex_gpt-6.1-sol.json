@@ -1,0 +1,192 @@
+{
+  "date": "2026-11-17T01:33:43.574Z",
+  "runs": [
+    {
+      "case": "signals-new-learner",
+      "tutorPromptVersion": "tutor@348cf713",
+      "judgePromptVersion": "judge-tutor@1d1292a7",
+      "tutorModel": "codex:gpt-6.1-sol",
+      "judgeModel": "codex:gpt-6.1-sol",
+      "ended": true,
+      "learnerTurnsUsed": 7,
+      "code": [
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "all 2 finished task(s) had one"
+        },
+        {
+          "rule": "one_question",
+          "verdict": "pass",
+          "evidence": "every tutor message asks at most one"
+        }
+      ],
+      "judge": [
+        {
+          "rule": "predict_first",
+          "verdict": "pass",
+          "evidence": "Turn 8: “Predict what happens to its output” precedes the introduction of time invariance in turn 10."
+        },
+        {
+          "rule": "one_question",
+          "verdict": "pass",
+          "evidence": "Turns 2–22: every tutor message contains at most one question; turn 8 asks only for a prediction."
+        },
+        {
+          "rule": "hints_before_solution",
+          "verdict": "fail",
+          "evidence": "Turn 11: “I'm not sure.” Turn 12 immediately provides the definition and worked pulse example without two prior hints."
+        },
+        {
+          "rule": "asks_why",
+          "verdict": "fail",
+          "evidence": "Turns 2–22 contain no request to explain why a step works; turn 18 asks only to “recall the complete idea from memory.”"
+        },
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "Turn 3 tests recall of Euler’s formula for the review; turn 19 concludes the LTI task with a graded recall question following “from memory” in turn 18."
+        },
+        {
+          "rule": "never_grades",
+          "verdict": "pass",
+          "evidence": "Turn 6 gives corrective feedback after the grader’s verdict in turn 5; turn 22 likewise follows the verdict in turn 21."
+        }
+      ],
+      "transcript": [
+        {
+          "type": "task",
+          "id": "5a3de397-6efd-4045-8838-982e2a08cf78",
+          "label": "Review: Complex exponentials at depth 1"
+        },
+        {
+          "type": "tutor",
+          "id": "8a80ac18-82e2-4b7b-8576-6ea9a4a2b609",
+          "text": "Let’s briefly revisit complex exponentials."
+        },
+        {
+          "type": "question",
+          "id": "48600228-e140-4d0c-b79a-39493b8080fc",
+          "itemId": "7f693684-1e23-4217-9977-c0316bb76666",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "According to Euler’s formula, how can you write e^(jωt) using sine and cosine, where j² = −1?",
+          "step": "Recall Euler’s formula",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "fb287cab-c97c-4008-96d1-6953d62a2467",
+          "text": "I think it has something to do with e^(jωt) and rotating in the complex plane?",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "4fa12e1e-d7b6-4ece-ab93-f688f9292a9f",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You correctly connect complex exponentials with rotation in the complex plane. The required formula is e^(jωt) = cos(ωt) + j sin(ωt), where cosine is the real part and sine is the imaginary part."
+        },
+        {
+          "type": "tutor",
+          "id": "706c8d81-b839-4bc5-a130-d382be79df62",
+          "text": "You recalled the rotation connection; the missing piece is Euler’s formula: e^(jωt) = cos(ωt) + j sin(ωt). The real part is cos(ωt), and the imaginary part is sin(ωt): together, they give the coordinates of a point rotating around the unit circle."
+        },
+        {
+          "type": "task",
+          "id": "9cf20e77-01d5-4c1b-8b12-24d5ae4fe5c1",
+          "label": "Learn: LTI systems to depth 1 (Orient)"
+        },
+        {
+          "type": "tutor",
+          "id": "37858ce4-ada7-4f0b-80a4-525aad98ef89",
+          "text": "Imagine a system that always doubles its input signal. Predict what happens to its output if you send the same input two seconds later."
+        },
+        {
+          "type": "answer",
+          "id": "583bd86c-91a2-4a34-b88d-686c2d1bb60f",
+          "text": "e^(jθ) = cos θ + j sin θ"
+        },
+        {
+          "type": "tutor",
+          "id": "c7da3068-903a-4c12-b04a-d12961cad8e2",
+          "text": "That’s Euler’s formula from the review. Returning to the doubling system: sending the input two seconds later makes the doubled output arrive two seconds later too. This property is called time invariance—the system responds the same way regardless of when the input arrives. It’s one of the two properties in LTI, which stands for linear and time-invariant."
+        },
+        {
+          "type": "answer",
+          "id": "8eae57dd-b2bb-4615-9f6c-efcdf17db839",
+          "text": "I'm not sure. Maybe it means the output only depends on the input?"
+        },
+        {
+          "type": "tutor",
+          "id": "ba47e2a6-a4c6-49e3-9cef-f29bd1ee61b5",
+          "text": "The key is timing: time invariance means that delaying the input delays the output by the same amount, with its shape unchanged. For the doubling system, an input pulse of height 3 produces an output pulse of height 6 whenever you send it."
+        },
+        {
+          "type": "answer",
+          "id": "101ebcfb-eeeb-4fb5-8e98-9a6eefb9b79c",
+          "text": "Can I get a hint?"
+        },
+        {
+          "type": "tutor",
+          "id": "58c5edf4-6b86-4248-833e-de6d8aa50a8c",
+          "text": "Hint: focus on the timing. Imagine sliding the input pulse two seconds to the right on a graph. For a time-invariant system, the output pulse slides two seconds to the right too, keeping its height and shape."
+        },
+        {
+          "type": "answer",
+          "id": "9078921b-a16b-40ec-8563-71fd510b4ac4",
+          "text": "Linear means scaling and adding inputs scales and adds the outputs?"
+        },
+        {
+          "type": "tutor",
+          "id": "1ca59eb3-32a7-4515-bb74-75f12e1f627f",
+          "text": "Yes—linearity means scaling and adding inputs produces the same scaling and adding of their outputs. An LTI system has both properties: linearity and time invariance, where delaying the input delays the output by the same amount. Recognizing these systems helps us predict their responses to complicated signals using responses to simpler ones."
+        },
+        {
+          "type": "answer",
+          "id": "142914c4-bb4f-49f1-9397-cab2dfa0cbf2",
+          "text": "Time-invariant means if you delay the input, the output is just delayed by the same amount."
+        },
+        {
+          "type": "tutor",
+          "id": "a943664c-fdf2-45d2-ab4f-80873a2610fe",
+          "text": "Exactly—the output keeps its shape and shifts by the same amount. Now recall the complete idea from memory."
+        },
+        {
+          "type": "question",
+          "id": "e764430e-618c-432e-b571-34972b913d65",
+          "itemId": "8b48ea40-c3a3-45ba-b271-52741ff945f3",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "State what LTI stands for, describe its two properties, and name what recognizing an LTI system helps us predict.",
+          "step": "Recognize LTI properties and purpose",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "eb246a6a-ac22-4647-95d3-00e470480314",
+          "text": "Because then you can build any input from pieces and add up the responses.",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "f6e5fb12-81ca-4eec-81e6-152b0971cd5b",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You correctly connect LTI systems with predicting outputs by combining responses to simpler inputs. To complete your answer, LTI stands for linear and time-invariant: scaling and adding inputs produces correspondingly scaled and added outputs, and delaying an input delays its output by the same amount."
+        },
+        {
+          "type": "tutor",
+          "id": "63938422-ddb8-4418-85d9-13ec8dc8c3bd",
+          "text": "You identified the purpose: predicting outputs by combining responses to simpler inputs. The missing pieces were the name and properties: LTI means linear and time-invariant. Linear means scaling and adding inputs scales and adds their outputs; time-invariant means delaying an input delays its output by the same amount."
+        },
+        {
+          "type": "summary",
+          "id": "d953f533-0844-40d5-9076-c9049dd466f9",
+          "text": "Reviewed Euler’s formula and introduced LTI systems; both tasks finished at the introductory level.\nThe learner recalled Euler’s formula after correction, building on their existing connection to rotation in the complex plane.\nThe doubling-system and sliding-pulse examples were followed by accurate statements of linearity and time invariance.\nTime invariance was initially unclear: the learner suggested it meant the output only depends on the input. Their final recall captured combining simpler responses but omitted the LTI name and properties.\nNext, check unaided recall of the complete definition, then practice applying both properties to predict outputs from simple inputs."
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}
