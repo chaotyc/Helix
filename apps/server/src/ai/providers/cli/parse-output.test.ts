@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { geminiSafeSchema, groupAgyModels, parseAgyEvents } from "./antigravity.ts";
 import { followClaudeStream, parseClaudeStream, readClaudeLine } from "./claude-stream.ts";
-import { parseCodexEvents } from "./codex.ts";
+import { parseCodexEvents, readCodexLine } from "./codex.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
 import { AGY_OUTPUT, CLAUDE_OUTPUT, CODEX_OUTPUT } from "./test-fixtures.ts";
 
@@ -31,6 +31,20 @@ describe("Codex output", () => {
   it("reports a failed turn, and no answer as null", () => {
     expect(() => parseCodexEvents('{"type":"turn.failed","error":{"message":"usage limit reached"}}', "m")).toThrow("usage limit reached");
     expect(parseCodexEvents('{"type":"thread.started"}', "m")).toBeNull();
+  });
+
+  it("reports an error event only when no answer followed it", () => {
+    const reconnect = '{"type":"error","message":"Reconnecting... 1/5"}';
+    expect(parseCodexEvents(`${reconnect}\n${CODEX_OUTPUT}`, "m")?.text).toBe('{"answer":"hi","n":3}');
+    expect(() => parseCodexEvents(`{"type":"turn.started"}\n${reconnect}`, "m")).toThrow("Reconnecting... 1/5");
+  });
+
+  it("reads each line through its schema, ignoring what doesn't fit", () => {
+    expect(readCodexLine('{"type":"item.completed","item":{"type":"reasoning","text":"**Plan**"}}')?.item).toEqual({ type: "reasoning", text: "**Plan**" });
+    expect(readCodexLine("not json")).toBeNull();
+    expect(readCodexLine('{"no":"type"}')).toBeNull();
+    // An odd field is dropped, the event kept.
+    expect(readCodexLine('{"type":"turn.completed","usage":"lots"}')).toEqual({ type: "turn.completed" });
   });
 });
 

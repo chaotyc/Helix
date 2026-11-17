@@ -6,6 +6,7 @@
 // the ChatGPT login still comes from ~/.codex.
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { z } from "zod";
 import { modelIdFor, parseModelId } from "@helix/contracts";
 import type { ModelCall, ModelResult } from "../../model-call.ts";
 import { effortFor } from "../effort.ts";
@@ -13,13 +14,29 @@ import { QUIET_LIMITS, timeoutMessage } from "./deadline.ts";
 import { oneShotPrompt } from "./prompt.ts";
 import { failureDetail, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
 
-type CodexEvent = {
-  type?: string;
-  item?: { type?: string; text?: string };
-  usage?: { input_tokens?: number; output_tokens?: number };
-  message?: string;
-  error?: { message?: string };
-};
+// One line of `codex exec --json`: only the fields Helix reads. Other event and item types
+// (command runs, file changes, item.started, ...) pass the check and are ignored; a field in an
+// unexpected shape is dropped rather than losing the whole event.
+const CodexEvent = z.object({
+  type: z.string(),
+  item: z.object({ type: z.string(), text: z.string().optional() }).optional().catch(undefined),
+  usage: z.object({ input_tokens: z.number().optional(), output_tokens: z.number().optional() }).optional().catch(undefined),
+  message: z.string().optional().catch(undefined),
+  error: z.object({ message: z.string().optional() }).optional().catch(undefined),
+});
+type CodexEvent = z.infer<typeof CodexEvent>;
+
+// A line as an event, or null when it isn't one (a log line, an unexpected shape).
+export function readCodexLine(line: string): CodexEvent | null {
+  let json: unknown;
+  try {
+    json = JSON.parse(line);
+  } catch {
+    return null;
+  }
+  const event = CodexEvent.safeParse(json);
+  return event.success ? event.data : null;
+}
 
 export const callCodex: ModelCall = async (request) => {
   const command = requireCommand("codex", "Codex");
@@ -61,23 +78,22 @@ export const callCodex: ModelCall = async (request) => {
 };
 
 // Codex prints one JSON event per line; the answer is the last agent message, the token counts
-// come with turn.completed. Null when no answer came.
+// come with turn.completed. A failed turn throws; so does an error event when no answer followed
+// (Codex also reports errors it recovers from, like a dropped connection it retries). Null when
+// no answer came and nothing said why.
 export function parseCodexEvents(stdout: string, model: string): ModelResult | null {
   let text: string | null = null;
   let usage: CodexEvent["usage"] = {};
+  let lastError: string | null = null;
   for (const line of stdout.split("\n")) {
-    let event: CodexEvent;
-    try {
-      event = JSON.parse(line) as CodexEvent;
-    } catch {
-      continue;
-    }
+    const event = readCodexLine(line);
+    if (!event) continue;
     if (event.type === "item.completed" && event.item?.type === "agent_message") text = event.item.text ?? "";
     else if (event.type === "turn.completed") usage = event.usage ?? {};
-    else if (event.type === "turn.failed" || event.type === "error") {
-      throw new Error(`Codex failed: ${event.error?.message ?? event.message ?? "unknown error"}`);
-    }
+    else if (event.type === "turn.failed") throw new Error(`Codex failed: ${event.error?.message ?? event.message ?? "unknown error"}`);
+    else if (event.type === "error") lastError = event.error?.message ?? event.message ?? "unknown error";
   }
+  if (text === null && lastError) throw new Error(`Codex failed: ${lastError}`);
   if (text === null) return null;
   return {
     stopReason: "end_turn",
