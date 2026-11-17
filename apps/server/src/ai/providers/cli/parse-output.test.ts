@@ -1,6 +1,6 @@
 // The parsers read each tool's real output (test-fixtures.ts).
 import { describe, expect, it } from "vitest";
-import { groupAgyModels, parseAgyEvents } from "./antigravity.ts";
+import { geminiSafeSchema, groupAgyModels, parseAgyEvents } from "./antigravity.ts";
 import { parseClaudeOutput } from "./claude-code.ts";
 import { parseCodexEvents } from "./codex.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
@@ -45,6 +45,14 @@ describe("Claude Code output", () => {
     });
   });
 
+  it("names the requested model, not the Haiku that Claude Code runs on the side", () => {
+    const out = JSON.parse(CLAUDE_OUTPUT) as Record<string, unknown>;
+    out.modelUsage = { "claude-haiku-5-5": { outputTokens: 40 }, "claude-opus-5-5": { outputTokens: 900 } };
+    expect(parseClaudeOutput(JSON.stringify(out), "claude-opus-5-5")?.model).toBe("claude-code:claude-opus-5-5");
+    // An alias it resolved: the model that wrote the most.
+    expect(parseClaudeOutput(JSON.stringify(out), "opus")?.model).toBe("claude-code:claude-opus-5-5");
+  });
+
   it("reports an error result, and nothing printed as null", () => {
     expect(() => parseClaudeOutput(JSON.stringify({ type: "result", subtype: "error_during_execution", is_error: true, result: "Not logged in" }), "m")).toThrow("Not logged in");
     expect(parseClaudeOutput("", "m")).toBeNull();
@@ -65,6 +73,27 @@ describe("Antigravity output", () => {
   it("reports an error result", () => {
     const failed = '{"event":"result","result":{"status":"ERROR","error":"stream input message is missing the \\"event\\" field"}}';
     expect(() => parseAgyEvents(failed, "m")).toThrow('missing the "event" field');
+  });
+
+  it("rewrites number enums, which Gemini's function declarations reject, and keeps the rest", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        depth: { type: "number", enum: [1, 2, 3, 4, 5] },
+        odd: { type: "number", enum: [1, 5], description: "Odd ones." },
+        role: { type: "string", enum: ["target", "background"] },
+        list: { type: "array", items: { type: "object", properties: { needsDepth: { type: "number", enum: [3, 1, 2] } } } },
+      },
+    };
+    expect(geminiSafeSchema(schema)).toEqual({
+      type: "object",
+      properties: {
+        depth: { type: "integer", minimum: 1, maximum: 5 },
+        odd: { type: "number", description: "Odd ones. One of: 1, 5." },
+        role: { type: "string", enum: ["target", "background"] },
+        list: { type: "array", items: { type: "object", properties: { needsDepth: { type: "integer", minimum: 1, maximum: 3 } } } },
+      },
+    });
   });
 
   it("groups each model's effort variants", () => {

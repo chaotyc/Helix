@@ -17,7 +17,7 @@ type ClaudeResult = {
   structured_output?: unknown;
   stop_reason?: string | null;
   usage?: { input_tokens?: number; output_tokens?: number; cache_creation_input_tokens?: number; cache_read_input_tokens?: number };
-  modelUsage?: Record<string, unknown>;
+  modelUsage?: Record<string, { outputTokens?: number }>;
 };
 
 export const callClaudeCode: ModelCall = async (request) => {
@@ -58,7 +58,12 @@ export function parseClaudeOutput(stdout: string, requested: string): ModelResul
     throw new Error(`Claude Code failed: ${out.result || out.subtype || "unknown error"}`);
   }
   const usage = out.usage ?? {};
-  const answeredBy = Object.keys(out.modelUsage ?? {})[0] ?? requested;
+  // modelUsage also lists models Claude Code runs for its own housekeeping (Haiku), so the answer
+  // came from the requested model when it's there, else from the one that wrote the most.
+  const used = Object.entries(out.modelUsage ?? {});
+  const answeredBy = used.some(([m]) => m === requested)
+    ? requested
+    : (used.sort(([, a], [, b]) => (b.outputTokens ?? 0) - (a.outputTokens ?? 0))[0]?.[0] ?? requested);
   return {
     stopReason: out.stop_reason === "refusal" ? "refusal" : out.stop_reason === "max_tokens" ? "max_tokens" : "end_turn",
     text: out.structured_output !== undefined ? JSON.stringify(out.structured_output) : (out.result ?? ""),
