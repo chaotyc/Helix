@@ -8,3 +8,8 @@ dist/
 # Mac app build output
 apps/desktop/build/
 apps/desktop/release/
+
+# Private working notes (kept locally, not published)
+CLAUDE.local.md
+docs/
+.claude/
