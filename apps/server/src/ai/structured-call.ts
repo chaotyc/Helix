@@ -1,11 +1,11 @@
-// One structured answer from Claude, checked, with one retry (E6) and every call logged (E7).
+// One structured answer from a model, checked, with one retry (E6) and every call logged (E7).
 // Shared by every agent that returns JSON.
-//   1. Ask Claude, streaming progress.
+//   1. Ask the model, streaming progress.
 //   2. Stop at once on a refusal or a cut-off answer: retrying won't help.
-//   3. Check the answer. If it breaks a rule, show Claude its answer and the problems, and ask again.
+//   3. Check the answer. If it breaks a rule, show the model its answer and the problems, and ask again.
 import type { DatabaseSync } from "node:sqlite";
 import type { Effort, ExtractionStage, ModelId } from "@helix/contracts";
-import type { ModelCall, ModelRequest, ModelResult } from "./claude.ts";
+import type { ModelCall, ModelRequest, ModelResult } from "./model-call.ts";
 import { costUsd } from "./pricing.ts";
 import type { Prompt } from "./prompts.ts";
 import { logAiCall, type AiCallRecord } from "../db/ai-calls.ts";
@@ -26,7 +26,7 @@ export type StructuredCall<T> = {
   retryMessage: (problems: string[]) => string;
   callModel: ModelCall;
   progress: (stage: ExtractionStage, detail: string) => void;
-  thinkingDetail: string; // shown once, when Claude starts thinking
+  thinkingDetail: string; // shown once, when the model starts thinking
   onText?: (textSoFar: string) => void; // agent-specific progress as the answer streams in
 };
 
@@ -57,14 +57,14 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
           output: result?.text,
           inputTokens: result?.inputTokens,
           outputTokens: result?.outputTokens,
-          costUsd: result ? costUsd(result.model, result.inputTokens, result.outputTokens) : null,
+          costUsd: result ? costUsd(result.model, result.inputTokens, result.outputTokens, call.model) : null,
           durationMs: Date.now() - started,
           startedAt,
         }),
       );
     };
 
-    // ---- Ask Claude ----
+    // ---- Ask the model ----
     let result: ModelResult;
     let thinkingShown = false;
     try {
@@ -83,20 +83,20 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
       });
     } catch (err) {
       log("error", undefined, [err instanceof Error ? err.message : String(err)]);
-      progress("failed", "the call to Claude failed");
+      progress("failed", "the call to the model failed");
       throw err;
     }
 
     // ---- Guard against answers that can't be used at all ----
     if (result.stopReason === "refusal") {
       log("refused", result);
-      progress("failed", "Claude declined this request");
-      throw new Error("Claude declined this request (even after the automatic fallback).");
+      progress("failed", "the model declined this request");
+      throw new Error("The model declined this request (on Claude, even after the automatic fallback).");
     }
     if (result.stopReason === "max_tokens") {
       log("truncated", result);
       progress("failed", "the answer was cut off");
-      throw new Error("Claude's answer was cut off before it finished. Try lower effort or a shorter source.");
+      throw new Error("The answer was cut off before it finished. Try lower effort or a shorter source.");
     }
 
     // ---- Check it ----
@@ -109,7 +109,7 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
         progress("failed", `still invalid after ${MAX_ATTEMPTS} tries`);
         throw new Error(`The answer was still invalid after ${MAX_ATTEMPTS} tries:\n- ${check.problems.join("\n- ")}`);
       }
-      messages.push({ role: "assistant", content: result.content });
+      messages.push({ role: "assistant", content: result.text, native: result.native });
       messages.push({ role: "user", content: call.retryMessage(check.problems) });
       continue;
     }

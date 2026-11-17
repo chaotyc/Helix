@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ClarifyAnswer, Confidence, Effort, GoalInput, MapEdit, Session, SessionKind, Settings, SourceKind } from "@helix/contracts";
+import type { ClarifyAnswer, Confidence, Connection, Effort, GoalInput, MapEdit, Session, SessionKind, Settings, SourceKind } from "@helix/contracts";
 import { send } from "./connection.ts";
 import { useAppStore } from "./store.ts";
 import { useShortcut } from "./hooks/useShortcut.ts";
@@ -26,6 +26,8 @@ export function App() {
   const maps = useAppStore((state) => state.maps);
   const extraction = useAppStore((state) => state.extraction);
   const settings = useAppStore((state) => state.settings);
+  const providers = useAppStore((state) => state.providers);
+  const signIns = useAppStore((state) => state.signIns);
   const sharedWith = useAppStore((state) => state.sharedWith);
   const questions = useAppStore((state) => state.questions);
   const editErrors = useAppStore((state) => state.editErrors);
@@ -87,6 +89,19 @@ export function App() {
   // Saved on the server; the tab shows the server's reply, so it never shows an unsaved choice.
   function changeSettings(next: Settings): void {
     sendOrWarn({ type: "settings.set", settings: next }, "the settings weren't saved");
+  }
+
+  // Each connection's state (keys, signed-in tools) is checked whenever the settings tab opens.
+  function refreshProviders(): void {
+    sendOrWarn({ type: "providers.get" }, "the connections weren't checked");
+  }
+  useEffect(() => {
+    if (view === "settings") refreshProviders();
+  }, [view]);
+
+  function signIn(connection: Connection): void {
+    useAppStore.getState().startSignIn(connection);
+    sendOrWarn({ type: "provider.signIn", connection }, "the sign-in didn't start");
   }
 
   function createGoal(goal: GoalInput): void {
@@ -201,7 +216,14 @@ export function App() {
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {view === "settings" ? (
-            <SettingsPanel settings={settings} onChange={changeSettings} />
+            <SettingsPanel
+              settings={settings}
+              providers={providers}
+              signIns={signIns}
+              onChange={changeSettings}
+              onRefreshProviders={refreshProviders}
+              onSignIn={signIn}
+            />
           ) : view === "new-goal" ? (
             <NewGoalForm onCreate={createGoal} />
           ) : view === "map" && selectedGoal ? (

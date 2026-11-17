@@ -1,8 +1,9 @@
 // The Mac app. Electron's main process:
 //   1. starts the Helix server as a background process (Electron's own Node runs it),
 //   2. waits until the server says it's listening, then opens a window on it,
-//   3. keeps the Anthropic API key, encrypted with the macOS keychain (safeStorage), and hands it
-//      to the server when starting it. The key never travels over the WebSocket.
+//   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted with the macOS keychain
+//      (safeStorage), and hands them to the server when starting it. Keys never travel over the
+//      WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
 // Data lives in ~/Library/Application Support/Helix (HELIX_DATA_DIR overrides it, for testing).
 import { BrowserWindow, app, dialog, ipcMain, safeStorage, shell, utilityProcess, type UtilityProcess } from "electron";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -11,7 +12,18 @@ import { fileURLToPath } from "node:url";
 
 app.setName("Helix");
 const DATA_DIR = process.env.HELIX_DATA_DIR ?? app.getPath("userData");
-const KEY_FILE = join(DATA_DIR, "api-key.bin"); // encrypted; useless without this Mac's keychain
+// Each provider's key, encrypted; useless without this Mac's keychain. The Anthropic key keeps the
+// file name it had before other providers existed.
+const KEYS = {
+  anthropic: { file: "api-key.bin", env: "ANTHROPIC_API_KEY" },
+  openai: { file: "openai-key.bin", env: "OPENAI_API_KEY" },
+  google: { file: "google-key.bin", env: "GEMINI_API_KEY" },
+  xai: { file: "xai-key.bin", env: "XAI_API_KEY" },
+  meta: { file: "meta-key.bin", env: "META_API_KEY" },
+} as const;
+type KeyProvider = keyof typeof KEYS;
+const isKeyProvider = (value: unknown): value is KeyProvider => typeof value === "string" && Object.hasOwn(KEYS, value);
+const keyFile = (provider: KeyProvider) => join(DATA_DIR, KEYS[provider].file);
 const LOG_FILE = join(DATA_DIR, "server.log");
 const START_TIMEOUT_MS = 20_000;
 
@@ -25,20 +37,21 @@ let server: UtilityProcess | null = null;
 let origin = ""; // http://127.0.0.1:<port>, the only page the window may show
 let window: BrowserWindow | null = null;
 
-// ---- The API key ----
+// ---- The API keys ----
 
-function savedKey(): string | null {
-  if (!existsSync(KEY_FILE) || !safeStorage.isEncryptionAvailable()) return null;
+function savedKey(provider: KeyProvider): string | null {
+  const file = keyFile(provider);
+  if (!existsSync(file) || !safeStorage.isEncryptionAvailable()) return null;
   try {
-    return safeStorage.decryptString(readFileSync(KEY_FILE));
+    return safeStorage.decryptString(readFileSync(file));
   } catch {
     return null; // written on another Mac, or the keychain entry is gone
   }
 }
 
-function saveKey(key: string): void {
+function saveKey(provider: KeyProvider, key: string): void {
   if (!safeStorage.isEncryptionAvailable()) throw new Error("The macOS keychain isn't available, so the key can't be stored safely.");
-  writeFileSync(KEY_FILE, safeStorage.encryptString(key), { mode: 0o600 });
+  writeFileSync(keyFile(provider), safeStorage.encryptString(key), { mode: 0o600 });
 }
 
 // ---- The server ----
@@ -49,7 +62,6 @@ function log(line: string): void {
 
 // Starts the server and resolves with its port once it's listening.
 function startServer(): Promise<number> {
-  const key = savedKey() ?? process.env.ANTHROPIC_API_KEY; // a saved key wins over the environment
   const env: Record<string, string> = {
     ...(process.env as Record<string, string>),
     HELIX_PORT: "0", // any free port
@@ -57,8 +69,11 @@ function startServer(): Promise<number> {
     HELIX_WEB_DIR: join(RESOURCES, "web"),
     HELIX_RESOURCES_DIR: join(RESOURCES, "helix-src"), // migrations, prompts, and the files prompt versions hash
   };
-  if (key) env.ANTHROPIC_API_KEY = key;
-  else delete env.ANTHROPIC_API_KEY;
+  for (const provider of Object.keys(KEYS) as KeyProvider[]) {
+    const key = savedKey(provider) ?? process.env[KEYS[provider].env]; // a saved key wins over the environment
+    if (key) env[KEYS[provider].env] = key;
+    else delete env[KEYS[provider].env];
+  }
 
   const child = utilityProcess.fork(join(RESOURCES, "server", "server.mjs"), [], { env, stdio: "pipe", serviceName: "Helix server" });
   server = child;
@@ -129,22 +144,50 @@ function fromHelix(event: Electron.IpcMainInvokeEvent): boolean {
   return Boolean(origin) && (event.senderFrame?.url ?? "").startsWith(origin);
 }
 
+function setKey(provider: unknown, key: unknown): Promise<void> {
+  if (!isKeyProvider(provider)) throw new Error("Unknown provider.");
+  if (typeof key !== "string" || !/^\S{10,400}$/.test(key.trim())) throw new Error("That doesn't look like an API key.");
+  saveKey(provider, key.trim());
+  return startAndShow(); // the server reads the keys when it starts
+}
+
+function clearKey(provider: unknown): Promise<void> {
+  if (!isKeyProvider(provider)) throw new Error("Unknown provider.");
+  rmSync(keyFile(provider), { force: true });
+  return startAndShow();
+}
+
+// The Anthropic key alone: the bridge's first version, still used by its settings section.
 ipcMain.handle("helix:key-status", (event) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
-  return { saved: savedKey() !== null, canEncrypt: safeStorage.isEncryptionAvailable() };
+  return { saved: savedKey("anthropic") !== null, canEncrypt: safeStorage.isEncryptionAvailable() };
 });
 
 ipcMain.handle("helix:set-key", async (event, key: unknown) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
-  if (typeof key !== "string" || !/^\S{10,400}$/.test(key.trim())) throw new Error("That doesn't look like an API key.");
-  saveKey(key.trim());
-  await startAndShow(); // the server reads the key when it starts
+  await setKey("anthropic", key);
 });
 
 ipcMain.handle("helix:clear-key", async (event) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
-  rmSync(KEY_FILE, { force: true });
-  await startAndShow();
+  await clearKey("anthropic");
+});
+
+// Any provider's key.
+ipcMain.handle("helix:keys-status", (event) => {
+  if (!fromHelix(event)) throw new Error("Not allowed.");
+  const saved = Object.fromEntries((Object.keys(KEYS) as KeyProvider[]).map((p) => [p, savedKey(p) !== null]));
+  return { saved, canEncrypt: safeStorage.isEncryptionAvailable() };
+});
+
+ipcMain.handle("helix:set-provider-key", async (event, provider: unknown, key: unknown) => {
+  if (!fromHelix(event)) throw new Error("Not allowed.");
+  await setKey(provider, key);
+});
+
+ipcMain.handle("helix:clear-provider-key", async (event, provider: unknown) => {
+  if (!fromHelix(event)) throw new Error("Not allowed.");
+  await clearKey(provider);
 });
 
 // ---- App lifecycle ----

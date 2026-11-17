@@ -1,19 +1,20 @@
-// Builds a course's map with Claude from the command line: first up to 3 clarifying questions,
+// Builds a course's map from the command line, with the generation model from the settings tab: first up to 3 clarifying questions,
 // answered here in the terminal, then the map.
 //   pnpm --filter @helix/server extract-map --goal "Signals" --file syllabus.txt --kind syllabus
 //   pnpm --filter @helix/server extract-map --goal "Signals" --effort medium     (no source: goal and answers only)
 // --goal takes a goal id or part of its title. --kind: syllabus | contents | notes | other (default).
-// Needs ANTHROPIC_API_KEY in apps/server/.env.
+// Needs that model's key in apps/server/.env, or its subscription tool installed and signed in.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
 import { Effort, SourceKind } from "@helix/contracts";
-import { callClaude } from "../ai/claude.ts";
+import { callModel, missingSetup } from "../ai/call-model.ts";
 import { clarifyMap } from "../ai/clarification/clarify-map.ts";
 import { extractMap } from "../ai/extraction/extract-map.ts";
 import { openDatabase } from "../db/open.ts";
 import { listGoals } from "../db/goals.ts";
+import { getSettings } from "../db/settings.ts";
 import { askQuestions } from "./ask-questions.ts";
 
 const { values } = parseArgs({
@@ -69,7 +70,7 @@ const terminal = createInterface({ input: process.stdin, output: process.stdout 
 console.log(`Building a map for "${goal.title}" ${sourceText ? `from ${values.file} (${kind.data})` : "from the goal and your answers"}…`);
 try {
   console.log("Choosing clarifying questions…");
-  const round = await clarifyMap(db, { goalId: goal.id, sourceText, sourceKind: kind.data }, { callModel: callClaude, onProgress });
+  const round = await clarifyMap(db, { goalId: goal.id, sourceText, sourceKind: kind.data }, { callModel, onProgress });
   const answers = await askQuestions(round.questions, (prompt) => terminal.question(prompt), console.log);
   terminal.close();
 
@@ -77,7 +78,7 @@ try {
   const map = await extractMap(
     db,
     { goalId: goal.id, roundId: round.roundId, answers, effort: effort.data },
-    { callModel: callClaude, onProgress },
+    { callModel, onProgress },
   );
   const cost = db
     .prepare("SELECT SUM(cost_usd) AS cost FROM ai_call WHERE goal_id = $goalId AND started_at >= $since")
@@ -90,8 +91,7 @@ try {
 } catch (err) {
   terminal.close();
   console.error(`Failed: ${err instanceof Error ? err.message : String(err)}`);
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("No ANTHROPIC_API_KEY found. Copy apps/server/.env.example to apps/server/.env and add your key.");
-  }
+  const missing = missingSetup(getSettings(db).models.generation);
+  if (missing) console.error(missing);
   process.exit(1);
 }

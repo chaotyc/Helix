@@ -6,7 +6,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { Concept, Edge, ViewEntry, type ModelId, type RuleVerdict, type TimelineItem } from "@helix/contracts";
+import { Concept, DEFAULT_SETTINGS, Edge, ViewEntry, type ModelId, type RuleVerdict, type TimelineItem } from "@helix/contracts";
 import {
   createGoal,
   createSession,
@@ -20,6 +20,7 @@ import {
   readTurns,
   recordMapChange,
   replyToSession,
+  saveSettings,
   startSession,
   type ModelCall,
 } from "@helix/server";
@@ -65,11 +66,13 @@ export type TutorRun = {
   costUsd: number;
 };
 
-export type TutorRunOptions = { callModel: ModelCall; judgeModel: ModelId; log?: (line: string) => void };
+// tutorModel teaches (saved as the teaching model of the case's own database); judgeModel judges.
+export type TutorRunOptions = { callModel: ModelCall; tutorModel: ModelId; judgeModel: ModelId; log?: (line: string) => void };
 
 export async function runTutorCase(c: TutorCase, options: TutorRunOptions): Promise<TutorRun> {
   const log = options.log ?? (() => {});
   const db = openDatabase(":memory:");
+  saveSettings(db, { models: { ...DEFAULT_SETTINGS.models, teaching: options.tutorModel } });
   const goal = createGoal(db, { title: c.goal.title, kind: "course", capstone: c.goal.capstone });
   recordMapChange(
     db,

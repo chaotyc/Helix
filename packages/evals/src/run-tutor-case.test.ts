@@ -29,7 +29,7 @@ describe("runTutorCase", () => {
       { summary: "Learned a." },
       { verdicts },
     ]);
-    const run = await runTutorCase(c, { callModel: fake.callModel, judgeModel: "claude-opus-5-5" });
+    const run = await runTutorCase(c, { callModel: fake.callModel, tutorModel: "claude-opus-5-5", judgeModel: "claude-opus-5-5" });
 
     expect(run.ended).toBe(true);
     expect(run.learnerTurnsUsed).toBe(2);

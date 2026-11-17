@@ -8,7 +8,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
 import { ExtractionProposal, type ClarifyAnswer, type Effort, type ExtractionStage, type GoalMap, type ModelId } from "@helix/contracts";
 import { goalSlice, replayGraph } from "@helix/core";
-import type { ModelCall } from "../claude.ts";
+import type { ModelCall } from "../model-call.ts";
 import { loadPrompt } from "../prompts.ts";
 import { REQUEST_PARTS_FILE } from "../request-parts.ts";
 import { structuredCall } from "../structured-call.ts";

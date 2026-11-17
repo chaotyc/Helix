@@ -63,6 +63,15 @@ function handleMessage(raw: string): void {
     case "settings":
       useAppStore.getState().setSettings(msg.settings);
       return;
+    case "providers":
+      useAppStore.getState().setProviders(msg.providers);
+      return;
+    case "provider.signIn.output":
+      useAppStore.getState().addSignInOutput(msg.connection, msg.text);
+      return;
+    case "provider.signIn.done":
+      useAppStore.getState().finishSignIn(msg.connection, msg.ok, msg.detail);
+      return;
     case "sessions":
       useAppStore.getState().setSessions(msg.sessions);
       return;

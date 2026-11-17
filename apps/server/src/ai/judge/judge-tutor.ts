@@ -3,7 +3,7 @@
 // the eval; this covers the ones that need judgment.
 import type { DatabaseSync } from "node:sqlite";
 import { TutorJudgeReport, TutorRule, type Goal, type ModelId, type TimelineItem } from "@helix/contracts";
-import type { ModelCall } from "../claude.ts";
+import type { ModelCall } from "../model-call.ts";
 import { LEARNER_PARTS_FILE, transcriptLines } from "../learner-parts.ts";
 import { outputSchema, parseAnswer, retryWith } from "../parse.ts";
 import { loadPrompt } from "../prompts.ts";

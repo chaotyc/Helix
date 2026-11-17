@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import type { Concept, ConceptGraph, ServerMsg, Session, TimelineItem } from "@helix/contracts";
-import type { ModelCall } from "../ai/claude.ts";
+import type { ModelCall } from "../ai/model-call.ts";
 import type { AgentDeps } from "../ai/items/write-item.ts";
 import { learnerSnapshot } from "../db/learner.ts";
 import { addTurn } from "../db/sessions.ts";

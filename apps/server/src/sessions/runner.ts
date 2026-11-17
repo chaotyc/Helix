@@ -4,7 +4,7 @@
 //   - on a failure, says so and resends the saved timeline (dropping half-streamed text).
 import type { DatabaseSync } from "node:sqlite";
 import type { Confidence, ServerMsg, Session, SessionKind } from "@helix/contracts";
-import type { ModelCall } from "../ai/claude.ts";
+import type { ModelCall } from "../ai/model-call.ts";
 import { getGoal } from "../db/goals.ts";
 import { createSession, createTasks, getSession, readTurns } from "../db/sessions.ts";
 import type { SessionCtx } from "./context.ts";
