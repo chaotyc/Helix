@@ -115,3 +115,49 @@ export type RuleVerdict = z.infer<typeof RuleVerdict>;
 
 export const TutorJudgeReport = z.strictObject({ verdicts: z.array(RuleVerdict) });
 export type TutorJudgeReport = z.infer<typeof TutorJudgeReport>;
+
+// ---------------------------------------------------------------------------
+// The grader eval (packages/evals): a simulated learner writes answers of assigned kinds,
+// the real grader grades them, and a judge decides whether each grade is right. The kind
+// is an instruction to the simulator, not a label: only the judge's verdict is scored.
+// ---------------------------------------------------------------------------
+
+export const AnswerKind = z.enum([
+  "fully_right", // meets the rubric, in the learner's own words
+  "right_other_form", // right by other notation, an equivalent form, or another valid method
+  "right_result_wrong_reasoning", // the right result reached by wrong reasoning
+  "partly_right", // right as far as it goes, missing a required part
+  "misconception", // follows from a wrong belief about the concept
+  "slip", // the right approach with one small execution error
+  "misread", // answers a different question
+  "no_answer", // no real attempt
+]);
+export type AnswerKind = z.infer<typeof AnswerKind>;
+
+export const SimulatedAnswer = z.strictObject({
+  kind: AnswerKind,
+  answer: z.string().describe("the learner's answer, as they would type it"),
+  confidence: z.number().int().describe("1 to 5: how sure this learner would be before seeing feedback"),
+});
+export type SimulatedAnswer = z.infer<typeof SimulatedAnswer>;
+
+export const SimulatedAnswers = z.strictObject({ answers: z.array(SimulatedAnswer) });
+export type SimulatedAnswers = z.infer<typeof SimulatedAnswers>;
+
+export const GradeVerdict = z.enum([
+  "right", // the grade's right/wrong call is correct
+  "false_pass", // graded right, but the answer is wrong
+  "false_fail", // graded wrong, but the answer is right
+]);
+export type GradeVerdict = z.infer<typeof GradeVerdict>;
+
+export const GraderJudgment = z.strictObject({
+  reason: z.string().describe("two or three lines: what the answer shows against the rubric, and what decided the verdict"),
+  rubricSound: z.boolean().describe("false if the rubric or model answer is wrong, or too vague to grade from"),
+  verdict: GradeVerdict,
+  tagFits: z
+    .enum(["yes", "no", "not_applicable"])
+    .describe("yes or no only when the grade says wrong and the verdict is right; otherwise not_applicable"),
+  betterTag: ErrorTag.nullable().describe("when tagFits is no: the tag that fits; otherwise null"),
+});
+export type GraderJudgment = z.infer<typeof GraderJudgment>;
