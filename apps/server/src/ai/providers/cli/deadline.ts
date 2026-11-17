@@ -6,7 +6,10 @@
 //   - 45 minutes total, for every tool: three times the longest map build seen (Codex, high
 //     effort, ~14 minutes with the judge). Far past that, something is wrong, and an open call
 //     holds a plan's usage.
-//   - 15 minutes idle (QUIET_LIMITS). Claude Code, Codex, and Antigravity print nothing while they
+//   - 5 minutes idle for Claude Code (STREAMING_LIMITS). It prints a thinking tick about every
+//     second while it thinks and a piece of the answer every few tokens while it writes, so five
+//     silent minutes is far outside normal.
+//   - 15 minutes idle for the rest (QUIET_LIMITS). Codex and Antigravity print nothing while they
 //     write their answer, which arrives in one piece at the end (Antigravity is silent while it
 //     thinks, too): a large map (30K output tokens at ~50 tokens a second) can take ten silent
 //     minutes. Grok and Muse haven't been run for real, so they get the cautious limit.
@@ -14,6 +17,7 @@
 export type Limits = { idleMs: number; totalMs: number };
 
 const TOTAL_MS = 45 * 60_000;
+export const STREAMING_LIMITS: Limits = { idleMs: 5 * 60_000, totalMs: TOTAL_MS };
 export const QUIET_LIMITS: Limits = { idleMs: 15 * 60_000, totalMs: TOTAL_MS };
 
 export type TimeoutKind = "idle" | "total";

@@ -126,13 +126,18 @@ describe("Codex", () => {
 
 describe("Claude Code", () => {
   it("replaces Claude Code's prompt with the agent's, gives it no tools, and enforces the schema", async () => {
-    const result = await callClaudeCode(request("claude-code:claude-haiku-5-5", "xhigh"));
-    expect(result).toMatchObject({ text: '{"answer":"hi","n":3}', model: "claude-code:claude-haiku-5-5" });
+    const streamed: string[] = [];
+    const result = await callClaudeCode({ ...request("claude-code:claude-opus-5-5", "xhigh"), onText: (t) => streamed.push(t) });
+    expect(result).toMatchObject({ text: '{"answer":"hi","n":3}', model: "claude-code:claude-opus-5-5" });
+    expect(streamed).toEqual(['{"answer": "h', '{"answer": "hi", "n', '{"answer": "hi", "n": 3}']);
     const a = args("claude");
     expect(a[0]).toBe("-p");
+    expect(a[a.indexOf("--output-format") + 1]).toBe("stream-json");
+    expect(a).toContain("--verbose");
+    expect(a).toContain("--include-partial-messages");
     expect(a[a.indexOf("--system-prompt") + 1]).toBe("You check things.");
     expect(a[a.indexOf("--tools") + 1]).toBe("");
-    expect(a[a.indexOf("--model") + 1]).toBe("claude-haiku-5-5");
+    expect(a[a.indexOf("--model") + 1]).toBe("claude-opus-5-5");
     expect(a[a.indexOf("--effort") + 1]).toBe("xhigh");
     expect(JSON.parse(a[a.indexOf("--json-schema") + 1]!)).toMatchObject({ required: ["ok"] });
     expect(a).toContain("--no-session-persistence");

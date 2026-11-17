@@ -1,6 +1,6 @@
 // The two clocks that stop a tool: silence, and the ceiling. Real processes with tiny limits.
 import { describe, expect, it } from "vitest";
-import { QUIET_LIMITS, timeoutMessage } from "./deadline.ts";
+import { QUIET_LIMITS, STREAMING_LIMITS, timeoutMessage } from "./deadline.ts";
 import { runTool } from "./tools.ts";
 
 const sh = (script: string, idleTimeoutMs: number, timeoutMs: number) =>
@@ -33,6 +33,7 @@ describe("runTool's deadlines", () => {
 describe("timeout messages", () => {
   it("say which clock ran out and what to try", () => {
     expect(timeoutMessage("Codex", "idle", QUIET_LIMITS)).toMatch(/^Codex went quiet for 15 minutes and was stopped/);
+    expect(timeoutMessage("Claude Code", "idle", STREAMING_LIMITS)).toMatch(/^Claude Code went quiet for 5 minutes/);
     expect(timeoutMessage("Codex", "total", QUIET_LIMITS)).toMatch(/^Codex was still working after 45 minutes.*lower effort/);
   });
 });
