@@ -1,12 +1,21 @@
-// One provider's API key, in the Mac app only. The key goes straight to the app, which encrypts it
-// with the macOS keychain and restarts the server with it; it's never sent to the server as a message.
+// One provider's API key, in the desktop app only. The key goes straight to the app, which encrypts
+// it with the system's secret store (macOS keychain, Windows' DPAPI, or a Linux keyring) and restarts
+// the server with it; it's never sent to the server as a message.
 import { useEffect, useState } from "react";
-import type { DesktopBridge, KeyProvider } from "../desktop.ts";
+import { desktopPlatform, type DesktopBridge, type KeyProvider } from "../desktop.ts";
 import { Button } from "./ui/Button.tsx";
 import { Alert, Spinner } from "./ui/feedback.tsx";
 import { INPUT } from "./ui/form.tsx";
 
 type Props = { desktop: DesktopBridge; provider: KeyProvider; placeholder: string };
+
+// Why a key can't be saved, in this system's words.
+const NO_SECURE_STORAGE =
+  desktopPlatform === "linux"
+    ? "No system keyring (such as GNOME Keyring or KWallet) is available, so a key can't be saved safely."
+    : desktopPlatform === "win32"
+      ? "Windows' secure storage isn't available, so a key can't be saved."
+      : "The macOS keychain isn't available, so a key can't be saved.";
 
 export function ApiKeyField({ desktop, provider, placeholder }: Props) {
   const [saved, setSaved] = useState(false);
@@ -37,7 +46,7 @@ export function ApiKeyField({ desktop, provider, placeholder }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      {!canEncrypt && <Alert tone="danger">The macOS keychain isn't available, so a key can't be saved.</Alert>}
+      {!canEncrypt && <Alert tone="danger">{NO_SECURE_STORAGE}</Alert>}
       <form
         className="flex gap-2"
         onSubmit={(e) => {
@@ -49,7 +58,7 @@ export function ApiKeyField({ desktop, provider, placeholder }: Props) {
           type="password"
           value={key}
           onChange={(e) => setKey(e.target.value)}
-          placeholder={saved ? "A key is saved in your keychain; enter one to replace it" : placeholder}
+          placeholder={saved ? "A key is saved, encrypted; enter one to replace it" : placeholder}
           autoComplete="off"
           aria-label="API key"
           className={`${INPUT} h-8 py-0 font-mono text-[13px]`}

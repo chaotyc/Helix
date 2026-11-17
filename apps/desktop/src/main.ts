@@ -1,9 +1,10 @@
 // The desktop app (macOS, Windows, Linux). Electron's main process:
 //   1. starts the Helix server as a background process (Electron's own Node runs it),
 //   2. waits until the server says it's listening, then opens a window on it,
-//   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted with the macOS keychain
-//      (safeStorage), and hands them to the server when starting it. Keys never travel over the
-//      WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
+//   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted by the system's secret
+//      store (safeStorage: the macOS keychain, Windows' DPAPI, or a Linux keyring such as GNOME
+//      Keyring or KWallet), and hands them to the server when starting it. Keys never travel over
+//      the WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
 //   4. on launch, checks GitHub Releases for a newer version and offers the download (updates.ts).
 // Data lives in the system's per-user app folder: ~/Library/Application Support/Helix on macOS,
 // %APPDATA%\Helix on Windows, ~/.config/Helix on Linux (HELIX_DATA_DIR overrides it, for testing).
@@ -16,8 +17,8 @@ import { RELEASES_REPO, isNewer, latestRelease, skipVersion, skippedVersion } fr
 app.setName("Helix"); // also names the data folder, so it stays "Helix" whatever the app ID
 const MAC = process.platform === "darwin";
 const DATA_DIR = process.env.HELIX_DATA_DIR ?? app.getPath("userData");
-// Each provider's key, encrypted; useless without this Mac's keychain. The Anthropic key keeps the
-// file name it had before other providers existed.
+// Each provider's key, encrypted; useless without this computer's secret store (and this user's
+// login). The Anthropic key keeps the file name it had before other providers existed.
 const KEYS = {
   anthropic: { file: "api-key.bin", env: "ANTHROPIC_API_KEY" },
   openai: { file: "openai-key.bin", env: "OPENAI_API_KEY" },
@@ -43,18 +44,28 @@ let window: BrowserWindow | null = null;
 
 // ---- The API keys ----
 
+// Whether a key can be stored safely. On Linux without a keyring (no GNOME Keyring, KWallet, or
+// other Secret Service), Electron falls back to "basic_text": a fixed, publicly known password,
+// which is obfuscation, not encryption. Helix treats that as "can't encrypt" and stores nothing.
+function canEncrypt(): boolean {
+  if (!safeStorage.isEncryptionAvailable()) return false;
+  if (process.platform !== "linux") return true;
+  const backend = safeStorage.getSelectedStorageBackend();
+  return backend !== "basic_text" && backend !== "unknown";
+}
+
 function savedKey(provider: KeyProvider): string | null {
   const file = keyFile(provider);
-  if (!existsSync(file) || !safeStorage.isEncryptionAvailable()) return null;
+  if (!existsSync(file) || !canEncrypt()) return null;
   try {
     return safeStorage.decryptString(readFileSync(file));
   } catch {
-    return null; // written on another Mac, or the keychain entry is gone
+    return null; // written on another computer or user account, or the stored secret is gone
   }
 }
 
 function saveKey(provider: KeyProvider, key: string): void {
-  if (!safeStorage.isEncryptionAvailable()) throw new Error("The macOS keychain isn't available, so the key can't be stored safely.");
+  if (!canEncrypt()) throw new Error("This computer's secure storage (keychain or keyring) isn't available, so the key can't be stored safely.");
   writeFileSync(keyFile(provider), safeStorage.encryptString(key), { mode: 0o600 });
 }
 
@@ -179,7 +190,7 @@ function clearKey(provider: unknown): Promise<void> {
 // The Anthropic key alone: the bridge's first version, still used by its settings section.
 ipcMain.handle("helix:key-status", (event) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
-  return { saved: savedKey("anthropic") !== null, canEncrypt: safeStorage.isEncryptionAvailable() };
+  return { saved: savedKey("anthropic") !== null, canEncrypt: canEncrypt() };
 });
 
 ipcMain.handle("helix:set-key", async (event, key: unknown) => {
@@ -196,7 +207,7 @@ ipcMain.handle("helix:clear-key", async (event) => {
 ipcMain.handle("helix:keys-status", (event) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
   const saved = Object.fromEntries((Object.keys(KEYS) as KeyProvider[]).map((p) => [p, savedKey(p) !== null]));
-  return { saved, canEncrypt: safeStorage.isEncryptionAvailable() };
+  return { saved, canEncrypt: canEncrypt() };
 });
 
 ipcMain.handle("helix:set-provider-key", async (event, provider: unknown, key: unknown) => {
