@@ -27,7 +27,8 @@ export const Goal = z.object({
   id: z.string(),
   title: z.string().min(1),
   kind: z.enum(["course"]),
-  capstone: z.string(), // "what would prove you've got it?"
+  prompt: z.string().optional(), // the learner's own words: what they want and why
+  capstone: z.string().optional(), // "what would prove you've got it?" (older goals, seed data, eval cases)
   examDate: z.iso.date().optional(), // "2026-12-14"
   createdAt: z.string(), // ISO timestamp, e.g. "2026-11-08T21:46:01.065Z"
 });

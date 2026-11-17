@@ -12,7 +12,8 @@ export const EvalCase = z.object({
   name: z.string().min(1),
   goal: z.object({
     title: z.string().min(1),
-    capstone: z.string(),
+    prompt: z.string().optional(), // the learner's own words, from the new-goal form
+    capstone: z.string().optional(),
     examDate: z.iso.date().optional(),
   }),
   source: z.object({ file: z.string(), kind: SourceKind }).nullable(), // null: build from the goal and answers alone
