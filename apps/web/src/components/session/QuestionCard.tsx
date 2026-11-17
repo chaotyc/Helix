@@ -1,22 +1,25 @@
 import { depthName } from "@helix/contracts";
-import { depthClasses } from "../../depth.ts";
+import { Badge } from "../ui/Badge.tsx";
 
 type Props = { conceptName: string; depth: number; prompt: string; step?: string };
 
 // A graded question: the answer goes to the grader, with a confidence rating.
 export function QuestionCard({ conceptName, depth, prompt, step }: Props) {
   return (
-    <div className="max-w-2xl rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-        <span className="font-medium">Question</span>
-        <span>·</span>
-        <span>{conceptName}</span>
-        <span className={`rounded px-1.5 py-0.5 font-mono ${depthClasses(depth)}`}>
-          {depth} {depthName(depth)}
+    <div className="ml-10 min-w-0 flex-1 overflow-hidden rounded-xl border border-line-strong bg-raised shadow-xs">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line bg-sunken px-4 py-2 text-xs">
+        <Badge tone="accent">Question</Badge>
+        <span className="font-medium text-fg">{conceptName}</span>
+        <span className="text-fg-subtle">
+          Depth {depth} · {depthName(depth)}
         </span>
-        {step && <span className="text-zinc-500">· {step}</span>}
+        {step && (
+          <span className="ml-auto text-fg-subtle">
+            Step: <span className="text-fg-muted">{step}</span>
+          </span>
+        )}
       </div>
-      <div className="whitespace-pre-wrap text-sm text-zinc-100">{prompt}</div>
+      <div className="px-4 py-3.5 text-[15px] leading-7 whitespace-pre-wrap text-fg">{prompt}</div>
     </div>
   );
 }

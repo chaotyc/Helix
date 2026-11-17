@@ -6,6 +6,7 @@ export type DesktopBridge = {
   keyStatus: () => Promise<KeyStatus>;
   setKey: (key: string) => Promise<void>; // restarts the server and reloads the window
   clearKey: () => Promise<void>;
+  onFullScreen?: (listener: (fullScreen: boolean) => void) => void; // optional: older app builds lack it
 };
 
 export const desktop: DesktopBridge | null = (window as { helixDesktop?: DesktopBridge }).helixDesktop ?? null;
