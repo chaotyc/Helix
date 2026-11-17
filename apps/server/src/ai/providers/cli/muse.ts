@@ -8,7 +8,7 @@ import { modelIdFor, parseModelId } from "@helix/contracts";
 import type { ModelCall } from "../../model-call.ts";
 import { effortFor } from "../effort.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
-import { TOOL_TIMEOUT_MS, requireCommand, toolEnv, withTempDir } from "./tools.ts";
+import { TOOL_TIMEOUT_MS, requireCommand, toolEnv, toolLaunch, withTempDir } from "./tools.ts";
 
 export const callMuse: ModelCall = async (request) => {
   const museBin = requireCommand("muse", "Muse Code");
@@ -17,9 +17,11 @@ export const callMuse: ModelCall = async (request) => {
   return withTempDir(async (cwd) => {
     let client: MuseClient;
     try {
+      // No shell: on Windows, an npm-installed muse.cmd runs as node <script> (windows-shim.ts).
+      const launch = toolLaunch(museBin, ["serve", "--disable-shell", "--disable-write"]);
       client = await MuseClient.spawn({
-        museBin,
-        args: ["serve", "--disable-shell", "--disable-write"],
+        museBin: launch.command,
+        args: launch.args,
         cwd,
         env: toolEnv(museBin), // without META_API_KEY, which Muse would use before your login
         clientInfo: { name: "helix", version: "0.1.0" },
