@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ClarifyAnswer, Confidence, Connection, Effort, GoalInput, MapEdit, Session, SessionKind, Settings } from "@helix/contracts";
 import { send } from "./connection.ts";
-import { desktop } from "./desktop.ts";
+import { hiddenTitleBar } from "./desktop.ts";
 import { dayAndTime, SESSION_KIND_LABEL } from "./format.ts";
 import { useAppStore } from "./store.ts";
 import { useShortcut } from "./hooks/useShortcut.ts";
@@ -306,8 +306,8 @@ export function App() {
 
   return (
     <div className="flex h-screen bg-canvas text-fg">
-      {/* In the Mac app, the strip along the window's top edge moves the window too. */}
-      {desktop && <div aria-hidden="true" className="app-drag fixed inset-x-0 top-0 z-40 h-2" />}
+      {/* In the desktop app on macOS (no title bar), the strip along the window's top edge moves the window too. */}
+      {hiddenTitleBar && <div aria-hidden="true" className="app-drag fixed inset-x-0 top-0 z-40 h-2" />}
       <Sidebar
         goals={goals}
         sessions={sessions}

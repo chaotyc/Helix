@@ -1,9 +1,11 @@
-// What the Mac app adds to the page: calls for the API keys in the Settings tab, and word of the
-// window entering or leaving full screen. The page gets these functions and nothing else of
-// Electron or Node (contextIsolation and sandbox are on).
+// What the desktop app adds to the page: calls for the API keys in the Settings tab, the operating
+// system (the window's chrome differs: see main.ts), and word of the window entering or leaving full
+// screen. The page gets these and nothing else of Electron or Node (contextIsolation and sandbox
+// are on; a sandboxed preload still has process.platform).
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("helixDesktop", {
+  platform: process.platform, // "darwin", "win32", or "linux"
   keyStatus: () => ipcRenderer.invoke("helix:key-status"),
   setKey: (key: string) => ipcRenderer.invoke("helix:set-key", key),
   clearKey: () => ipcRenderer.invoke("helix:clear-key"),

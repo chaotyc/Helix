@@ -112,10 +112,11 @@
   --color-danger-soft: var(--hx-danger-soft);
 }
 
-/* `desktop:` classes apply only inside the Mac app (main.tsx marks <html> with data-desktop);
-   `windowed:` only there and not in full screen, where the window buttons are hidden. */
+/* `desktop:` classes apply only inside the desktop app (main.tsx marks <html> with data-desktop);
+   `windowed:` only where the window has no title bar (macOS: data-hidden-title-bar) and not in
+   full screen, where the window buttons are hidden. */
 @custom-variant desktop (&:where([data-desktop] *));
-@custom-variant windowed (&:where([data-desktop]:not([data-full-screen]) *));
+@custom-variant windowed (&:where([data-hidden-title-bar]:not([data-full-screen]) *));
 
 @theme {
   /* The Mac's own typeface (San Francisco), with fallbacks elsewhere. */
@@ -176,13 +177,14 @@
   }
 }
 
-/* ---- The Mac app's window ----
+/* ---- The desktop app's window on macOS ----
    It has no title bar (apps/desktop/src/main.ts): the red/yellow/green buttons sit in the
-   sidebar's top row, and the strips marked `app-drag` move the window. Controls in them stay clickable. */
-[data-desktop] .app-drag {
+   sidebar's top row, and the strips marked `app-drag` move the window. Controls in them stay clickable.
+   On Windows and Linux the system's title bar moves the window, so these rules don't apply. */
+[data-hidden-title-bar] .app-drag {
   -webkit-app-region: drag;
 }
-[data-desktop] .app-drag :is(button, a, input, select, textarea) {
+[data-hidden-title-bar] .app-drag :is(button, a, input, select, textarea) {
   -webkit-app-region: no-drag;
 }
 

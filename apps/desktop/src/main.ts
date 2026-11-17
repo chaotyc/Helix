@@ -1,11 +1,12 @@
-// The Mac app. Electron's main process:
+// The desktop app (macOS, Windows, Linux). Electron's main process:
 //   1. starts the Helix server as a background process (Electron's own Node runs it),
 //   2. waits until the server says it's listening, then opens a window on it,
 //   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted with the macOS keychain
 //      (safeStorage), and hands them to the server when starting it. Keys never travel over the
 //      WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
 //   4. on launch, checks GitHub Releases for a newer version and offers the download (updates.ts).
-// Data lives in ~/Library/Application Support/Helix (HELIX_DATA_DIR overrides it, for testing).
+// Data lives in the system's per-user app folder: ~/Library/Application Support/Helix on macOS,
+// %APPDATA%\Helix on Windows, ~/.config/Helix on Linux (HELIX_DATA_DIR overrides it, for testing).
 import { BrowserWindow, app, dialog, ipcMain, nativeTheme, safeStorage, shell, utilityProcess, type UtilityProcess } from "electron";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -13,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import { RELEASES_REPO, isNewer, latestRelease, skipVersion, skippedVersion } from "./updates.ts";
 
 app.setName("Helix"); // also names the data folder, so it stays "Helix" whatever the app ID
+const MAC = process.platform === "darwin";
 const DATA_DIR = process.env.HELIX_DATA_DIR ?? app.getPath("userData");
 // Each provider's key, encrypted; useless without this Mac's keychain. The Anthropic key keeps the
 // file name it had before other providers existed.
@@ -113,6 +115,14 @@ async function startAndShow(): Promise<void> {
 
 // ---- The window ----
 
+// macOS: no title bar. The UI runs to the top edge, and the window buttons sit in the sidebar's top
+// row, centered on it (the row is 48px tall, 8px down; see .app-drag in apps/web/src/index.css).
+// Windows and Linux: the system's own title bar and frame, which follow the system's light or dark
+// setting and never cover the UI. The menu bar (Edit, View, ...) hides until Alt is pressed.
+const WINDOW_CHROME: Electron.BrowserWindowConstructorOptions = MAC
+  ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 20, y: 25 } }
+  : { autoHideMenuBar: true, ...(process.platform === "linux" ? { icon: join(HERE, "..", "assets", "icon.png") } : {}) };
+
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1400,
@@ -120,11 +130,8 @@ function createWindow(): BrowserWindow {
     minWidth: 900,
     minHeight: 600,
     title: "Helix",
-    // No title bar: the UI runs to the top edge, and the window buttons sit in the sidebar's top row,
-    // centered on it (the row is 48px tall, 8px down; see .app-drag in apps/web/src/index.css).
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 20, y: 25 },
-    // The UI's window color in the Mac's current appearance (--hx-canvas in apps/web/src/index.css),
+    ...WINDOW_CHROME,
+    // The UI's window color in the system's current appearance (--hx-canvas in apps/web/src/index.css),
     // so there's no flash of the wrong color before the UI paints.
     backgroundColor: nativeTheme.shouldUseDarkColors ? "#09090b" : "#f2f2f4",
     webPreferences: {
