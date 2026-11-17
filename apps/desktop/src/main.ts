@@ -5,7 +5,7 @@
 //      (safeStorage), and hands them to the server when starting it. Keys never travel over the
 //      WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
 // Data lives in ~/Library/Application Support/Helix (HELIX_DATA_DIR overrides it, for testing).
-import { BrowserWindow, app, dialog, ipcMain, safeStorage, shell, utilityProcess, type UtilityProcess } from "electron";
+import { BrowserWindow, app, dialog, ipcMain, nativeTheme, safeStorage, shell, utilityProcess, type UtilityProcess } from "electron";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -118,7 +118,13 @@ function createWindow(): BrowserWindow {
     minWidth: 900,
     minHeight: 600,
     title: "Helix",
-    backgroundColor: "#09090b", // zinc-950, so there's no white flash before the UI paints
+    // No title bar: the UI runs to the top edge, and the window buttons sit in the sidebar's top row,
+    // centered on it (the row is 48px tall, 8px down; see .app-drag in apps/web/src/index.css).
+    titleBarStyle: "hiddenInset",
+    trafficLightPosition: { x: 20, y: 25 },
+    // The UI's window color in the Mac's current appearance (--hx-canvas in apps/web/src/index.css),
+    // so there's no flash of the wrong color before the UI paints.
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#09090b" : "#f2f2f4",
     webPreferences: {
       preload: join(HERE, "preload.cjs"),
       contextIsolation: true,
@@ -134,6 +140,10 @@ function createWindow(): BrowserWindow {
   win.webContents.on("will-navigate", (event, url) => {
     if (!url.startsWith(origin)) event.preventDefault();
   });
+  // In full screen the window buttons are hidden, so the page stops leaving room for them.
+  win.on("enter-full-screen", () => win.webContents.send("helix:full-screen", true));
+  win.on("leave-full-screen", () => win.webContents.send("helix:full-screen", false));
+  win.webContents.on("did-finish-load", () => win.webContents.send("helix:full-screen", win.isFullScreen())); // e.g. after saving the key reloads
   win.on("closed", () => (window = null));
   return win;
 }

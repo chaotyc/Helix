@@ -1,6 +1,9 @@
+import type { ReactNode } from "react";
 import { CONNECTIONS, Connection, MODELS, MODEL_LIST, ModelId, ModelRole, modelLabel, parseModelId, type ProviderStatus, type Settings } from "@helix/contracts";
 import type { SignIn } from "../store.ts";
 import { ProvidersSection } from "./ProvidersSection.tsx";
+import { Select } from "./ui/form.tsx";
+import { ChipIcon, KeyIcon } from "./ui/icons.tsx";
 
 type Props = {
   settings: Settings | null; // null until the server replies
@@ -19,11 +22,11 @@ const ROLE_INFO: Record<ModelRole, { title: string; detail: string }> = {
 
 type Option = { id: ModelId; label: string };
 
-// "$4 / $20 per M tokens" for an API model; "plan" for a subscription tool's.
-function priceLabel(id: ModelId): string {
-  const m = MODELS[id];
-  if (m?.inputPerM !== undefined && m.outputPerM !== undefined) return `$${m.inputPerM} / $${m.outputPerM} per M tokens`;
-  return CONNECTIONS[parseModelId(id).connection].kind === "cli" ? "your plan" : "price unknown";
+// "GPT-6.1 Sol · $2 / $10" for an API model; "Opus 5.5 · plan" for a subscription tool's.
+function optionLabel(option: Option): string {
+  const m = MODELS[option.id];
+  if (m?.inputPerM !== undefined && m.outputPerM !== undefined) return `${option.label} · $${m.inputPerM} / $${m.outputPerM}`;
+  return CONNECTIONS[parseModelId(option.id).connection].kind === "cli" ? `${option.label} · plan` : option.label;
 }
 
 // The models to offer per connection: what a signed-in tool reports, else the catalog.
@@ -39,66 +42,93 @@ function optionsByConnection(providers: ProviderStatus[] | null): Map<Connection
   return byConnection;
 }
 
-// The settings tab: which model does each job, and the connections that reach them (API keys and
-// subscription sign-ins). Model changes are saved on the server at once.
+// The settings page: which model does each job, and the connections that reach them (subscription
+// sign-ins and API keys). Model changes are saved on the server at once.
 export function SettingsPanel({ settings, providers, signIns, onChange, onRefreshProviders, onSignIn }: Props) {
   const options = optionsByConnection(providers);
   const state = (c: Connection) => providers?.find((p) => p.connection === c)?.state;
 
   return (
-    <div className="max-w-2xl p-8">
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Settings</h1>
-      <p className="mb-6 text-sm text-zinc-500">
-        Choose the model for each job. API models show their price (in / out); models through a subscription tool use your plan.
-      </p>
+    <div className="mx-auto w-full max-w-2xl animate-fade-in px-8 py-10">
+      <h1 className="text-xl font-semibold tracking-tight text-fg">Settings</h1>
+      <p className="mt-1 text-[13px] text-fg-muted">Changes are saved as soon as you make them.</p>
 
-      <h2 className="mb-3 text-sm font-semibold text-zinc-300">Models</h2>
-      {!settings ? (
-        <div className="text-sm text-zinc-600">Loading…</div>
-      ) : (
-        <div className="mb-10 flex flex-col gap-4">
-          {ModelRole.options.map((role) => {
-            const current = settings.models[role];
-            return (
-              <label key={role} className="flex items-center justify-between gap-6">
-                <span>
-                  <span className="block text-sm text-zinc-200">{ROLE_INFO[role].title}</span>
-                  <span className="block text-xs text-zinc-500">{ROLE_INFO[role].detail}</span>
-                </span>
-                <select
-                  value={current}
-                  onChange={(e) => {
-                    const model = ModelId.safeParse(e.target.value); // check at the door (rule 2)
-                    if (model.success) onChange({ models: { ...settings.models, [role]: model.data } });
-                  }}
-                  className="w-80 shrink-0 rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-200"
-                >
-                  {Connection.options.map((connection) => {
-                    const list = options.get(connection) ?? [];
-                    // Keep the saved choice visible even when its connection no longer lists it.
-                    const missing = parseModelId(current).connection === connection && !list.some((o) => o.id === current);
-                    const withCurrent = missing ? [{ id: current, label: modelLabel(current) }, ...list] : list;
-                    if (withCurrent.length === 0) return null;
-                    const s = state(connection);
-                    const setUp = s === "ready" || s === "unchecked";
-                    return (
-                      <optgroup key={connection} label={`${CONNECTIONS[connection].label}${s && !setUp ? " (not set up)" : ""}`}>
-                        {withCurrent.map((o) => (
-                          <option key={o.id} value={o.id}>
-                            {o.label} · {priceLabel(o.id)}
-                          </option>
-                        ))}
-                      </optgroup>
-                    );
-                  })}
-                </select>
-              </label>
-            );
-          })}
-        </div>
-      )}
+      <Section
+        icon={<ChipIcon />}
+        title="Models"
+        description="The model for each job. API prices are per million tokens, input / output; subscription models use your plan."
+      >
+        {!settings ? (
+          <div className="rounded-xl border border-line bg-raised px-4 py-6 text-center text-[13px] text-fg-subtle">Loading…</div>
+        ) : (
+          <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-raised shadow-xs">
+            {ModelRole.options.map((role) => {
+              const current = settings.models[role];
+              return (
+                <div key={role} className="flex items-center justify-between gap-6 px-4 py-3.5">
+                  <div className="min-w-0">
+                    <label htmlFor={`model-${role}`} className="block text-[13px] font-medium text-fg">
+                      {ROLE_INFO[role].title}
+                    </label>
+                    <div className="mt-0.5 text-xs text-fg-subtle">{ROLE_INFO[role].detail}</div>
+                  </div>
+                  <Select
+                    id={`model-${role}`}
+                    value={current}
+                    onChange={(e) => {
+                      const model = ModelId.safeParse(e.target.value); // check at the door (rule 2)
+                      if (model.success) onChange({ models: { ...settings.models, [role]: model.data } });
+                    }}
+                    className="w-64 shrink-0"
+                  >
+                    {Connection.options.map((connection) => {
+                      const list = options.get(connection) ?? [];
+                      // Keep the saved choice visible even when its connection no longer lists it.
+                      const missing = parseModelId(current).connection === connection && !list.some((o) => o.id === current);
+                      const withCurrent = missing ? [{ id: current, label: modelLabel(current) }, ...list] : list;
+                      if (withCurrent.length === 0) return null;
+                      const s = state(connection);
+                      const setUp = s === "ready" || s === "unchecked";
+                      return (
+                        <optgroup key={connection} label={`${CONNECTIONS[connection].label}${s && !setUp ? " (not set up)" : ""}`}>
+                          {withCurrent.map((o) => (
+                            <option key={o.id} value={o.id}>
+                              {optionLabel(o)}
+                            </option>
+                          ))}
+                        </optgroup>
+                      );
+                    })}
+                  </Select>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Section>
 
-      <ProvidersSection providers={providers} signIns={signIns} onRefresh={onRefreshProviders} onSignIn={onSignIn} />
+      <Section
+        icon={<KeyIcon />}
+        title="Connections"
+        description="A subscription tool is the maker's own command-line app, signed in with your plan; Helix runs it and never sees the login. An API key is billed per token."
+      >
+        <ProvidersSection providers={providers} signIns={signIns} onRefresh={onRefreshProviders} onSignIn={onSignIn} />
+      </Section>
     </div>
+  );
+}
+
+function Section({ icon, title, description, children }: { icon: ReactNode; title: string; description: string; children: ReactNode }) {
+  return (
+    <section className="mt-9">
+      <div className="mb-3 flex items-start gap-2.5">
+        <span className="mt-0.5 text-fg-subtle">{icon}</span>
+        <div>
+          <h2 className="text-sm font-semibold text-fg">{title}</h2>
+          <p className="text-xs text-fg-subtle">{description}</p>
+        </div>
+      </div>
+      {children}
+    </section>
   );
 }

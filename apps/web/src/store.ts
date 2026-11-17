@@ -41,7 +41,7 @@ type AppState = {
   sharedWith: Record<string, SharedWith>; // per goal: which other goals use each of its concepts
   questions: Record<string, PendingQuestions>; // per goal: clarifying questions waiting for answers
   editErrors: Record<string, string>; // per goal: why the last map edit was rejected
-  serverError: string | null; // the latest error the server reported (e.g. a failed Claude call)
+  serverError: string | null; // the latest error the server reported (e.g. a failed model call)
   createdGoalId: string | null; // the goal this window just created, to open it once it arrives
 
   // ---- Actions: the only ways to change the data above ----
