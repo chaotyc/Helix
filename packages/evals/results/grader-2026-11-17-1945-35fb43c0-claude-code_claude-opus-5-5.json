@@ -1,0 +1,1214 @@
+{
+  "date": "2026-11-17T19:45:04.368Z",
+  "graderPromptVersion": "grader@35fb43c0",
+  "graderModel": "claude-code:claude-opus-5-5",
+  "itemPromptVersion": "item-writer@b03776c5",
+  "learnerPromptVersion": "simulate-learner@bbee792e",
+  "learnerModel": "claude-code:claude-opus-5-5",
+  "judgePromptVersion": "judge-grader@1db51a05",
+  "judgeModel": "claude-code:claude-opus-5-5",
+  "effort": "medium",
+  "judgeEffort": "high",
+  "size": 6,
+  "runs": 1,
+  "seed": 1,
+  "questions": 6,
+  "maps": [
+    {
+      "case": "signals-demo",
+      "file": "maps-2026-11-17-1938-f1a36b43-claude-code_claude-opus-5-5.json",
+      "extractPromptVersion": "extract-map@f1a36b43",
+      "extractModel": "claude-code:claude-opus-5-5"
+    }
+  ],
+  "score": {
+    "graded": 48,
+    "accepted": 1,
+    "falsePass": 0,
+    "falseFail": 0,
+    "tagAgreement": 0.9444444444444444,
+    "unsoundRubrics": 0,
+    "meetsBar": true,
+    "byKind": {
+      "fully_right": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "right_other_form": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "right_result_wrong_reasoning": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "partly_right": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "misconception": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "slip": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "misread": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      },
+      "no_answer": {
+        "graded": 6,
+        "accepted": 6,
+        "falsePasses": 0,
+        "falseFails": 0
+      }
+    }
+  },
+  "costUsd": 0,
+  "items": [
+    {
+      "run": 1,
+      "case": "signals-demo",
+      "conceptId": "linear-differential-equations",
+      "conceptName": "Linear constant-coefficient differential equations",
+      "depth": 1,
+      "item": {
+        "prompt": "Here are four equations relating an input signal x to an output signal y:\n\n(a) dy(t)/dt + 3y(t) = x(t)\n(b) y[n] − 0.5y[n−1] = x[n]\n(c) dy(t)/dt + t·y(t) = x(t)\n(d) d²y(t)/dt² + 2 dy(t)/dt + y²(t) = x(t)\n\n1. Which one is a linear constant-coefficient differential equation (LCCDE)? For each of the other three, briefly say what rules it out.\n2. In one or two sentences, what are LCCDEs used for in signals and systems?",
+        "rubric": "Part 1. A correct answer must:\n- Pick (a) as the only LCCDE.\n- Rule out (b) because it is a difference equation in discrete time (n, shifts like y[n−1]), not a differential equation in continuous time. Saying it is the discrete-time counterpart is fine, but calling it an LCCDE is wrong.\n- Rule out (c) because a coefficient (t) changes with time, so it is not constant-coefficient. It is still linear, so saying \"time-varying coefficient\" is right and calling it \"nonlinear\" is wrong.\n- Rule out (d) because the y² term makes it nonlinear.\nPart 2. The answer must say that LCCDEs describe or model continuous-time systems, specifically linear time-invariant (LTI) ones, by relating the output and its derivatives to the input and its derivatives. Physical examples such as RC/RLC circuits or mass-spring systems are a plus but not required.\nMarked wrong if: any equation other than (a) is accepted as an LCCDE; (a) is rejected; the reason given for (c) or (d) is wrong (for example, calling (c) nonlinear or saying (d) fails only because it is second order); or Part 2 is missing or says LCCDEs are mainly for discrete-time signals. The answer does not need to solve any equation or explain why LCCDEs give LTI systems.",
+        "expectedAnswer": "1. Only (a) is an LCCDE. It is a differential equation in continuous time t, y and its derivative appear only to the first power, and the coefficients (1 and 3) are constants.\n- (b) is a difference equation. It uses discrete time n and shifted samples, not derivatives. It is the discrete-time counterpart of an LCCDE, not an LCCDE itself.\n- (c) is linear, but the coefficient t on y(t) changes with time, so it is not constant-coefficient. It describes a time-varying system.\n- (d) has a y²(t) term, which makes it nonlinear. Being second order is fine; the square is the problem.\n\n2. LCCDEs are the standard way to describe continuous-time LTI systems, such as RC/RLC circuits or mass-spring-damper systems. They relate the output and its derivatives to the input and its derivatives. From an LCCDE you can find the system's response, its impulse response, and its frequency response or transfer function."
+      },
+      "answers": [
+        {
+          "kind": "fully_right",
+          "answer": "1. (a) is the LCCDE. It's continuous time, linear in y and dy/dt, and the coefficients 1 and 3 are fixed numbers.\n(b) isn't a differential equation at all. It's a difference equation in discrete time n, using y[n-1] in place of a derivative. It's basically the discrete-time version.\n(c) is still linear, but the coefficient on y(t) is t, so it changes with time. It's not constant-coefficient.\n(d) has y^2(t), so it's nonlinear. The second derivative by itself would be fine.\n\n2. They're used to model continuous-time LTI systems like RC circuits or spring-mass systems. The equation ties the output and its derivatives to the input and its derivatives.",
+          "confidence": 5,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "This is fully correct. You picked (a) as the only LCCDE and gave the right reason for ruling out each of the others. (b) is a discrete-time difference equation. (c) is linear, but its coefficient t changes with time. (d) is nonlinear because of the y² term, not because it's second order. For Part 2, you correctly said LCCDEs model continuous-time LTI systems by relating the output and its derivatives to the input and its derivatives, and you gave good physical examples.",
+            "notes": "Solid orient-level grasp. Separates linearity, constant coefficients, and continuous vs discrete time cleanly, and correctly sees that the order of an equation doesn't affect whether it is linear. High confidence was justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner picks only (a) and rules out each of the others for the right reason: (b) is a discrete-time difference equation, (c) is linear but has a time-varying coefficient, and (d) is nonlinear because of y², not because it is second order. Part 2 says LCCDEs model continuous-time LTI systems by relating the output and its derivatives to the input and its derivatives, with examples. Every rubric item is met at the Orient depth, so the grade of right is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_other_form",
+          "answer": "Write the general LCCDE form as sum_k a_k d^k y/dt^k = sum_k b_k d^k x/dt^k, where the a_k and b_k are constants. Only (a) fits: N=1, a1=1, a0=3, b0=1.\n(b): there are no derivatives, just shifts in an integer index n. That makes it a linear constant-coefficient difference equation (discrete time), not a differential one.\n(c): here a0 = t, which depends on t, so the coefficients aren't constant. It's linear but time-varying.\n(d): y^2 doesn't fit the form because y has to show up to the first power only. So it's nonlinear.\n\nPart 2: an LCCDE is the input-output model of a continuous-time LTI system (circuits, mechanical systems). You can get the transfer function H(s) from it.",
+          "confidence": 4,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "Correct and well reasoned. You picked (a) as the only LCCDE and matched it to the general form. You got all three reasons right: (b) is a difference equation in discrete time, (c) is linear but has the time-varying coefficient t, and (d) is nonlinear because of y². Your Part 2 says what LCCDEs are for: they model continuous-time LTI systems such as circuits and mechanical systems, and they give you the transfer function H(s). One small addition: an LCCDE relates the output and its derivatives to the input and its derivatives, and your general form already shows that.",
+            "notes": "Solid at the Orient level. Knows the general LCCDE form, can tell differential equations from difference equations, can tell time-varying from nonlinear, and links LCCDEs to continuous-time LTI systems and H(s). The 4/5 confidence was justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner chose only (a) and ruled out the other three for the right reasons: (b) is a discrete-time difference equation, (c) is linear but has the time-varying coefficient t, and (d) is nonlinear because of y². Part 2 says LCCDEs model continuous-time LTI systems such as circuits, and the learner's general form already relates the output and its derivatives to the input and its derivatives. This meets every rubric point at depth 1, so the grade of right stands.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_result_wrong_reasoning",
+          "answer": "1. (a) is the LCCDE.\n(b) is out because it has y[n-1], and a delayed output term means the system has memory, which LCCDEs aren't allowed to have.\n(c) is out because the t multiplying y(t) makes the system time-varying, so the coefficient isn't constant.\n(d) is out because it's second order, and with a y^2 on top of that it's too complicated to count as linear.\n\n2. LCCDEs describe continuous-time LTI systems such as RLC circuits. They relate y and its derivatives to x.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You were right to pick (a). Your reason for ruling out (c), a time-varying coefficient, is correct, and so is your Part 2 answer that LCCDEs describe continuous-time LTI systems like RLC circuits. Your reason for (b) is wrong. LCCDE systems often have memory: an RC circuit's output depends on its past, and derivatives carry that history. What rules out (b) is that it's a difference equation in discrete time n, with sample shifts like y[n−1] instead of derivatives, so it's the discrete-time counterpart of an LCCDE. For (d), being second order is fine because LCCDEs can be any order. The only problem is the y² term, which makes the equation nonlinear.",
+            "notes": "The learner knows linear vs. time-varying and what LCCDEs are for. They mistakenly think memory or delay disqualifies an equation instead of seeing the continuous vs. discrete-time distinction. They also seem to think higher order counts against an equation being an LCCDE.",
+            "misconceptionId": null,
+            "newMisconception": "The learner believes LCCDEs can't describe systems with memory, so a delayed output term disqualifies an equation, when in fact memory is normal for LCCDE systems."
+          },
+          "judgment": {
+            "reason": "The learner correctly picks (a), gives the right reason for ruling out (c), and answers Part 2 correctly. But they rule out (b) on the false belief that LCCDE systems can't have memory, when the actual reason is that (b) is a discrete-time difference equation. They also cite being second order as a reason against (d), which the rubric names as a failure. Wrong reasons for (b) and (d) make the answer wrong. The memory error is a false belief about the concept, so misconception fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "partly_right",
+          "answer": "(a) is the LCCDE.\n(b) is discrete time, so it's a difference equation, not a differential equation.\n(c) has the coefficient t, which changes with time, so it's not constant coefficient.\n(d) has y squared, which makes it nonlinear.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "You got Part 1 fully right. (a) is the only LCCDE. (b) is a discrete-time difference equation. (c) has a time-varying coefficient t, and you correctly didn't call it nonlinear. (d) is nonlinear because of the y² term. But you didn't answer Part 2, and the rubric requires it. To finish, add something like: \"LCCDEs model continuous-time LTI systems, such as RC/RLC circuits or mass-spring systems, by relating the output and its derivatives to the input and its derivatives.\"",
+            "notes": "Can reliably tell an LCCDE apart from difference, time-varying, and nonlinear equations, with correct reasons for each. Skipped Part 2, so there's no evidence yet that they know LCCDEs model continuous-time LTI systems. Re-check the purpose briefly.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "Part 1 is fully correct: the answer picks (a), calls (b) a discrete-time difference equation, gives a time-varying coefficient for (c) without calling it nonlinear, and says the y² term makes (d) nonlinear. Part 2 is missing entirely, and the rubric explicitly marks a missing Part 2 as wrong, so the grade of wrong stands. 'Incomplete' fits because everything given is right and only a required part is absent.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misconception",
+          "answer": "1. (a) is the one. It's linear with constant coefficients 1 and 3.\n(b) is a difference equation in n, so it's discrete time and not a differential equation.\n(c) is nonlinear, because t multiplies y(t), and a product of t and y isn't linear anymore. Any term where y gets multiplied by a variable makes it nonlinear.\n(d) is also nonlinear because of y^2.\n\n2. They model continuous-time LTI systems like RC circuits, relating the output and its derivatives to the input.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You were right to pick (a), right to rule out (b) as a discrete-time difference equation, and right that the y² in (d) makes it nonlinear. Your Part 2 answer is good too. The mistake is (c): it is still linear. Linearity is about how y and its derivatives appear (only to the first power, never multiplied by each other). A coefficient that depends on t, like t·y(t), doesn't break that. What it breaks is the constant-coefficient condition, so (c) is a linear time-varying equation. It is not a nonlinear one.",
+            "notes": "The learner confidently (4/5) called t·y(t) nonlinear, so they mix up time-varying coefficients with nonlinearity. Everything else was right at Orient depth, including the LTI/continuous-time purpose.",
+            "misconceptionId": null,
+            "newMisconception": "Believes that multiplying y(t) by a function of time such as t makes a differential equation nonlinear, when it only makes the coefficients time-varying."
+          },
+          "judgment": {
+            "reason": "The learner picked (a), correctly ruled out (b) and (d), and gave an acceptable Part 2. But they called (c) nonlinear and claimed that any y multiplied by a variable is nonlinear. The rubric names this exact reason as one that makes the answer wrong. This is a false belief about what linearity means, so the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "slip",
+          "answer": "1. Only (a) is an LCCDE. It's continuous time, it's linear, and its coefficients are constants.\n- (b) uses n and y[n-1], so it's a difference equation in discrete time, the discrete counterpart.\n- (c) is linear, but its coefficient t varies with time, so it's not constant-coefficient.\n- (d) is ruled out because it's second order, and LCCDEs are first-order equations.\n2. LCCDEs model continuous-time LTI systems, like RLC circuits, by relating the output and its derivatives to the input.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Most of this is right. You correctly picked (a), described (b) as a discrete-time difference equation, said (c) is linear but has a time-varying coefficient, and described LCCDEs as models of continuous-time LTI systems such as RLC circuits. Your reason for ruling out (d) is wrong. LCCDEs can be of any order, and an RLC circuit gives a second-order LCCDE. (d) fails because of the y²(t) term, which makes it nonlinear. If that term were a plain y(t), (d) would be a valid second-order LCCDE.",
+            "notes": "Recognizes discrete vs continuous and time-varying vs constant coefficients. Confidently believes LCCDEs must be first order, which is inconsistent with their own RLC example. Missed that the y² term makes (d) nonlinear.",
+            "misconceptionId": null,
+            "newMisconception": "Believes linear constant-coefficient differential equations must be first order, so any higher-order equation is excluded."
+          },
+          "judgment": {
+            "reason": "The learner picks (a) and correctly rules out (b) and (c), and Part 2 meets the rubric. But they reject (d) for being second order, claiming LCCDEs must be first order. The rubric names exactly this reason as grounds for marking the answer wrong. The real problem with (d) is the y² term. So the grade of wrong is correct, and misconception fits because the learner holds a false belief about what counts as an LCCDE.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misread",
+          "answer": "Linear ones: (a), (b), (c). Nonlinear: (d), because of the y^2 term.\nTime-invariant ones: (a), (b), (d). (c) is time-varying because of the t coefficient.\nSo the LTI systems are (a) and (b).\nThese equations are used to describe how a system turns an input signal into an output signal.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Your reasons for (c) and (d) are right: (c) is still linear but has a time-varying coefficient t, and the y² term makes (d) nonlinear. But you sorted the equations into \"LTI systems\" rather than picking out the LCCDE, and your list includes (b). (b) is a difference equation in discrete time (y[n−1] is a shifted sample, not a derivative), so it is the discrete-time counterpart of an LCCDE, not an LCCDE. Only (a) qualifies. In Part 2, say specifically that LCCDEs model continuous-time LTI systems (such as RC circuits or mass-spring systems) by relating the output and its derivatives to the input and its derivatives. \"Turning input into output\" is true of any system description.",
+            "notes": "Treats LCCDE as the same thing as \"LTI equation\" and groups the difference equation (b) with (a). Doesn't separate continuous-time differential equations from discrete-time difference equations. Correctly sees (c) as linear but time-varying and (d) as nonlinear. Part 2 is too generic and never mentions continuous time.",
+            "misconceptionId": null,
+            "newMisconception": "Any linear constant-coefficient equation describing an LTI system counts as an LCCDE, including discrete-time difference equations."
+          },
+          "judgment": {
+            "reason": "The learner sorts the equations into LTI systems and ends with (a) and (b), so they never pick (a) as the only LCCDE and they effectively accept the difference equation (b). Their Part 2 answer also leaves out continuous time and derivatives. Their reasons for (c) and (d) are correct, but the rubric's fail conditions are still met. Treating \"LTI equation\" as if it meant \"LCCDE\" is a wrong belief about the concept, so the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "no_answer",
+          "answer": "not sure, we haven't covered this yet",
+          "confidence": 1,
+          "grade": {
+            "correct": false,
+            "errorTag": "no_answer",
+            "explanation": "It's fine that you haven't covered this yet, so here's a quick orientation. Only (a) is a linear constant-coefficient differential equation (LCCDE). It is a differential equation in continuous time, y and its derivative appear only to the first power, and its coefficients are fixed numbers. (b) is a difference equation in discrete time, (c) is linear but has a coefficient t that changes with time, and (d) is nonlinear because of the y² term. LCCDEs are used to model continuous-time LTI systems, such as RC/RLC circuits or mass-spring systems, by relating the output and its derivatives to the input and its derivatives.",
+            "notes": "The learner said they haven't covered LCCDEs yet (confidence 1/5). This is no evidence either way, so start from an introduction: what makes an equation linear, constant-coefficient, and differential rather than difference.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner only says they're not sure and haven't covered this yet. They don't pick an equation, give reasons, or say what LCCDEs are used for. The answer is clearly wrong, and no_answer is the right tag for a statement of not knowing. The rubric is correct and clear.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        }
+      ],
+      "failures": [],
+      "versions": {
+        "item": "item-writer@b03776c5",
+        "learner": "simulate-learner@bbee792e",
+        "grader": "grader@35fb43c0",
+        "judge": "judge-grader@1db51a05"
+      },
+      "models": {
+        "item": "claude-code:claude-opus-5-5",
+        "learner": "claude-code:claude-opus-5-5",
+        "grader": "claude-code:claude-opus-5-5",
+        "judge": "claude-code:claude-opus-5-5"
+      },
+      "costUsd": 0
+    },
+    {
+      "run": 1,
+      "case": "signals-demo",
+      "conceptId": "aliasing",
+      "conceptName": "Aliasing",
+      "depth": 2,
+      "item": {
+        "prompt": "A continuous-time tone x(t) = cos(2π·7000·t) (7 kHz) is sampled at fs = 10 kHz. The samples are then passed through an ideal reconstruction low-pass filter that keeps only frequencies from 0 to 5 kHz. What comes out is a 3 kHz tone, not a 7 kHz one.\n\nIn a few sentences, explain why this happens. Your explanation should:\n(a) use what sampling does to the spectrum (the spectral copies) to show where the 3 kHz comes from, and\n(b) explain why this would not happen if the sampling rate were above 14 kHz.",
+        "rubric": "A correct answer must explain the mechanism, not just state the result.\n\nRequired:\n1. Spectral replication: sampling at fs makes copies of the original spectrum repeat at every multiple of fs (the original shifted by k·fs). The 7 kHz tone has components at ±7 kHz, so copies appear at ±7 ± 10k kHz. That puts a component at 7 − 10 = −3 kHz and 10 − 7 = +3 kHz, inside the 0–5 kHz band the reconstruction filter keeps, while the true 7 kHz lies outside it and is removed. So the copy at 3 kHz is the one reconstructed. The answer must link the 3 kHz to a shifted copy (fs − f0 = 3 kHz, or f0 − fs = −3 kHz). Saying only \"it aliases to 3 kHz\" with no spectral reason does not count.\n2. Why fs > 14 kHz prevents it: the Nyquist condition is fs > 2·f_max = 14 kHz. When it holds, the copies are spaced far enough apart that they don't overlap or fold into the baseband (|f| < fs/2). The original 7 kHz then lies below fs/2 and is recovered as 7 kHz. Any equivalent statement counts, e.g. \"the nearest copy fs − 7 stays above fs/2\" or \"7 kHz < fs/2 so it stays in the passband.\"\n\nAlso acceptable (but not required): a time-domain check that the samples are identical, cos(2π·0.7n) = cos(2π·0.3n), since 0.7 and −0.3 differ by a whole number of cycles per sample.\n\nCounts as wrong:\n- Saying the filter or the reconstruction \"creates\" the 3 kHz, or calling it distortion or noise, without spectral copies.\n- Getting the alias frequency wrong (e.g. 17 kHz or 2 kHz as the output).\n- Giving the condition as fs > f_max (7 kHz) instead of fs > 2·f_max.\n- Giving only the numerical answer or formula (|f0 − k·fs|) without explaining why it holds. That shows recall or application, not explanation.\n\nMinor wording differences, using ω instead of f, and using either one-sided or two-sided spectra are all fine.",
+        "expectedAnswer": "Sampling at fs = 10 kHz turns the spectrum periodic: the original spectrum (lines at ±7 kHz) is copied and shifted to every multiple of 10 kHz. One of those shifted copies lands at 7 − 10 = −3 kHz, and its mirror lands at −7 + 10 = +3 kHz. So the sampled signal has energy at ±3 kHz, inside the 0–5 kHz band (|f| < fs/2). The reconstruction filter keeps whatever is in that band, which means it keeps the 3 kHz copy and throws away the real 7 kHz line, since 7 kHz is above fs/2. The high frequency has \"folded\" down and now looks like a low one. You can also see this in the samples themselves: cos(2π·0.7n) = cos(2π·(0.7−1)n) = cos(2π·0.3n), so the samples of a 7 kHz tone are exactly the samples of a 3 kHz tone, and nothing can tell them apart.\n\nIf fs > 14 kHz = 2·7 kHz, then fs/2 > 7 kHz, so the original tone lies inside the baseband. The nearest copy, at fs − 7 kHz, is then above fs/2, so no copy overlaps the baseband. The copies stay separate, the low-pass filter picks out the true 7 kHz component, and no alias appears."
+      },
+      "answers": [
+        {
+          "kind": "fully_right",
+          "answer": "Sampling at 10 kHz makes the spectrum repeat every 10 kHz. The original tone has lines at +7 and -7 kHz, so the sampled spectrum has copies at ±7 + k·10 kHz. Take k = 1 on the -7 line and you get -7 + 10 = +3 kHz, and k = -1 on +7 gives -3 kHz. Those land inside the 0-5 kHz band the reconstruction filter passes. The real 7 kHz line is above 5 kHz (fs/2), so the filter removes it and keeps the 3 kHz copy, and that's what you hear. If fs were above 14 kHz, fs/2 would be above 7 kHz, so the original tone would sit inside the passband. The nearest copy would be at fs - 7, which is above fs/2, so nothing gets folded into the baseband and the filter outputs the real 7 kHz.",
+          "confidence": 5,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "This is a complete and correct explanation. You showed that sampling at 10 kHz repeats the ±7 kHz lines every 10 kHz, so −7 + 10 = +3 kHz and 7 − 10 = −3 kHz land inside the 0–5 kHz band. The filter keeps those copies and removes the real 7 kHz, which is above fs/2. You also explained the 14 kHz condition: fs/2 is then above 7 kHz, so the original tone sits in the passband and the nearest copy (fs − 7) stays above fs/2. A quick extra check you could add is the time-domain one: cos(2π·0.7n) = cos(2π·0.3n), so the two tones give exactly the same samples.",
+            "notes": "Explained aliasing with spectral copies (±7 + 10k) and the Nyquist condition (fs/2 > 7, nearest copy fs−7 > fs/2). Solid at depth 2, and the 5/5 confidence was justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The answer gets the 3 kHz from shifted copies (−7+10=+3, 7−10=−3) inside the 0–5 kHz band, and says the true 7 kHz line is above fs/2 and gets filtered out. It explains fs>14 kHz with the reasons the rubric asks for: 7 kHz falls below fs/2, and the nearest copy at fs−7 stays above fs/2. Both required parts are explained at depth 2, so the grade of right stands.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_other_form",
+          "answer": "Using normalized frequency: the samples are x[n] = cos(2π·(7/10)·n) = cos(2π·0.7n). Since sampling makes the DTFT periodic with period 1 cycle/sample (each copy shifted by an integer, i.e. by fs in Hz), the line at 0.7 also shows up at 0.7 - 1 = -0.3, and the one at -0.7 shows up at +0.3. In fact cos(2π·0.7n) = cos(2π·0.3n) exactly, because the two differ by a whole cycle per sample. The reconstruction filter only passes |ν| < 0.5 (that's 0-5 kHz), so it keeps the copy at 0.3, which is 0.3·10 kHz = 3 kHz. With fs > 14 kHz the normalized frequency 7/fs is under 0.5, so the true tone is already in the principal band and the shifted copies (at 1 - 7/fs and above) stay outside it, so you get 7 kHz back.",
+          "confidence": 4,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "This is a correct, well-reasoned explanation. You showed that sampling makes the spectrum periodic, with copies shifted by whole cycles per sample (multiples of fs). That puts the ±0.7 lines at ∓0.3, which is ±3 kHz. You also explained that the reconstruction filter keeps only |ν| < 0.5, so it passes the 3 kHz copy and drops the real 7 kHz. For fs > 14 kHz, you correctly said that 7/fs < 0.5 and the nearest copy at 1 − 7/fs stays out of the principal band. Your time-domain identity cos(2π·0.7n) = cos(2π·0.3n) is a good extra check.",
+            "notes": "The learner explains aliasing through spectral copies, working fluently in normalized frequency (cycles/sample), and correctly ties the Nyquist condition to the copies staying out of the baseband. Their confidence (4/5) was justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner works in normalized frequency. They explain that sampling makes the spectrum repeat every 1 cycle/sample (that is, every fs), so ±0.7 also appears at ∓0.3. The filter passes only |ν|<0.5, so the copy at 0.3 (3 kHz) is the one that comes out. For fs>14 kHz they show that 7/fs<0.5 and the nearest copy, at 1−7/fs, stays outside the band. This meets both rubric points with reasons, not just the number or a formula.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_result_wrong_reasoning",
+          "answer": "Sampling at 10 kHz can't capture anything above 10 kHz properly, and the 7 kHz tone is close to that limit, so the sampler 'wraps' it relative to fs: the tone appears at fs - f = 10 - 7 = 3 kHz, like a copy reflected around the sampling frequency. The 3 kHz is inside 0-5 kHz, so the filter passes it. If fs is above 14 kHz, the sampling rate is high enough that the tone doesn't get close to fs and gets sampled at its real frequency, so the filter gives back 7 kHz.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You got the right number: 10 − 7 = 3 kHz, and 3 kHz falls inside the filter's 0–5 kHz band. The reasoning behind it is wrong, though. A 10 kHz sampler can't faithfully capture anything above fs/2 = 5 kHz, not anything above 10 kHz, so 7 kHz is already past the limit, not just \"close to\" it. The 3 kHz also isn't a reflection around fs. Sampling copies the whole spectrum (±7 kHz) to every multiple of 10 kHz, so a shifted copy lands at −7 + 10 = +3 kHz (and 7 − 10 = −3 kHz). The filter keeps that copy and removes the real 7 kHz line. For part (b), the condition is fs > 2·7 = 14 kHz. Then fs/2 > 7 kHz, so the original tone sits inside the baseband, and the nearest copy (fs − 7) stays above fs/2. \"The tone doesn't get close to fs\" doesn't explain this.",
+            "notes": "The learner treats fs, not fs/2, as the upper limit of what sampling can represent, and describes aliasing as reflection around fs. They can compute fs − f0 but don't explain the shifted spectral copies or the Nyquist (fs/2) boundary.",
+            "misconceptionId": null,
+            "newMisconception": "The learner believes the highest frequency a sampler can capture is the sampling rate fs itself, rather than fs/2, and that aliases come from reflection around fs."
+          },
+          "judgment": {
+            "reason": "The learner gets 10 − 7 = 3 kHz, but explains it as a \"reflection around fs\" instead of spectral copies shifted by multiples of fs. They also say the capture limit is fs rather than fs/2, and part (b) rests on \"not close to fs\" rather than 7 kHz < fs/2 or copies not overlapping the baseband. Neither rubric point is met, and the core error is a wrong belief about where the sampling limit lies, so the wrong grade and the misconception tag both fit.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "partly_right",
+          "answer": "When you sample at fs, the spectrum gets copied at every multiple of fs. The 7 kHz tone has components at ±7 kHz, so there's a copy at -7 + 10 = 3 kHz (and 7 - 10 = -3 kHz). The low-pass filter only keeps 0-5 kHz, so it drops the real 7 kHz line and keeps the 3 kHz copy. That's why a 3 kHz tone comes out even though the input was 7 kHz.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "Your explanation of where the 3 kHz comes from is right. Sampling copies the ±7 kHz lines to every multiple of 10 kHz, so a shifted copy lands at ±3 kHz. That is inside the 0–5 kHz band the filter keeps, while the real 7 kHz is removed. But you didn't answer part (b): why sampling above 14 kHz would prevent this. The missing reason is the Nyquist condition. If fs > 2·7 = 14 kHz, then fs/2 > 7 kHz, so the original tone sits inside the baseband. The nearest copy, at fs − 7 kHz, then lands above fs/2, so no copy falls into the filter's band and the true 7 kHz is recovered.",
+            "notes": "Explained spectral replication and the fold to fs − f0 correctly. Left out part (b), the Nyquist condition fs > 2·f_max, so there's no evidence yet on why sampling faster prevents aliasing.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner correctly links the 3 kHz to a shifted copy: copying the spectrum at multiples of fs puts a line at −7+10 = 3 kHz, the filter keeps that line and drops the real 7 kHz. This meets requirement 1. Part (b), why fs > 14 kHz prevents aliasing, is never addressed, and the rubric requires it. So the answer is wrong, and \"incomplete\" correctly names the mistake: what is there is right, but a required part is missing.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misconception",
+          "answer": "Sampling copies the spectrum at multiples of fs, so the 7 kHz line also shows up at 10 - 7 = 3 kHz. The 0-5 kHz filter keeps the 3 kHz copy and cuts the real 7 kHz, so you hear 3 kHz. To avoid this, the sampling rate just has to be higher than the signal frequency so each cycle gets sampled. Here 10 kHz is above 7 kHz but too close, so the copy folds back. Above 14 kHz you're comfortably above 7 kHz, the copies move out past the filter band, and the original comes through.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Part (a) is right. Sampling copies the spectrum to every multiple of fs, so a copy lands at 10 − 7 = 3 kHz. That copy is inside the 0–5 kHz filter band, while the real 7 kHz line is outside it and gets removed. Part (b) is where it goes wrong. You said the sampling rate only has to be higher than the signal frequency. That isn't enough, and 10 kHz is already above 7 kHz yet still aliases. 14 kHz isn't just \"comfortably above\" 7 kHz. It's exactly 2 × 7 kHz. The real condition is fs > 2·f_max, which means 7 kHz < fs/2. Then the nearest copy, at fs − 7 kHz, sits above fs/2, so no copy falls into the baseband and the filter passes the true 7 kHz tone.",
+            "notes": "The learner explains the spectral-copy mechanism for the 3 kHz alias correctly. They believe the sampling rate only needs to exceed f_max, not 2·f_max, and treat 14 kHz as an arbitrary safety margin rather than the point where fs/2 rises above 7 kHz.",
+            "misconceptionId": null,
+            "newMisconception": "Aliasing is avoided as long as the sampling rate is higher than the signal frequency, rather than higher than twice the signal frequency."
+          },
+          "judgment": {
+            "reason": "Part (a) meets the rubric: the learner ties the 3 kHz to a spectral copy at fs − 7 kHz and says the filter keeps it while removing the real 7 kHz. Part (b) explicitly states the condition as fs > signal frequency. The rubric lists this as wrong, and calling 14 kHz just \"comfortably above\" 7 kHz misses that 14 kHz is 2·f_max. This is a wrong belief about the Nyquist condition, so the \"wrong\" grade and the misconception tag are both correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "slip",
+          "answer": "Sampling at fs = 10 kHz makes copies of the spectrum at every multiple of 10 kHz. The tone has lines at ±7 kHz, so the shifted copies are at ±7 ± 10k. Shifting +7 by +10 gives 17 kHz and shifting -7 by +10 gives 2 kHz, which is inside the 0-5 kHz passband, while 7 kHz is above fs/2 = 5 kHz and gets filtered out. So the filter outputs the folded copy instead of the original. If fs > 14 kHz then fs/2 > 7 kHz, the original sits in the passband and the nearest copy fs - 7 is above fs/2, so there's no overlap and you get 7 kHz back.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "slip",
+            "explanation": "Your mechanism is right: sampling copies the ±7 kHz lines to ±7 ± 10k kHz, the filter keeps only what falls below fs/2 = 5 kHz, and the real 7 kHz line gets removed. Your part (b) is also right: when fs > 14 kHz, 7 kHz is below fs/2 and the nearest copy at fs − 7 lies above it. The problem is your arithmetic. −7 + 10 is 3 kHz, not 2 kHz. Your answer says the alias is at 2 kHz, so it doesn't explain the 3 kHz tone the question asks about. The rubric counts a wrong alias frequency as wrong. Check that your computed alias matches the observed output (fs − f0 = 10 − 7 = 3 kHz).",
+            "notes": "Understands spectral replication, folding into the baseband and the Nyquist condition fs > 2·f_max. Made an arithmetic slip (−7 + 10 written as 2) and didn't check it against the stated 3 kHz output.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner gets the mechanism right (copies at ±7 ± 10k, the filter keeps |f| < 5 kHz, 7 kHz is removed) and part (b) is correct. But they compute −7 + 10 as 2 kHz, and the rubric explicitly counts a wrong alias frequency such as 2 kHz as wrong. So the answer fails, and the error is an arithmetic slip in an otherwise correct method.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misread",
+          "answer": "To reconstruct the 7 kHz tone you need fs > 2·7 = 14 kHz, the Nyquist rate. At 10 kHz you're under that, so the signal is undersampled. To fix it you'd raise the sample rate above 14 kHz, or put an anti-aliasing low-pass filter before the sampler to remove anything above fs/2 = 5 kHz. Then the 7 kHz tone would just be removed instead of showing up as something else.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "You have the Nyquist condition right: fs must be above 2·7 = 14 kHz, and your point about an anti-aliasing filter is also correct. But part (a) is missing. You never explain where the 3 kHz comes from. Sampling at 10 kHz copies the ±7 kHz spectrum to every multiple of 10 kHz. One copy lands at −7 + 10 = +3 kHz (and its mirror at −3 kHz). That puts it inside the 0–5 kHz band the filter keeps, while the real 7 kHz is removed. For (b), you also need the reason, not just the rule: above 14 kHz, 7 kHz is below fs/2, and the nearest copy (fs − 7) sits above fs/2, so no copy falls into the band the filter keeps.",
+            "notes": "Knows the Nyquist rate (fs > 2·f_max) and the anti-aliasing fix. Did not explain how sampling makes spectral copies or show how 7 kHz folds to 3 kHz, so this shows recall, not an explanation of the mechanism.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner states the Nyquist condition (fs > 14 kHz) correctly and mentions anti-aliasing filters. They never use spectral copies to explain where the 3 kHz comes from, so required part (a) is missing, and part (b) gives the rule without the reason behind it. The grade of wrong is correct, and 'incomplete' fits because what they wrote is right but the required mechanism is absent.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "no_answer",
+          "answer": "not sure, something with nyquist i think",
+          "confidence": 1,
+          "grade": {
+            "correct": false,
+            "errorTag": "no_answer",
+            "explanation": "You were right that Nyquist is involved, but the answer doesn't explain how it causes this, so there's nothing yet to grade against the rubric. Here's the idea. Sampling at fs = 10 kHz copies the tone's spectrum (lines at ±7 kHz) to every multiple of 10 kHz. One shifted copy lands at 10 − 7 = 3 kHz, inside the 0–5 kHz band the filter keeps. The real 7 kHz line is outside that band, so it gets removed and you hear 3 kHz. If fs > 14 kHz (twice 7 kHz), then 7 kHz is below fs/2, so the real tone stays in the band and the nearest copy (fs − 7) stays above it. Try explaining this back in your own words.",
+            "notes": "No real attempt (confidence 1/5). They only half-remember that Nyquist is relevant. No sign they understand spectral copies or folding yet, so start from what sampling does to the spectrum.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner says they don't know and adds only a vague \"something with nyquist.\" It gives no spectral copies, no source for the 3 kHz, and no explanation of the 14 kHz condition. Mentioning Nyquist with no content isn't really an attempt, so wrong with the no_answer tag is the correct grade. The rubric is sound.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        }
+      ],
+      "failures": [],
+      "versions": {
+        "item": "item-writer@b03776c5",
+        "learner": "simulate-learner@bbee792e",
+        "grader": "grader@35fb43c0",
+        "judge": "judge-grader@1db51a05"
+      },
+      "models": {
+        "item": "claude-code:claude-opus-5-5",
+        "learner": "claude-code:claude-opus-5-5",
+        "grader": "claude-code:claude-opus-5-5",
+        "judge": "claude-code:claude-opus-5-5"
+      },
+      "costUsd": 0
+    },
+    {
+      "run": 1,
+      "case": "signals-demo",
+      "conceptId": "ideal-filters",
+      "conceptName": "Ideal frequency-selective filters",
+      "depth": 3,
+      "item": {
+        "prompt": "A discrete-time ideal lowpass filter has frequency response (over one period, -π < ω ≤ π):\n\nH(e^{jω}) = e^{-j3ω} for |ω| ≤ π/3\nH(e^{jω}) = 0 for π/3 < |ω| ≤ π\n\n(a) The input is x[n] = 1 + 2cos(πn/4) + 5cos(2πn/3). Find the output y[n]. For each component, say whether it is passed or blocked, and why.\n\n(b) The impulse response is h[n] = sin(π(n−3)/3) / (π(n−3)), with h[3] taken as its limiting value. Evaluate h[3] and h[−1]. Then use your result to say whether this filter is causal and why it cannot be built exactly as a real-time filter.",
+        "rubric": "A correct answer must include all of the following.\n\n(a) The output is y[n] = 1 + 2cos(π(n−3)/4), or an equivalent form such as 1 + 2cos(πn/4 − 3π/4).\n- DC (ω = 0) is passed with gain 1 and no phase change, so the output keeps the term 1.\n- ω = π/4 is less than π/3, so this component is passed with gain 1. Its phase shift is −3ω = −3π/4, which is the same as a delay of 3 samples.\n- ω = 2π/3 is greater than π/3, so this component is blocked completely and its 5cos term does not appear in the output.\nThe answer is wrong if the 2π/3 term is kept, even at reduced amplitude; if the phase shift is missing or wrong (for example −3 rad or −π/4); or if the π/4 term's amplitude is changed.\n\n(b)\n- h[3] = 1/3 (≈ 0.333), the limiting value ωc/π.\n- h[−1] = sin(−4π/3)/(−4π) = −√3/(8π) ≈ −0.069. Any equivalent exact or decimal value counts. A small sign slip in the arithmetic is acceptable only if the answer still shows clearly that the value is nonzero.\n- The conclusion must be that the filter is noncausal because h[n] ≠ 0 for some n < 0. The answer must also say that the sinc tail extends infinitely in both directions, so no finite delay can make it causal. Therefore the ideal filter cannot be realized exactly and must be approximated, for example by truncating or windowing.\n- Saying only \"ideal filters can't be built\" without using the computed h[−1] (or the two-sided infinite sinc) as the reason does not count.",
+        "expectedAnswer": "(a) Treat the input one component at a time.\n- DC, ω = 0: H = e^0 = 1, so the 1 passes unchanged.\n- ω = π/4: this is below the cutoff π/3, so the component passes. The magnitude is 1 and the phase is −3(π/4) = −3π/4. The output term is 2cos(πn/4 − 3π/4) = 2cos(π(n−3)/4), which is the input term delayed by 3 samples.\n- ω = 2π/3: this is above π/3, so it lies in the stopband where H = 0. The component is removed entirely.\n\nSo y[n] = 1 + 2cos(π(n−3)/4).\n\n(b)\n- h[3] is the limit as n → 3 of sin(π(n−3)/3)/(π(n−3)), which is (π/3)/π = 1/3.\n- h[−1] = sin(−4π/3)/(−4π) = (√3/2)/(−4π) = −√3/(8π) ≈ −0.069.\n\nBecause h[−1] ≠ 0, the filter responds before the impulse arrives, so it is noncausal. More generally, the sinc is nonzero at infinitely many negative n: its tails extend forever in both directions. The 3-sample delay only shifts the sinc. It cannot make h[n] zero for all n < 0, and no finite delay could. A real-time filter can therefore only approximate this brick-wall response, for example by truncating or windowing a delayed sinc. Doing so introduces a transition band and ripple."
+      },
+      "answers": [
+        {
+          "kind": "fully_right",
+          "answer": "(a) Handle each frequency separately.\nω=0: H(e^{j0}) = e^0 = 1, so the constant 1 passes unchanged.\nω=π/4: π/4 < π/3, so it's in the passband. |H|=1 and the phase is -3(π/4) = -3π/4. Output is 2cos(πn/4 - 3π/4) = 2cos(π(n-3)/4), which is just a 3-sample delay.\nω=2π/3: 2π/3 > π/3, so it's in the stopband where H=0. Blocked completely.\ny[n] = 1 + 2cos(π(n-3)/4)\n\n(b) h[3]: as n→3, sin(π(n-3)/3) ≈ π(n-3)/3, so h[3] = (π/3)/π = 1/3.\nh[-1] = sin(-4π/3)/(-4π). sin(-4π/3) = +√3/2, so h[-1] = -√3/(8π) ≈ -0.069.\nh[-1] isn't zero, so the output depends on future inputs and the filter is noncausal. The sinc keeps going forever in both directions (it's nonzero at infinitely many negative n), so the delay of 3 only moves it over. No finite delay can make h[n]=0 for every n<0. That means you can't build it exactly in real time. You have to approximate it, e.g. by truncating or windowing a delayed sinc, and that gives you a transition band and some ripple.",
+          "confidence": 5,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "This is fully correct. In (a) you checked each frequency against the cutoff π/3. You kept DC and the π/4 term with the right phase, −3π/4, which is a 3-sample delay, and you removed the 2π/3 term entirely. In (b), h[3] = 1/3 and h[−1] = −√3/(8π) ≈ −0.069 are both right. You used the nonzero h[−1] to show the filter is noncausal, and you explained that the sinc extends forever in both directions, so no finite delay makes it causal. Truncating or windowing is the correct way to approximate it, at the cost of a transition band and ripple.",
+            "notes": "Solid at Apply: handles linear phase as a delay, evaluates passband/stopband correctly, computes sinc values including the limit, and links the two-sided infinite sinc to non-realizability. Confidence of 5 was justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "For (a), the learner gets y[n] = 1 + 2cos(π(n−3)/4). They pass DC, pass the π/4 term with phase −3π/4 (a 3-sample delay), and block the 2π/3 term, with a reason for each. For (b), h[3] = 1/3 and h[−1] = −√3/(8π) are correct, since sin(−4π/3) = +√3/2. The learner uses the nonzero h[−1] and the sinc's infinite two-sided tails to show the filter is noncausal and that no finite delay fixes this, so it can only be approximated by truncating or windowing. Every rubric point is met, so the \"right\" grade is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_other_form",
+          "answer": "Write the cosines as complex exponentials and multiply each one by H at its frequency.\n1 = e^{j0n} -> H(1)=1, stays 1.\n2cos(πn/4) = e^{jπn/4} + e^{-jπn/4}. Since π/4 is inside |ω|≤π/3, these become e^{-j3π/4}e^{jπn/4} + e^{j3π/4}e^{-jπn/4} = 2cos(πn/4 - 3π/4). Gain is 1 and the phase is linear, so this is the same as a delay of 3.\n5cos(2πn/3): ±2π/3 lies outside π/3, so H=0 there and the term disappears.\ny[n] = 1 + 2cos(πn/4 - 3π/4)\n\n(b) Let m = n-3. Then h = sin(πm/3)/(πm). Using L'Hopital at m=0 gives (π/3)cos(0)/π = 1/3, so h[3]=1/3 ≈ 0.333.\nn=-1 means m=-4: sin(-4π/3)/(-4π) = 0.866/(-12.566) ≈ -0.0689.\nThat's nonzero at a negative time index, so the filter is noncausal. sin(πm/3)/(πm) only goes to zero like 1/m and never stays zero, so the left tail is infinite. Shifting it right by 3 (or by any finite amount) still leaves nonzero values for n<0. So a real-time version can only approximate it, e.g. by cutting the sinc off to a finite length (with a window) and adding enough delay.",
+          "confidence": 4,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "This answer is fully correct. In (a), you handled each frequency correctly. DC passes unchanged. π/4 is inside the passband, so it keeps its amplitude and gets a −3π/4 phase shift, which is a 3-sample delay. 2π/3 is in the stopband and is removed, so y[n] = 1 + 2cos(πn/4 − 3π/4). In (b), h[3] = 1/3 and h[−1] = sin(−4π/3)/(−4π) ≈ −0.0689 are both right. You correctly used the nonzero h[−1], and the fact that the sinc's tail never ends, to show that no finite delay makes the filter causal, so it can only be approximated by windowing or truncating.",
+            "notes": "Solid at Apply: correctly applies H per frequency with the linear-phase delay, evaluates the sinc limit and its value at negative n, and ties noncausality to the infinite tail. Confidence 4 was well-calibrated.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The grade is right. In (a) the learner treats each component separately and gets y[n] = 1 + 2cos(πn/4 − 3π/4). DC passes, π/4 passes with a −3π/4 phase shift (a 3-sample delay), and 2π/3 is blocked, with a reason given for each. In (b) h[3] = 1/3 and h[−1] ≈ −0.0689 are both correct. The learner uses the nonzero h[−1] and the two-sided infinite sinc tail to show that no finite delay makes the filter causal, and says it must be approximated by windowing or truncation. Every rubric point is met.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_result_wrong_reasoning",
+          "answer": "(a) The DC term passes with gain 1, so the 1 stays.\nπ/4 is less than π/3, so it passes. The phase is -3ω = -3π/4, giving 2cos(πn/4 - 3π/4) = 2cos(π(n-3)/4).\n2π/3 is above π/3, so H=0 and it's blocked.\ny[n] = 1 + 2cos(π(n-3)/4)\n\n(b) h[3] = limit = (π/3)/π = 1/3.\nh[-1] = sin(-4π/3)/(-4π) = -√3/(8π) ≈ -0.069.\nThe filter is noncausal. The reason is that h[n] has infinite length, and any system whose impulse response never ends is noncausal, since you can't wait forever for it to finish. That's also why it can't be built in real time: you'd need infinite memory. So you have to truncate it to a finite length, i.e. window it.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Part (a) is fully correct. You passed DC, passed π/4 with the −3π/4 phase (a 3-sample delay), blocked 2π/3, and got y[n] = 1 + 2cos(π(n−3)/4). Your values for h[3] = 1/3 and h[−1] = −√3/(8π) ≈ −0.069 are also correct. The problem is your reason for noncausality. Infinite length doesn't make a system noncausal: h[n] = (0.5)^n u[n] lasts forever and is still causal. This filter is noncausal because h[−1] ≠ 0, so it responds before the impulse arrives. Your own result for h[−1] already shows this. The sinc's tails also go on forever in both directions, so no finite delay can make it zero for every n < 0. That is why it can only be approximated, for example by truncating or windowing a delayed sinc.",
+            "notes": "The learner applied the filter in (a) and computed h[n] correctly, but thinks infinite-length impulse responses are noncausal. They didn't use the nonzero h[−1] as the reason the filter is noncausal. They mix up IIR/infinite length with noncausality.",
+            "misconceptionId": null,
+            "newMisconception": "Any system whose impulse response has infinite length is noncausal."
+          },
+          "judgment": {
+            "reason": "Part (a) and the values h[3]=1/3 and h[−1]=−√3/(8π) are correct. The rubric, however, requires the noncausality conclusion to rest on h[n]≠0 for some n<0. The learner instead claims that any infinite-length impulse response is noncausal, which is false: (0.5)^n u[n] is infinite and causal. The learner also never uses h[−1] as the reason. This wrong belief decides the verdict, and the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "partly_right",
+          "answer": "(a) 0 and π/4 are both below the cutoff π/3, so they pass with gain 1. The filter adds phase -3ω, which is a delay of 3 samples. 2π/3 is above the cutoff, so it gets removed.\ny[n] = 1 + 2cos(π(n-3)/4)\n\n(b) h[3] = 1/3 from the limit sin(x)/x -> 1.\nh[-1] = sin(-4π/3)/(-4π) ≈ -0.069\nSince h[-1] is not 0, the filter is noncausal, so it can't be built as a real-time filter.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "Part (a) is fully correct. You passed DC and π/4 with gain 1, applied the −3ω phase as a 3-sample delay, and blocked 2π/3, which gives y[n] = 1 + 2cos(π(n−3)/4). In (b), h[3] = 1/3 and h[−1] ≈ −0.069 are both right, and using the nonzero h[−1] to show the filter is noncausal is the right move. What's missing is the reason this can't be fixed. The sinc tail is nonzero at infinitely many negative n, so it goes on forever in both directions, and no finite delay can make h[n] = 0 for all n < 0. A real filter can therefore only approximate this one, for example by truncating or windowing a delayed sinc.",
+            "notes": "Got all the computations and filtering right. Did not explain why an infinite two-sided sinc can't be fixed by a finite delay, and did not mention approximating it by truncating or windowing. Check whether they know that delaying a filter can make some noncausal filters causal, but not the ideal one.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "Part (a) and both h values are correct, and the learner uses the nonzero h[−1] to show the filter is noncausal. The rubric also requires saying that the sinc extends infinitely in both directions, so no finite delay can make it causal, and that the filter must be approximated (for example by truncating or windowing). The answer leaves all of this out, so the grade of wrong is correct and the incomplete tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misconception",
+          "answer": "(a) DC: H=1, so 1 passes.\nπ/4 < π/3 passes with magnitude 1. The filter's phase is e^{-j3ω}, which I read as a phase shift of 3, so the term becomes 2cos(πn/4 - 3).\n2π/3 > π/3, so it's blocked.\ny[n] = 1 + 2cos(πn/4 - 3)\n\n(b) h[3] = 1/3 (the limit of sin x/x).\nh[-1] = sin(-4π/3)/(-4π) = -√3/(8π) ≈ -0.069.\nIt's nonzero for n<0, so it's noncausal. The sinc goes on forever both ways, so delaying it can't fix that. In practice you'd window it to make a finite approximation.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You got the pass/block decisions right (DC and π/4 pass, 2π/3 is blocked), and part (b) is fully correct: h[3] = 1/3, h[−1] = −√3/(8π) ≈ −0.069, and you used the nonzero value at n = −1 and the two-sided sinc to explain why no delay makes it causal. The mistake is the phase. e^{−j3ω} is not a fixed shift of 3 radians. Its phase is −3ω, which changes with frequency, so you have to evaluate it at ω = π/4 to get −3π/4. The output is y[n] = 1 + 2cos(πn/4 − 3π/4) = 1 + 2cos(π(n−3)/4), which is a 3-sample delay, not 2cos(πn/4 − 3).",
+            "notes": "Treated the linear-phase term e^{-j3ω} as a constant phase offset of 3 rad instead of −3ω evaluated at each frequency, so they don't link linear phase to a time delay. Passband/stopband decisions and the causality/sinc reasoning are solid.",
+            "misconceptionId": null,
+            "newMisconception": "A linear-phase factor e^{-jkω} applies the same phase shift of k radians to every frequency, rather than a phase of −kω that depends on frequency (a k-sample delay)."
+          },
+          "judgment": {
+            "reason": "The learner made the right pass/block decisions, and part (b) is fully correct: h[3]=1/3, h[−1]=−√3/(8π), and the noncausality argument uses the two-sided sinc. In (a), though, they explicitly read e^{−j3ω} as a fixed phase of −3 rad and gave 2cos(πn/4 − 3). The rubric names −3 rad as a wrong answer, so the grade of wrong is correct. The mistake comes from a stated wrong belief about linear phase, so the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "slip",
+          "answer": "(a) ω=0 passes with H=1, so the 1 stays.\nω=π/4 is under π/3, so it passes with gain 1 and phase -3π/4, i.e. a 3-sample delay: 2cos(π(n-3)/4).\nω=2π/3 is above π/3, so it's blocked (H=0).\ny[n] = 1 + 2cos(π(n-3)/4)\n\n(b) At n=3 we get 0/0, so take the limit. sin(π(n-3)/3) ~ π(n-3)/3, so h[3] = π/3 ≈ 1.047.\nh[-1] = sin(-4π/3)/(-4π) = (√3/2)/(-4π) = -√3/(8π) ≈ -0.069.\nh[-1] ≠ 0, so the filter is noncausal. The sinc has infinite tails on both sides, so shifting it by 3 or by any finite delay still leaves nonzero values at negative n. It can only be approximated, e.g. by a truncated/windowed sinc.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "slip",
+            "explanation": "Part (a) is fully correct. You treated each component separately, passed DC and π/4 with the correct −3π/4 phase (a 3-sample delay), and blocked 2π/3. In (b), your h[−1] = −√3/(8π) ≈ −0.069 and your causality argument are both right: the two-sided infinite sinc can't be made causal by any finite delay, so it can only be approximated by truncating or windowing. The mistake is h[3]. You replaced the numerator with π(n−3)/3 but dropped the π(n−3) in the denominator. The limit is (π/3)/π = 1/3 = ωc/π, not π/3 ≈ 1.047. A quick check would have caught this: the sample values of this sinc can't be larger than 1/3.",
+            "notes": "Solid on frequency-by-frequency filtering, linear phase as delay, and noncausality of the sinc. Slipped on the 0/0 limit for h[3] by dropping the denominator and got π/3 instead of 1/3. Watch whether they check the peak value against ωc/π.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "Part (a) is right, and so are h[−1] = −√3/(8π) and the noncausal, two-sided-sinc argument. But h[3] is given as π/3 ≈ 1.047, while the rubric requires 1/3 (ωc/π). The learner used the right limit method and dropped the π(n−3) denominator. Since the rubric requires every part, the wrong grade stands, and slip is the right tag.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misread",
+          "answer": "(a) The filter passes frequencies above π/3 and kills everything below it.\nDC (ω=0) is below π/3, so it's blocked.\nπ/4 is below π/3, so it's blocked too.\n2π/3 is above π/3, so it passes with phase -3(2π/3) = -2π, which is the same as no phase change.\ny[n] = 5cos(2πn/3)\n\n(b) h[3] = 1/3 and h[-1] = sin(-4π/3)/(-4π) ≈ -0.069. It's nonzero for negative n, so it's noncausal. The sinc is infinite both ways, so it can't be made causal by a delay and has to be approximated with a window.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Part (b) is right: h[3] = 1/3, h[−1] ≈ −0.069, and you correctly concluded that the filter is noncausal because h[−1] ≠ 0. You also correctly said that no delay can make the two-sided infinite sinc causal, so it has to be approximated, for example with a window. Part (a) is wrong because you swapped the passband and stopband. This is a lowpass filter: H = e^{−j3ω} (gain 1) for |ω| ≤ π/3 and H = 0 above π/3. DC therefore passes unchanged, and the π/4 term passes with phase −3π/4, which is a 3-sample delay. The 2π/3 term is blocked, so the correct output is y[n] = 1 + 2cos(π(n−3)/4).",
+            "notes": "The learner swapped passband and stopband, saying a lowpass filter passes frequencies above the cutoff, even though H was given explicitly. They applied phase and delay mechanics correctly to the component they kept. Part (b) was fully correct: they computed the sinc values and argued noncausality and why the filter can't be realized.",
+            "misconceptionId": null,
+            "newMisconception": "The learner thinks a lowpass filter passes frequencies above the cutoff and blocks those below it."
+          },
+          "judgment": {
+            "reason": "Part (a) swaps passband and stopband: it blocks DC and π/4 and passes 2π/3, giving y[n]=5cos(2πn/3) instead of 1+2cos(π(n−3)/4). The rubric fails any answer that keeps the 2π/3 term. Part (b) is correct but can't make up for (a). The misconception tag fits because the learner states the wrong belief that this lowpass filter passes frequencies above the cutoff.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "no_answer",
+          "answer": "I don't really know how to do this one, sorry. Is it something to do with sinc functions?",
+          "confidence": 1,
+          "grade": {
+            "correct": false,
+            "errorTag": "no_answer",
+            "explanation": "It's fine not to know this yet. And yes, the impulse response of an ideal lowpass filter is a sinc, so your guess is on the right track. For (a), take each input frequency on its own. DC and ω = π/4 are below the cutoff π/3, so they pass with gain 1, and the e^{-j3ω} term delays them by 3 samples. ω = 2π/3 is above the cutoff, so it is removed completely, which gives y[n] = 1 + 2cos(π(n−3)/4). For (b), h[3] = 1/3 and h[−1] = −√3/(8π) ≈ −0.069. Because h[−1] isn't zero and the sinc keeps going forever in both directions, the filter is noncausal. No finite delay can fix that, so a real filter can only approximate it, for example by truncating or windowing the sinc.",
+            "notes": "Didn't attempt the problem, just said it was linked to sinc functions (confidence 1). No evidence they can apply a frequency response to each input component or evaluate the sinc impulse response. Start again at depth 2: how passband and stopband work, and how linear phase acts as a delay.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner says they don't know and asks whether the problem involves sinc functions. They give no output y[n], no values for h[3] or h[−1], and no conclusion about causality, so the answer meets none of the rubric's requirements. I checked the rubric's values: h[3] = 1/3 and h[−1] = −√3/(8π), so the rubric is sound. The grade of wrong with the tag no_answer is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        }
+      ],
+      "failures": [],
+      "versions": {
+        "item": "item-writer@b03776c5",
+        "learner": "simulate-learner@bbee792e",
+        "grader": "grader@35fb43c0",
+        "judge": "judge-grader@1db51a05"
+      },
+      "models": {
+        "item": "claude-code:claude-opus-5-5",
+        "learner": "claude-code:claude-opus-5-5",
+        "grader": "claude-code:claude-opus-5-5",
+        "judge": "claude-code:claude-opus-5-5"
+      },
+      "costUsd": 0
+    },
+    {
+      "run": 1,
+      "case": "signals-demo",
+      "conceptId": "z-transform-region-of-convergence",
+      "conceptName": "Z-transform region of convergence",
+      "depth": 4,
+      "item": {
+        "prompt": "A filter has the system function\n\nH(z) = 1 / [(1 − 0.5 z⁻¹)(1 − 2 z⁻¹)]\n\nwith poles at z = 0.5 and z = 2. A student analyzed it this way:\n\n(a) \"There are three possible ROCs: |z| < 0.5, 0.5 < |z| < 2, and |z| > 2.\"\n(b) \"If I choose |z| > 2, the impulse response is causal and stable, because the ROC lies outside all the poles.\"\n(c) \"If I choose 0.5 < |z| < 2, the impulse response is right-sided, because the ROC is bounded on the inside by the pole at 0.5.\"\n(d) \"So this H(z) can be built as a filter that is both causal and stable.\"\n\nFor each of (a)–(d), say whether it is correct. For each wrong one, explain the error and give the correct statement. Use what the ROC's shape tells you about the sequence and what it tells you about stability.",
+        "rubric": "A correct answer must judge all four statements correctly, with reasons based on the ROC:\n\n(a) CORRECT. The ROC is a ring bounded by poles and contains no poles, so with poles at radii 0.5 and 2 there are exactly these three choices.\n\n(b) WRONG. |z| > 2 does give a causal (right-sided) sequence. It is NOT stable, because stability requires the ROC to include the unit circle |z| = 1, and |z| > 2 does not. The answer must point to the unit circle, or say the same thing another way: the pole at z = 2 gives a growing term like 2ⁿu[n], so h[n] is not absolutely summable. \"Outside all poles\" means causal, not stable.\n\n(c) WRONG. An annulus 0.5 < |z| < 2 that is bounded on both sides means a two-sided sequence, not a right-sided one. The pole at 0.5 contributes a right-sided term and the pole at 2 contributes a left-sided term. The answer should also note, or at least not deny, that this ROC contains the unit circle, so this choice is stable.\n\n(d) WRONG. Causal requires |z| > 2 and stable requires the ROC to contain |z| = 1. No valid ROC does both, because a pole lies outside the unit circle. The stable choice (the annulus) is two-sided and noncausal. The causal choice is unstable.\n\nEquivalent wording is fine, and so is an explicit partial-fraction h[n] used as justification. The answer counts as WRONG if it does any of these:\n- marks (b) correct, or says it fails only on causality\n- calls the annulus right-sided or left-sided\n- claims some ROC gives a causal and stable system\n- judges the statements without giving ROC-based reasons\n\nCalling |z| < 0.5 anticausal/left-sided and unstable is correct but not required.",
+        "expectedAnswer": "(a) Correct. An ROC is a ring that cannot contain a pole, so its edges are set by the pole radii 0.5 and 2. That leaves three options: inside 0.5, between 0.5 and 2, and outside 2.\n\n(b) Wrong. An ROC outside the outermost pole does mean the sequence is right-sided, and here causal. Stability, though, depends on whether the ROC contains the unit circle |z| = 1, and |z| > 2 does not. You can also see it in h[n]: the pole at 2 contributes a term proportional to 2ⁿu[n], which grows without bound. Correct statement: |z| > 2 gives a causal but unstable system.\n\n(c) Wrong. An ROC bounded on both sides, like 0.5 < |z| < 2, means a two-sided sequence. The pole inside the ring (0.5) gives a right-sided term and the pole outside it (2) gives a left-sided term. Partial fractions give h[n] = −(1/3)(0.5)ⁿu[n] − (4/3)(2)ⁿu[−n−1]. This ring does contain |z| = 1, so this choice is stable but noncausal.\n\n(d) Wrong. To be causal the ROC must be |z| > 2, and to be stable it must contain |z| = 1. These two conditions can't both hold because there is a pole at z = 2, outside the unit circle. So this H(z) has a causal (unstable) version or a stable (two-sided, noncausal) version, never both. The third option, |z| < 0.5, is left-sided and also unstable."
+      },
+      "answers": [
+        {
+          "kind": "fully_right",
+          "answer": "(a) Correct. The ROC is always a ring centered at the origin with no poles inside it, so its boundaries have to sit at the pole radii. With poles at 0.5 and 2 you get exactly three choices: |z|<0.5, 0.5<|z|<2, |z|>2.\n\n(b) Wrong. Being outside the outermost pole tells you the sequence is right-sided, and here it's causal. But stability has nothing to do with being outside the poles. It depends on whether the ROC includes the unit circle |z|=1, and |z|>2 doesn't. So it's causal but NOT stable. (The pole at 2 gives a 2^n u[n] term that blows up.)\n\n(c) Wrong. A ring bounded on both sides means a two-sided sequence, not right-sided. The pole at 0.5, inside the ring, gives a right-sided piece. The pole at 2, outside the ring, gives a left-sided piece. This ring does contain |z|=1, so this choice is stable, just not causal.\n\n(d) Wrong. Causal needs |z|>2. Stable needs the unit circle in the ROC. Since there's a pole at z=2, outside the unit circle, no ROC gives both. You can have causal+unstable or stable+noncausal, never both.",
+          "confidence": 4,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "You judged all four statements correctly, and every reason comes from the ROC. In (a) you said the ROC is a pole-free ring whose edges sit at the pole radii. In (b) you kept causality (the ROC is outside the outermost pole) separate from stability (the ROC must contain |z|=1), and you backed it up with the growing 2^n u[n] term. In (c) you recognized the annulus as two-sided and said which pole gives which side. You also noted that this ROC contains the unit circle, so that choice is stable. In (d) you showed there's a real conflict because the pole at z=2 is outside the unit circle. If you want to go further, the partial-fraction form h[n] = −(1/3)(0.5)^n u[n] − (4/3)(2)^n u[−n−1] makes the two-sided result in (c) explicit.",
+            "notes": "Solid depth-4 grasp: the learner separates ROC shape (which side the sequence extends to, i.e. causality) from whether the ROC contains the unit circle (stability), and can find each error in a flawed analysis. Confidence of 4 was well calibrated.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner judges all four statements correctly and gives ROC-based reasons for each. In (b) they separate causality from stability and point to the unit circle and the growing 2^n u[n] term. In (c) they call the annulus two-sided, say which pole gives which side, and note that it contains |z|=1. In (d) they explain why no ROC is both causal and stable. The rubric is sound (I checked the partial fractions), so the grade of right is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_other_form",
+          "answer": "I did partial fractions first: H(z) = (-1/3)/(1-0.5z^-1) + (4/3)/(1-2z^-1).\n\n(a) Correct. The ROC can't include a pole and it's an annulus, so the only edges are 0.5 and 2, which gives three regions.\n\n(b) Wrong. For |z|>2 both terms invert to right-sided: h[n] = -(1/3)(0.5)^n u[n] + (4/3)(2)^n u[n]. That's causal, but the 2^n term grows without bound, so sum |h[n]| is infinite and the system is unstable. Being outside all the poles only gets you causality. In ROC terms, |z|=1 isn't in |z|>2.\n\n(c) Wrong. For 0.5<|z|<2 the 0.5 term is right-sided and the 2 term has to be left-sided: h[n] = -(1/3)(0.5)^n u[n] - (4/3)(2)^n u[-n-1]. That's two-sided. Both pieces decay away from n=0, so it's absolutely summable. It's stable, which fits with |z|=1 being inside the ring.\n\n(d) Wrong. The only causal h[n] is the one in (b), and it's unstable. The only stable one is in (c), and it's noncausal. |z|<0.5 gives a left-sided h[n] that's unstable too. So no realization is both causal and stable.",
+          "confidence": 5,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "All four judgments are right, and each one is backed by an ROC-based reason. Your partial fractions are correct (A = −1/3, B = 4/3). For (b), you separated the two ideas: being outside all the poles gives causality, and stability needs |z| = 1 inside the ROC. For (c), you identified the annulus as two-sided, with the 0.5 pole giving the right-sided term and the 2 pole giving the left-sided term, and you noted that it's stable. In (d) you went through all three ROCs and correctly concluded that no causal and stable version exists because there's a pole outside the unit circle.",
+            "notes": "Analyzes ROC fully at depth 4: keeps causality (ROC outside outermost pole) separate from stability (unit circle in ROC), knows the annulus means two-sided, and uses correct partial-fraction inversion. Confidence of 5 was justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner judges all four statements correctly: (a) right, (b) wrong, (c) wrong, (d) wrong. Each one has an ROC-based reason. Their partial fractions are correct: A = −1/3 and B = 4/3. In (b) they say the unit circle is not in |z| > 2 and that the 2ⁿu[n] term grows without bound. In (c) they call the ring two-sided and stable. In (d) they rule out every ROC as both causal and stable. This meets every rubric requirement, so the grade of right is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_result_wrong_reasoning",
+          "answer": "(a) correct. The ROC is a ring between poles, so the three regions are <0.5, between 0.5 and 2, and >2.\n\n(b) wrong. It is causal because it's outside the poles, but it isn't stable. A stable ROC has to be a bounded region, and |z|>2 goes all the way out to infinity, so it can't be stable. Correct: causal but unstable.\n\n(c) wrong. A ring with two edges is two-sided. The 0.5 pole gives the right-sided part and the 2 pole gives the left-sided part. Since this ROC is bounded it is the stable one.\n\n(d) wrong. Causal means the ROC has to extend to infinity, and stable means the ROC has to be bounded. Those contradict each other, so you can't get both here.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You judged all four statements right. Your answers to (a) and (c) are well reasoned: the ROC is a ring with poles on its edges, and a ring with two edges means a two-sided sequence. The problem is your reason for stability. Stability has nothing to do with whether the ROC is bounded. A system is stable when its ROC contains the unit circle |z| = 1. Many causal filters are stable even though their ROC reaches infinity. For example, 1/(1 − 0.5z⁻¹) with |z| > 0.5 is causal and stable. The fix: (b) is unstable because |z| > 2 does not contain |z| = 1, since the 2ⁿu[n] term grows without bound. (c) is stable because the ring contains |z| = 1. (d) fails because causal needs |z| > 2 and stable needs the unit circle in the ROC. The pole at z = 2, outside the unit circle, makes both impossible at once. Causal and stable are not opposites in general.",
+            "notes": "The learner got all four verdicts right but believes \"stable means a bounded ROC\" and \"causal and stable are always contradictory.\" They do not tie stability to the unit circle. Next, test a causal stable system, such as poles all inside |z| < 1.",
+            "misconceptionId": null,
+            "newMisconception": "The learner believes a system is stable when its ROC is a bounded region, so any ROC that extends to infinity (any causal system) must be unstable, rather than stability depending on whether the ROC contains the unit circle."
+          },
+          "judgment": {
+            "reason": "The learner judged all four statements correctly, but the stability reasons in (b), (c) and (d) rest on a false rule: a bounded ROC means stable, and an ROC reaching infinity means unstable. The rubric requires pointing to the unit circle or to the growing 2ⁿu[n] term, and the answer does neither. The reasoning in (d) also implies that no causal system is ever stable, so the grade of wrong, with a misconception tag, is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "partly_right",
+          "answer": "(a) Correct, because the ROC is an annulus that can't contain poles, so with poles at 0.5 and 2 those are the only three.\n(b) Wrong. |z|>2 is causal, but it doesn't include the unit circle |z|=1, so it's not stable.\n(c) Wrong. Bounded on both sides means two-sided: the right-sided part comes from 0.5 and the left-sided part from 2. It does contain the unit circle, so it's stable.\n(d) Wrong, it can't be both.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "You judged all four correctly, and your reasoning for (a)–(c) is solid. In (b) you separated causality (the ROC is outside the outermost pole) from stability (the ROC must contain |z| = 1). In (c) you saw that the annulus gives a two-sided sequence that is stable. But (d) is just \"it can't be both,\" with no ROC-based reason, and the question asks for one for every statement. The fix is one sentence: being causal forces the ROC to be |z| > 2 and being stable forces it to contain |z| = 1. Because the pole at z = 2 lies outside the unit circle, no ROC meets both conditions, so the causal version is unstable and the stable version (the annulus) is noncausal.",
+            "notes": "Understands ROC shape → sidedness and unit circle → stability, and keeps causal and stable separate. Lost credit only because (d) had no stated reason. Next time, ask them to justify a conclusion that combines both conditions.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "Parts (a)–(c) match the rubric. Each verdict is right and comes with a valid ROC-based reason: the ring between poles, the unit circle test for stability, and the two-sided annulus that contains |z|=1. Part (d) only says \"it can't be both.\" It gives no ROC reasoning (causal forces |z|>2, stability needs |z|=1, and the pole at 2 rules out both together), and the rubric fails answers that judge a statement without ROC-based reasons. So the wrong grade is correct, and \"incomplete\" fits because one required part is missing.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misconception",
+          "answer": "(a) Correct. The ROC is bounded by poles, so there are three rings.\n\n(b) Correct. If the ROC is outside every pole, the sequence is right-sided, so it's causal, and none of the poles are in the ROC, so the sum converges and it's stable.\n\n(c) Wrong. Since it's bounded on both sides it's two-sided, not right-sided. The 0.5 pole gives the right-sided part and the 2 pole gives the left-sided part. It's also not stable because the pole at 2 is outside the ROC.\n\n(d) Correct. Picking |z|>2 gives a causal and stable filter, as in (b).",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You got (a) right, and in (c) you correctly said the ring 0.5 < |z| < 2 gives a two-sided sequence, with the 0.5 pole giving the right-sided part and the 2 pole the left-sided part. Where it went wrong is stability. A system is stable when its ROC contains the unit circle |z| = 1. Being outside the poles has nothing to do with it, and no ROC ever contains a pole anyway. So in (b), |z| > 2 is causal but unstable: the pole at 2 adds a term like 2ⁿu[n], which grows without bound. In (c), the ring does contain |z| = 1, so that choice is stable, just not causal. That makes (d) wrong: the causal ROC (|z| > 2) misses the unit circle, and the stable ROC is two-sided, so no choice is both causal and stable.",
+            "notes": "Understands that the ROC's shape tells you which side the sequence is on (outside means right-sided, a ring means two-sided). Misunderstands stability: thinks it means the ROC is outside all poles, not that it contains the unit circle. Confident (4/5) in this, so it's worth working on directly.",
+            "misconceptionId": null,
+            "newMisconception": "Believes a system is stable when its ROC lies outside all the poles, rather than when the ROC contains the unit circle |z| = 1."
+          },
+          "judgment": {
+            "reason": "The learner judges (a) and (c) correctly, but marks (b) correct and claims |z|>2 gives a stable system. They also wrongly call the annulus unstable and mark (d) correct, which the rubric says makes the answer wrong. These all come from one wrong belief: that being outside the poles, not containing the unit circle, is what makes a system stable. So the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "slip",
+          "answer": "(a) Correct. The ROC is a ring with no poles in it and its edges are at pole radii, so there are three options.\n\n(b) Wrong. |z|>2 means right-sided/causal, but stability needs |z|=1 to be in the ROC and it isn't. Causal but unstable.\n\n(c) Wrong. 0.5<|z|<2 is bounded on both sides, so h[n] is two-sided. The pole at 0.5 gives the left-sided term and the pole at 2 gives the right-sided term. The ring contains the unit circle, so this one is stable but noncausal.\n\n(d) Wrong. Causal needs |z|>2 and stable needs |z|=1 inside the ROC. The pole at 2 lies outside the unit circle, so you can't have both.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You judged all four statements correctly. Parts (a), (b) and (d) are well argued: you tied stability to the unit circle and causality to |z| > 2. The problem is in (c), where you have the poles backwards. The pole at 0.5 is inside the ring, so its term must be right-sided, (0.5)ⁿu[n], whose ROC is |z| > 0.5. The pole at 2 is outside the ring, so its term must be left-sided, 2ⁿu[−n−1], whose ROC is |z| < 2. Your version can't be right: a right-sided 2ⁿu[n] term grows without bound, which would contradict your own correct conclusion that this ROC is stable. Rule to remember: poles inside the ring give right-sided terms, and poles outside it give left-sided terms. That gives h[n] = −(1/3)(0.5)ⁿu[n] − (4/3)(2)ⁿu[−n−1].",
+            "notes": "Strong on ROC shape and on the unit-circle test for stability. But in a two-sided ROC, they matched the inner and outer poles to the wrong sides (right-sided vs left-sided), and they did it with confidence 4. Check whether they can link each pole's term to its own ROC.",
+            "misconceptionId": null,
+            "newMisconception": "In an annular ROC, the pole inside the ring gives the left-sided term and the pole outside the ring gives the right-sided term."
+          },
+          "judgment": {
+            "reason": "The learner judged all four correctly and gave sound unit-circle reasoning in (b) and (d). In (c), though, they swapped the poles: they say the pole at 0.5 gives the left-sided term and the pole at 2 the right-sided term. That contradicts the rubric and conflicts with their own stability claim. Wrong reasoning about how the ROC maps poles to sequence terms makes the answer wrong at depth 4, and the swap reflects a conceptual error.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misread",
+          "answer": "Using partial fractions, H(z) = (-1/3)/(1-0.5z^-1) + (4/3)/(1-2z^-1).\nFor |z|<0.5: h[n] = (1/3)(0.5)^n u[-n-1] - (4/3)(2)^n u[-n-1]\nFor 0.5<|z|<2: h[n] = -(1/3)(0.5)^n u[n] - (4/3)(2)^n u[-n-1]\nFor |z|>2: h[n] = -(1/3)(0.5)^n u[n] + (4/3)(2)^n u[n]\nSo there are three possible impulse responses, one for each ROC.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "Your partial fractions are right (A = −1/3, B = 4/3), and all three impulse responses match their ROCs, including the two-sided h[n] for the annulus. You stopped there, though, and never said whether (a)–(d) are correct, never explained the errors, and never mentioned stability. To finish, use your own results: (a) is correct, since there are three ROCs. (b) is wrong: |z| > 2 is causal, but the (4/3)2ⁿu[n] term grows, and this ROC doesn't contain the unit circle, so the system is unstable. (c) is wrong: the annulus gives a two-sided h[n]. It contains |z| = 1, so it is stable but noncausal. (d) is wrong: with a pole at z = 2, outside the unit circle, no ROC is both outside all the poles and contains |z| = 1.",
+            "notes": "The learner can do partial fractions and match each ROC to its sequence correctly (all three h[n] are right). They did not judge (a)–(d) or link the ROC to stability (unit circle). Check next whether they know that stability means the ROC contains |z| = 1.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner's partial fractions (A = −1/3, B = 4/3) and all three impulse responses are correct. But they never judge (a)–(d), never discuss stability or the unit circle, and never say that no ROC gives a system that is both causal and stable. The rubric requires a judgement on each statement with ROC-based reasons, so the answer is wrong. The work is correct as far as it goes, so `incomplete` fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "no_answer",
+          "answer": "I don't really get how the ROC connects to stability, sorry.",
+          "confidence": 1,
+          "grade": {
+            "correct": false,
+            "errorTag": "no_answer",
+            "explanation": "Thanks for saying where you're stuck. That's useful, but this doesn't judge any of the four statements, so it can't count as correct. The missing link is this: a system is stable exactly when its ROC includes the unit circle |z| = 1, and the ROC's shape tells you which way the sequence runs. If the ROC is outside the outermost pole, the sequence is right-sided (causal). If it's inside the innermost pole, it's left-sided. A ring between two poles means two-sided. Use that here: (a) is correct, and (b), (c) and (d) are wrong. |z| > 2 is causal but doesn't contain |z| = 1, so it's unstable. The ring 0.5 < |z| < 2 is two-sided but stable. No ROC gives you both causal and stable, because the pole at z = 2 lies outside the unit circle.",
+            "notes": "No attempt. The learner says they don't understand how the ROC relates to stability (ROC must contain the unit circle). Low confidence (1/5). Reteach the stability link and how ROC shape shows which way the sequence runs before testing again at depth 4.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner only says they don't understand how the ROC connects to stability. They don't judge any of (a)–(d) and give no ROC-based reasoning, so the answer fails the rubric. The rubric and model answer are sound: the partial fractions check out (A = −1/3, B = 4/3). The grader was right to mark it wrong, and the tag no_answer fits because the learner only said they didn't know.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        }
+      ],
+      "failures": [],
+      "versions": {
+        "item": "item-writer@b03776c5",
+        "learner": "simulate-learner@bbee792e",
+        "grader": "grader@35fb43c0",
+        "judge": "judge-grader@1db51a05"
+      },
+      "models": {
+        "item": "claude-code:claude-opus-5-5",
+        "learner": "claude-code:claude-opus-5-5",
+        "grader": "claude-code:claude-opus-5-5",
+        "judge": "claude-code:claude-opus-5-5"
+      },
+      "costUsd": 0
+    },
+    {
+      "run": 1,
+      "case": "signals-demo",
+      "conceptId": "z-transform",
+      "conceptName": "Z-transform",
+      "depth": 1,
+      "item": {
+        "prompt": "The Z-transform of a discrete-time signal x[n] is defined as X(z) = Σ x[n] z^(−n), with the sum taken over all n.\n\nIn a few sentences:\n(a) Say what kind of signal the Z-transform works on and what z is allowed to be.\n(b) Say how it relates to the DTFT: which choice of z turns X(z) into the DTFT?\n(c) Give one way the Z-transform is used when designing or analyzing a digital filter, such as a low-pass filter.",
+        "rubric": "To be marked correct, the answer must get all three parts right:\n(a) It applies to discrete-time signals or sequences x[n], not continuous-time signals. z is a complex variable. Any equivalent wording is fine, such as \"z can be any complex number in the region of convergence\" or \"z = re^{jω}\". It is wrong to say z must be real, or that z is restricted to the unit circle.\n(b) Setting z = e^{jω}, so that |z| = 1 and z lies on the unit circle, gives the DTFT. This only works when the unit circle is in the region of convergence, but the answer does not need to mention that. Equivalent forms count, such as \"evaluate X(z) on the unit circle\". It is wrong to name the Laplace transform, z = e^{s} with no unit-circle idea, or z = ω, or to say the DTFT is the more general of the two.\n(c) The answer must name at least one real use. Acceptable uses include: representing a filter by its transfer function H(z) = Y(z)/X(z); turning a difference equation or convolution into algebra or multiplication; finding poles and zeros to judge stability or frequency response; or getting the frequency response by evaluating H(z) on the unit circle. A vague use with no link to filters or systems, like \"it's used in signal processing\", does not count.\nThe answer does not need derivations, worked calculations, or ROC details. Those are neither required nor penalized if they are correct. Confusing the Z-transform with the continuous-time Laplace transform makes the answer wrong.",
+        "expectedAnswer": "(a) The Z-transform works on discrete-time signals, meaning sequences x[n]. The variable z is a complex number, which can be written z = re^{jω}. It can take any value where the sum converges, called the region of convergence.\n\n(b) If you set z = e^{jω}, so that z is on the unit circle with |z| = 1, X(z) becomes X(e^{jω}) = Σ x[n] e^{−jωn}, which is the DTFT. So the DTFT is the Z-transform evaluated on the unit circle, and the Z-transform is the version that allows z anywhere in the complex plane.\n\n(c) In filter design, you describe the filter by its transfer function H(z) = Y(z)/X(z). Taking the Z-transform turns the filter's difference equation into an algebraic expression. The poles and zeros of H(z) tell you whether the filter is stable. Evaluating H(z) on the unit circle gives the frequency response, which shows whether it actually passes low frequencies and attenuates high ones."
+      },
+      "answers": [
+        {
+          "kind": "fully_right",
+          "answer": "(a) It's for discrete-time signals, i.e. sequences x[n] defined at integer n. z is a complex variable, so it can be anywhere in the complex plane where the sum converges (the ROC).\n(b) Put z = e^{jω}, which is the unit circle |z|=1. Then X(z) turns into Σ x[n]e^{-jωn}, which is the DTFT. So the DTFT is a special case of the Z-transform.\n(c) For a filter you take the Z-transform of the difference equation and get a transfer function H(z) = Y(z)/X(z). Then you can look at the poles and zeros to check stability, and plug in z = e^{jω} to see the frequency response, like whether a low-pass filter really cuts the high frequencies.",
+          "confidence": 5,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "All three parts are right. (a) You said the Z-transform works on discrete-time sequences and that z is a complex variable that can be anywhere in the ROC. (b) You set z = e^{jω} on the unit circle to get the DTFT, and you correctly said the DTFT is the special case. (c) You named several real filter uses: getting H(z) from the difference equation, checking stability from the poles and zeros, and finding the frequency response on the unit circle. Your 5/5 confidence was justified.",
+            "notes": "The learner has a full depth-1 picture of the Z-transform: discrete-time domain, complex z with an ROC, DTFT as the unit-circle special case, and transfer-function, pole-zero and frequency-response uses. Their confidence was well calibrated, so they're ready for depth 2 or 3.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "(a) The answer says the Z-transform works on discrete-time sequences and that z is complex, anywhere in the ROC. (b) Setting z = e^{jω} on the unit circle gives the DTFT, and the answer correctly calls the DTFT the special case. (c) It names H(z) from the difference equation, poles and zeros for stability, and the frequency response on the unit circle. Every rubric part is met, so the \"right\" grade is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_other_form",
+          "answer": "a) Works on sampled/discrete sequences x[n]. z is complex, write it in polar form z = r e^{jθ} with any r and θ for which the series converges.\nb) If you fix r = 1 you're on the unit circle and the Z-transform reduces to the DTFT X(e^{jθ}). Basically DTFT = Z-transform with the magnitude of z set to one.\nc) Convolution y[n] = h[n]*x[n] becomes a product Y(z) = H(z)X(z), so cascading filter stages or solving for the output is just multiplication/algebra instead of convolution sums.",
+          "confidence": 4,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "All three parts are right. (a) It works on discrete sequences x[n], and z is complex, z = re^{jθ}, taking any value where the series converges. (b) Setting r = 1 puts z on the unit circle and gives the DTFT X(e^{jθ}). (c) Turning convolution into multiplication, Y(z) = H(z)X(z), is a real filter use, and you tied it to cascading stages and solving for the output. You could also add that evaluating H(z) on the unit circle gives the frequency response, and that the poles of H(z) tell you whether the filter is stable.",
+            "notes": "Solid at orient level: knows z is complex with an ROC, that the DTFT is the Z-transform on the unit circle, and the convolution-to-product property. Hasn't yet mentioned poles, zeros or stability.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "(a) The answer says the transform works on discrete sequences x[n] and that z is complex, z = re^{jθ}, in the region where the series converges. (b) Setting r = 1 puts z on the unit circle and gives the DTFT. (c) Convolution becomes multiplication, Y(z) = H(z)X(z), which the rubric accepts, and the answer ties it to filters. All three parts meet the rubric, so the \"right\" grade is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_result_wrong_reasoning",
+          "answer": "(a) Discrete-time signals x[n]. z is a complex number.\n(b) Setting z = e^{jω} gives the DTFT. This works because e^{jω} is the only value of z that keeps the sum finite, so the DTFT is really the only place the Z-transform converges for most signals anyway.\n(c) You use it to find the transfer function H(z) of the filter and its poles and zeros to see if it's stable.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Parts (a) and (c) are right. The Z-transform works on discrete-time sequences, z is complex, and finding H(z) and its poles and zeros to check stability is a real filter-design use. Part (b) has the right substitution, z = e^{jω}, but the reason you give is wrong. The unit circle is not the only place the sum converges. The Z-transform usually converges over a whole region of the z-plane (the ROC), often an annulus or the area outside some radius, and for some signals that region doesn't include the unit circle at all. That is why the Z-transform is the more general tool: the DTFT is just the special case where you evaluate it on the unit circle, which works only when the unit circle lies inside the ROC.",
+            "notes": "Gets (a) and (c) and the z = e^{jω} substitution, but believes the Z-transform converges only on the unit circle, so they don't see what makes it more general than the DTFT. Next time, cover the ROC with an example like a^n u[n], which converges for |z| > |a|.",
+            "misconceptionId": null,
+            "newMisconception": "The Z-transform sum converges only on the unit circle (z = e^{jω}) for most signals, so the DTFT is essentially the only region where the Z-transform exists."
+          },
+          "judgment": {
+            "reason": "Parts (a) and (c) meet the rubric: the answer says it works on discrete-time sequences with complex z, and names H(z) with poles and zeros for checking stability. Part (b) has the right substitution, but it claims e^{jω} is the only value that keeps the sum finite, so the transform converges only on the unit circle. That amounts to restricting z to the unit circle, which the rubric marks wrong, and it gets the ROC idea backwards. A right result with wrong reasoning is wrong, so the grade of wrong is correct and the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "partly_right",
+          "answer": "(a) It's applied to discrete-time signals x[n], and z is a complex variable.\n(b) You get the DTFT when z = e^{jω}, i.e. on the unit circle.\n(c) It's used a lot in signal processing and is a really important tool for working with digital signals in general.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "Parts (a) and (b) are right. The Z-transform works on discrete-time sequences x[n], z is a complex variable, and setting z = e^{jω} (the unit circle) gives the DTFT. Part (c) doesn't name a concrete use. \"Used a lot in signal processing\" doesn't connect it to filters or systems. A complete answer names something specific: for example, the Z-transform turns a filter's difference equation into a transfer function H(z) = Y(z)/X(z). The poles and zeros of H(z) tell you about stability, and evaluating H(z) on the unit circle gives the frequency response, which shows whether a low-pass filter really passes low frequencies.",
+            "notes": "Knows the definition basics: discrete-time signals, complex z, and that the unit circle gives the DTFT. Couldn't name a specific filter-design use (transfer function, poles/zeros, frequency response), so next time check whether they know how it's applied.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "Parts (a) and (b) meet the rubric: discrete-time x[n] with complex z, and z = e^{jω} on the unit circle gives the DTFT. Part (c) only says it is \"used a lot in signal processing\". The rubric specifically names this kind of vague use as not counting, so a required part is missing and the answer is wrong. The tag \"incomplete\" fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misconception",
+          "answer": "(a) The Z-transform is for discrete-time signals x[n]. z is a complex number but it always has magnitude 1, so it lies on the unit circle, z = e^{jω}.\n(b) Since z is already on the unit circle, the Z-transform and the DTFT are basically the same thing, you just write z instead of e^{jω}.\n(c) You write the filter as H(z) = Y(z)/X(z) and use the poles and zeros to check stability.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You were right that the Z-transform works on discrete-time sequences x[n], and part (c) is a valid use: writing the filter as H(z) = Y(z)/X(z) and checking stability from its poles and zeros. The problem is that z is not limited to the unit circle. z can be any complex number z = re^{jω} where the sum converges, which is the region of convergence. Because of this, the Z-transform and the DTFT are not the same thing. The DTFT is the special case you get when you set z = e^{jω} (|z| = 1), and the Z-transform is the more general tool. That extra freedom in r is why the Z-transform can handle signals with no DTFT, and why it makes sense to place poles anywhere in the plane.",
+            "notes": "The learner believes z always has |z| = 1, so they see the Z-transform as just the DTFT written in different notation. They are missing that the DTFT is a special case. Their use of H(z) and poles/zeros for stability is fine. Confidence was 4/5, so this belief is firmly held and needs direct correction.",
+            "misconceptionId": null,
+            "newMisconception": "The learner believes the Z-transform variable z is restricted to the unit circle (|z| = 1), so the Z-transform is the same as the DTFT with z written instead of e^{jω}."
+          },
+          "judgment": {
+            "reason": "Part (a) says z always has magnitude 1 and lies on the unit circle, which the rubric names as wrong, and part (b) builds on that by treating the Z-transform and the DTFT as the same thing. Part (c) is a valid use, but the rubric needs all three parts right. The mistake is a wrong belief about what z can be, so the grade of wrong and the misconception tag both fit.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "slip",
+          "answer": "(a) Discrete-time sequences x[n]; z is a complex variable, anywhere in the region of convergence.\n(b) Let z = e^{ω}, i.e. evaluate X(z) along the real axis with magnitude 1, and you get the DTFT.\n(c) The transfer function H(z) = Y(z)/X(z) of the filter; evaluating it on the unit circle gives the frequency response so you can check the low-pass behavior.",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "Parts (a) and (c) are right. The Z-transform works on discrete-time sequences, z is a complex variable anywhere in the region of convergence, and the transfer function H(z) = Y(z)/X(z) evaluated on the unit circle gives the filter's frequency response. Part (b) is wrong. z = e^{ω} is a real number, and it has magnitude 1 only when ω = 0, so 'along the real axis with magnitude 1' doesn't describe a path at all. The DTFT comes from setting z = e^{jω}. The j makes |z| = 1 for every ω, so as ω changes z moves around the unit circle in the complex plane. That's also the unit circle you correctly used in (c).",
+            "notes": "Got (a) and (c) right, but in (b) wrote z = e^{ω} 'along the real axis with magnitude 1' with no j. Doesn't yet see that e^{jω} traces the unit circle, even though (c) correctly mentions the unit circle. Confidence was 4/5.",
+            "misconceptionId": null,
+            "newMisconception": "The learner believes the DTFT comes from evaluating X(z) at z = e^{ω} along the real axis, not at z = e^{jω} on the unit circle."
+          },
+          "judgment": {
+            "reason": "Parts (a) and (c) meet the rubric: the answer says discrete-time sequences, a complex z in the ROC, and H(z) evaluated on the unit circle to get the frequency response. Part (b) sets z = e^{ω} and says this means evaluating \"along the real axis\", which the rubric rejects because the unit-circle idea is missing. The grade of wrong is correct. The explicit \"real axis\" claim shows a wrong belief rather than a dropped j, so the misconception tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misread",
+          "answer": "(a) The Laplace transform works on continuous-time signals x(t), and s = σ + jω is a complex variable.\n(b) Setting s = jω (σ = 0, the imaginary axis) gives the continuous Fourier transform.\n(c) For an analog low-pass filter you write H(s) and check that the poles are in the left half plane so it's stable.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "What you wrote is accurate for the Laplace transform, but the question asks about the Z-transform. The Z-transform works on discrete-time sequences x[n], and z is a complex variable (z = re^{jω}). Setting z = e^{jω}, which puts z on the unit circle, gives the DTFT. For a digital low-pass filter, you write the transfer function H(z) = Y(z)/X(z). You then check that its poles are inside the unit circle for stability, and you evaluate H(z) on the unit circle to get the frequency response. In short, s and the jω axis are the continuous-time versions of z and the unit circle.",
+            "notes": "Answered all three parts about the Laplace transform (x(t), s = jω, poles in the left half plane) instead of the Z-transform. This suggests the learner mixes up the continuous-time and discrete-time transforms. Next, contrast s-plane/jω axis with z-plane/unit circle and explain the link z = e^{sT}.",
+            "misconceptionId": null,
+            "newMisconception": "The learner treats the Z-transform as if it were the continuous-time Laplace transform, using x(t), s, and the jω axis in place of x[n], z, and the unit circle."
+          },
+          "judgment": {
+            "reason": "The answer never discusses x[n], z, the unit circle or H(z). It describes the Laplace transform, and the rubric explicitly marks that as wrong, so the 'wrong' grade is correct. The learner names the Laplace transform and describes it accurately rather than saying something false about the Z-transform, so this is answering a different question (misread), not a mistaken belief about how the Z-transform works.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "no",
+            "betterTag": "misread"
+          }
+        },
+        {
+          "kind": "no_answer",
+          "answer": "Sorry, I haven't covered the Z-transform yet, not sure.",
+          "confidence": 1,
+          "grade": {
+            "correct": false,
+            "errorTag": "no_answer",
+            "explanation": "It's fine that you haven't covered this yet, and it's good that you said so instead of guessing. Here are the three key points. (a) The Z-transform works on discrete-time sequences x[n], and z is a complex number, z = re^{jω}. (b) If you set z = e^{jω}, which puts z on the unit circle, you get the DTFT, so the DTFT is the Z-transform evaluated on the unit circle. (c) In filter design, the Z-transform turns a filter's difference equation into a transfer function H(z) = Y(z)/X(z). The poles and zeros of H(z) tell you whether the filter is stable, and evaluating H(z) on the unit circle gives its frequency response.",
+            "notes": "No attempt: the learner said they haven't covered the Z-transform yet (confidence 1). There's no evidence about what they know, so start from the basics at depth 1.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner says they haven't covered the Z-transform yet and answers none of (a), (b) or (c), so the answer meets none of the rubric's requirements. Marking it wrong is correct, and no_answer fits because the learner says they don't know. The rubric and model answer are accurate.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        }
+      ],
+      "failures": [],
+      "versions": {
+        "item": "item-writer@b03776c5",
+        "learner": "simulate-learner@bbee792e",
+        "grader": "grader@35fb43c0",
+        "judge": "judge-grader@1db51a05"
+      },
+      "models": {
+        "item": "claude-code:claude-opus-5-5",
+        "learner": "claude-code:claude-opus-5-5",
+        "grader": "claude-code:claude-opus-5-5",
+        "judge": "claude-code:claude-opus-5-5"
+      },
+      "costUsd": 0
+    },
+    {
+      "run": 1,
+      "case": "signals-demo",
+      "conceptId": "discrete-time-convolution",
+      "conceptName": "Discrete-time convolution",
+      "depth": 2,
+      "item": {
+        "prompt": "A discrete-time LTI system has impulse response h[n]. For any input x[n], its output is given by the convolution sum\n\n  y[n] = Σₖ x[k] h[n−k].\n\nIn a few sentences, explain why this formula is correct. Your explanation should:\n(a) say how the input x[n] is broken into simpler pieces,\n(b) name the specific roles that linearity and time invariance each play, and\n(c) explain why the impulse response shows up as h[n−k], and not as h[k] or h[n].\n\nYou may use the input x[n] = 2δ[n] + 3δ[n−1] as an example, writing out what the output is in terms of h.",
+        "rubric": "To be marked correct, the answer must explain the reasoning behind the formula, not just describe or restate it. It must contain all three of these points:\n1. **Decomposition:** any input can be written as a sum of scaled, shifted impulses, x[n] = Σₖ x[k] δ[n−k]. Here x[k] is a number that scales the impulse located at time k.\n2. **Time invariance** is what makes the response to the shifted impulse δ[n−k] equal to h[n−k], the impulse response delayed by k. **Linearity** (scaling and superposition) is what makes the response to x[k]δ[n−k] equal to x[k]h[n−k] and lets these responses be added to give the total output. Both properties must be named and given their correct roles. Swapping the roles is wrong, for example by saying linearity gives the shift.\n3. **Why n−k:** the impulse at time k produces a copy of h that starts at time k. So the output at time n picks up the value of that copy n−k samples after it started. Writing h[k] or h[n] would ignore where the impulse sits or how much time has passed since it.\n\nThe worked example is optional. If the learner gives one, it must say y[n] = 2h[n] + 3h[n−1]. Any equivalent wording counts, as does describing it as \"flip and slide,\" provided the learner justifies it with the shifted-impulse argument.\n\nThese do not count:\n- Only restating the formula.\n- Only computing a numerical convolution with no reasons.\n- Saying \"because the system is LTI\" without saying what each property contributes.\n- Explaining it purely as a polynomial-multiplication trick or as a flip-and-slide recipe with no impulse decomposition.",
+        "expectedAnswer": "Any discrete-time signal can be built from impulses: x[n] = Σₖ x[k] δ[n−k]. Each term is an impulse placed at time k and scaled by the number x[k]. For example, 2δ[n] + 3δ[n−1] is an impulse of height 2 at n=0 plus one of height 3 at n=1.\n\nNext, find the system's response to each piece. By definition, δ[n] produces h[n]. Time invariance says that delaying the input delays the output by the same amount, so δ[n−k] produces h[n−k]. Linearity then does two things. First, scaling the input by x[k] scales the output, so x[k]δ[n−k] produces x[k]h[n−k]. Second, the response to a sum of inputs is the sum of the responses. Adding up all the pieces gives y[n] = Σₖ x[k]h[n−k].\n\nThe index is n−k because the impulse at time k starts its own copy of h at time k. At time n, that copy has been running for n−k samples, so it contributes x[k]·h[n−k]. Using h[k] or h[n] would ignore when each impulse arrived.\n\nIn the example: y[n] = 2h[n] + 3h[n−1]."
+      },
+      "answers": [
+        {
+          "kind": "fully_right",
+          "answer": "First, any input can be written as a sum of impulses: x[n] = Σₖ x[k]δ[n−k]. Each term is a single impulse sitting at time k, and the number x[k] sets its height. So 2δ[n] + 3δ[n−1] is just an impulse of height 2 at n=0 and one of height 3 at n=1.\n\nWe know δ[n] gives h[n], since that's what the impulse response means. Time invariance says that if you delay the input by k, the output is delayed by k too, so δ[n−k] gives h[n−k]. Linearity covers the rest: scaling the input by x[k] scales the output by x[k], and the output for a sum of inputs is the sum of the outputs. Adding all the x[k]h[n−k] terms gives y[n].\n\nIt's h[n−k] because the impulse at time k starts its own copy of h at time k. At time n, that copy is n−k steps in, so it contributes h at index n−k. h[n] would act like every impulse happened at 0, and h[k] doesn't depend on n at all.\n\nExample: y[n] = 2h[n] + 3h[n−1].",
+          "confidence": 5,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "Your answer is correct and complete. You wrote the input as a sum of scaled, shifted impulses, x[n] = Σₖ x[k]δ[n−k]. You gave time invariance the job of turning δ[n−k] into h[n−k], and you gave linearity the jobs of scaling by x[k] and adding the pieces. You also explained the n−k index well: each impulse starts its own copy of h at time k, so at time n that copy is n−k steps in. Your point that h[k] doesn't depend on n is a nice extra detail, and your example y[n] = 2h[n] + 3h[n−1] is right.",
+            "notes": "Shows full depth-2 understanding of the convolution sum: impulse decomposition, the separate roles of time invariance (shift) and linearity (scale and add), and why the index is n−k. Confidence 5 was justified. Ready for depth-3 practice computing convolutions.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The answer covers all three rubric points. It decomposes the input into scaled, shifted impulses. It gives time invariance the shift (δ[n−k]→h[n−k]) and gives linearity the scaling and the adding of responses, with the roles the right way round. It explains n−k as how far along the copy started at time k has run by time n. Its example, y[n]=2h[n]+3h[n−1], is correct, and the reasoning works at Explain depth, so the \"right\" grade is correct.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_other_form",
+          "answer": "Let T{·} be the system, so T{δ[n]} = h[n].\nStep 1: x[n] = Σₖ x[k]δ[n−k]. This is the sifting property: only the k=n term survives, so it really is x[n]. Each x[k] is a constant weight on a shifted impulse.\nStep 2 (time invariance): T{δ[n−k]} = h[n−k]. Shift the input and the output shifts the same way.\nStep 3 (linearity): T{Σₖ x[k]δ[n−k]} = Σₖ x[k]T{δ[n−k]}. Superposition lets me pull the sum out and homogeneity lets me pull the constants x[k] out. So y[n] = Σₖ x[k]h[n−k].\nWhy n−k: substitute m = n−k. Then m is how many samples have gone by since the impulse at time k happened. The impulse response has to be evaluated at that elapsed time, not at the absolute time n and not at k. With x = 2δ[n]+3δ[n−1], the impulse at 0 gives 2h[n] and the impulse at 1 gives 3h[n−1], so y[n] = 2h[n] + 3h[n−1].",
+          "confidence": 4,
+          "grade": {
+            "correct": true,
+            "errorTag": null,
+            "explanation": "This is a complete, correct explanation. You split the input into weighted, shifted impulses and checked it with the sifting property. You gave each property its proper job: time invariance turns δ[n−k] into h[n−k], while superposition and homogeneity let you pull out the sum and the weights x[k]. You also explained n−k correctly as the time elapsed since the impulse at time k. Your example y[n] = 2h[n] + 3h[n−1] is right. One small addition would make the n−k step even clearer: say that each impulse starts its own copy of h at time k, so h has to be read n−k samples into that copy.",
+            "notes": "Solid depth-2 understanding: correct decomposition, correct roles for linearity and time invariance, and n−k read as elapsed time. Confidence (4) is justified.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The answer covers all three rubric points. It decomposes x[n] into weighted, shifted impulses, with a correct sifting justification. It assigns the shift to time invariance and the scaling and summing (homogeneity and superposition) to linearity. It explains n−k as the time elapsed since the impulse at time k, rather than absolute time n or the impulse time k. The optional example y[n] = 2h[n] + 3h[n−1] is correct, so the \"right\" grade stands.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "not_applicable",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "right_result_wrong_reasoning",
+          "answer": "You break x[n] into scaled, shifted impulses: x[n] = Σₖ x[k]δ[n−k], where x[k] is the height of the impulse at time k. Linearity is what tells you that a shifted impulse δ[n−k] gives a shifted response h[n−k], because a linear system treats every input the same way. Time invariance is what lets you scale by x[k] and add all the responses together, since the system doesn't change over time and the pieces can just be summed. It's h[n−k] because the impulse at k starts a copy of h at time k, and by time n that copy has gone n−k samples. So for x = 2δ[n]+3δ[n−1] the output is y[n] = 2h[n] + 3h[n−1].",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You split the input into scaled, shifted impulses correctly. Your reasoning for h[n−k] is also right: the copy of h starts at time k and has run n−k samples by time n. Your example output y[n] = 2h[n] + 3h[n−1] is correct too. However, you swapped the roles of the two properties. Time invariance is what makes δ[n−k] produce h[n−k]: delaying the input delays the output by the same amount. Linearity is what lets you scale that response by x[k] and add all the responses together, which is superposition. A system can be linear without being time-invariant, and then a shifted impulse would not give a shifted copy of h.",
+            "notes": "The decomposition, the n−k reasoning and the example are all solid, but the learner confidently (4/5) swapped linearity and time invariance. Next, contrast systems that are linear but time-varying with systems that are time-invariant but nonlinear.",
+            "misconceptionId": null,
+            "newMisconception": "The learner believes linearity is what makes a shifted impulse produce a shifted response, and time invariance is what allows scaling and summing the responses. The roles of the two properties are swapped."
+          },
+          "judgment": {
+            "reason": "The decomposition, the n−k timing argument and the example are all correct. However, the answer says linearity is what produces the shifted response h[n−k] and that time invariance is what allows scaling and summing. The rubric explicitly calls this role swap wrong, so marking the answer wrong is correct. 'misconception' fits because it is a wrong belief about what each property does.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "partly_right",
+          "answer": "The input gets split into impulses: x[n] = Σ x[k]δ[n−k], so each sample x[k] is an impulse at position k with height x[k]. Because the system is time invariant, shifting the impulse to k shifts the response to h[n−k]. Because it's linear, multiplying the impulse by x[k] multiplies the response by x[k], and the total output is the sum of all the separate responses. Putting those together gives y[n] = Σ x[k]h[n−k]. For the example, y[n] = 2h[n] + 3h[n−1].",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "You got the decomposition right: x[n] = Σ x[k]δ[n−k]. You also gave time invariance and linearity their correct roles (time invariance gives the shift to h[n−k]; linearity gives the x[k] scaling and lets the responses add), and your example y[n] = 2h[n] + 3h[n−1] is correct. What's missing is part (c). You said the response shifts to h[n−k], but you didn't explain why the index is n−k and not h[k] or h[n]. The reason is that the impulse at time k starts its own copy of h at time k. At time n, that copy has been running for n−k samples, so it contributes x[k]·h[n−k]. Writing h[k] or h[n] would ignore where the impulse sits or how much time has passed since it.",
+            "notes": "Understands decomposition and assigns linearity and time invariance correctly. Did not explain the n−k index as elapsed time since the impulse at k, so check whether they can say why it isn't h[k] or h[n].",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The answer covers the decomposition and gives time invariance (the shift) and linearity (scaling plus superposition) their correct roles, and the example 2h[n] + 3h[n−1] is correct. It never addresses part (c): it says the response shifts to h[n−k] but doesn't explain that the copy of h starting at time k has run n−k samples by time n, or why h[k] or h[n] would be wrong. Rubric point 3 is required, so marking it wrong is correct, and \"incomplete\" fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misconception",
+          "answer": "Write the input as a sum of scaled impulses x[k]δ[n−k]. Linearity means each piece can be handled on its own: scale by x[k] and add the results at the end. Time invariance means the system responds the same way no matter when the impulse comes in, so every impulse gives the same h[n] and only the scale factor changes. The n−k isn't really about timing. It comes from convolution flipping h, because the system is \"looking backward\" over past inputs, so you reverse h and slide it along. That's why it's h[n−k] instead of h[k]. For the example, both impulses just produce h, so y[n] = 2h[n] + 3h[n] = 5h[n].",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "misconception",
+            "explanation": "You got the decomposition right: the input is a sum of scaled impulses x[k]δ[n−k]. You also correctly said that linearity lets you scale each piece by x[k] and add the results. The mistake is in what you said time invariance does. It doesn't mean every impulse gives the same unshifted h[n]. It means that delaying the input by k delays the output by k, so δ[n−k] produces h[n−k]. That delay is where the n−k comes from. The impulse at time k starts its own copy of h at time k, and at time n that copy has been running for n−k samples. So it is about timing, and \"flip and slide\" is just a way to picture this result, not the reason for it. In your example, the impulse at n=1 gives a delayed copy, so y[n] = 2h[n] + 3h[n−1], not 5h[n].",
+            "notes": "Gave decomposition and linearity correctly, but thinks time invariance means each impulse produces the same unshifted h[n]. Explains n−k as a \"flip\" rather than a delay. Example came out as 5h[n] instead of 2h[n] + 3h[n−1]. Confidence was 4, so this is a firmly held misconception.",
+            "misconceptionId": null,
+            "newMisconception": "Time invariance means every impulse produces the same unshifted h[n] wherever it occurs, and the n−k in convolution comes from flipping h rather than from delaying the response to an impulse at time k."
+          },
+          "judgment": {
+            "reason": "The decomposition and the role of linearity are right. But the learner says time invariance makes every impulse produce the same unshifted h[n], and that n−k comes from flipping h rather than from timing. That contradicts rubric points 2 and 3, and it leads to the wrong example answer 5h[n] instead of 2h[n]+3h[n−1]. This is a wrong belief about what time invariance does, so 'misconception' fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "slip",
+          "answer": "Any x[n] can be written as Σₖ x[k]δ[n−k], which is a bunch of impulses at each time k, each scaled by the number x[k]. The system turns δ[n] into h[n]. Time invariance means a delayed impulse δ[n−k] gives a delayed response h[n−k]. Linearity means scaling the input scales the output, so x[k]δ[n−k] gives x[k]h[n−k], and the responses to different pieces just add up. That gives the sum. The argument is n−k because the impulse at time k kicks off a copy of h at time k, so at time n we're n−k samples into that copy. h[n] would ignore where the impulse was. Example: x = 2δ[n] + 3δ[n−1] gives y[n] = 2h[n] + 3h[n+1].",
+          "confidence": 4,
+          "grade": {
+            "correct": false,
+            "errorTag": "slip",
+            "explanation": "Your explanation is strong. You broke x[n] into scaled, shifted impulses and gave time invariance its role (the delayed impulse gives the delayed response h[n−k]). You also gave linearity its roles: scaling, then adding up the pieces. Your account of n−k as \"how far into the copy of h that started at time k\" is right too. The problem is the example, which has a sign error. The impulse 3δ[n−1] sits at k=1, so by your own argument it produces 3h[n−1], not 3h[n+1]. The correct output is y[n] = 2h[n] + 3h[n−1]. h[n+1] would be the response shifted earlier in time, which is the opposite of a delay.",
+            "notes": "Explained the decomposition, the LTI roles and the reason for n−k correctly. The worked example had a sign slip, giving h[n+1] instead of h[n−1]. This contradicts their own general reasoning, so it is probably a slip, but check that they apply the shift direction correctly in concrete cases.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The explanation covers decomposition, gives time invariance the shift and linearity the scaling and adding, and explains n−k correctly. But the example says 3h[n+1], and the rubric says any example given must read 2h[n] + 3h[n−1]. So the answer is wrong. Because the learner's own general argument gives h[n−1], this is a sign slip, not a wrong belief about shifts.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        },
+        {
+          "kind": "misread",
+          "answer": "To compute the convolution, you flip h to get h[−k], then shift it by n to get h[n−k]. For each n, you multiply x[k] by the flipped and shifted h point by point and add up the products. For x = 2δ[n]+3δ[n−1], say h = {1, 1} at n=0,1. Then y[0] = 2·1 = 2, y[1] = 2·1 + 3·1 = 5, y[2] = 3·1 = 3, so y = {2, 5, 3}. The length of the output is len(x)+len(h)−1.",
+          "confidence": 3,
+          "grade": {
+            "correct": false,
+            "errorTag": "incomplete",
+            "explanation": "Your flip-and-slide steps are right, and so is the example: with h = {1, 1}, y = {2, 5, 3}, which matches 2h[n] + 3h[n−1]. But the question asks why the formula is correct, and your answer only explains how to compute it. Here are the missing pieces. (a) Any input is a sum of scaled, shifted impulses, x[n] = Σₖ x[k]δ[n−k]. (b) Time invariance makes δ[n−k] produce h[n−k]. Linearity makes x[k]δ[n−k] produce x[k]h[n−k] and lets you add up all those responses. (c) The impulse at time k starts its own copy of h at time k, so at time n that copy is n−k samples in. That is why h[n−k] appears, and the \"flip\" in flip-and-slide is just this same indexing seen from another angle.",
+            "notes": "Can carry out flip-and-slide convolution correctly and got the right numbers, but gave no impulse decomposition, no roles for linearity and time invariance, and no reason for the n−k index. Shows procedural (depth-3-style) skill but no evidence of the depth-2 explanation.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner gives only a flip-and-slide recipe and a numerical example. There is no impulse decomposition, no role for linearity or time invariance, and no reason for the n−k index. The rubric explicitly rejects a flip-and-slide recipe without the impulse decomposition, so \"wrong\" is the right call. The answer explains how to compute convolution instead of why the formula holds, so it answers a different question. That fits `misread` better than `incomplete`, since none of the three required points is even partly covered.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "no",
+            "betterTag": "misread"
+          }
+        },
+        {
+          "kind": "no_answer",
+          "answer": "not sure, I just know it's the definition of convolution for LTI systems",
+          "confidence": 1,
+          "grade": {
+            "correct": false,
+            "errorTag": "no_answer",
+            "explanation": "Saying you're not sure was the honest call. But calling the formula \"the definition of convolution for LTI systems\" doesn't explain why it's correct, and it's actually a result you can derive. The argument has three steps. First, write any input as a sum of scaled, shifted impulses: x[n] = Σₖ x[k]δ[n−k]. Second, time invariance means the response to δ[n−k] is h[n−k], and linearity means you can scale that response by x[k] and add up all the pieces. Third, the impulse at time k starts its own copy of h at time k, so at time n that copy has been running for n−k samples, which is why the formula uses h[n−k]. For example, 2δ[n] + 3δ[n−1] gives y[n] = 2h[n] + 3h[n−1].",
+            "notes": "The learner didn't attempt the derivation and rated confidence 1/5. They treat the convolution sum as a definition and haven't shown the impulse-decomposition reasoning or the separate roles of linearity and time invariance. Start again from the decomposition of x[n] into impulses.",
+            "misconceptionId": null,
+            "newMisconception": null
+          },
+          "judgment": {
+            "reason": "The learner says they're not sure and only calls the formula \"the definition of convolution for LTI systems.\" That covers none of the three rubric points: impulse decomposition, the separate roles of linearity and time invariance, and why the index is n−k. The answer is clearly wrong. It is essentially a statement of not knowing, so the no_answer tag fits.",
+            "rubricSound": true,
+            "verdict": "right",
+            "tagFits": "yes",
+            "betterTag": null
+          }
+        }
+      ],
+      "failures": [],
+      "versions": {
+        "item": "item-writer@b03776c5",
+        "learner": "simulate-learner@bbee792e",
+        "grader": "grader@35fb43c0",
+        "judge": "judge-grader@1db51a05"
+      },
+      "models": {
+        "item": "claude-code:claude-opus-5-5",
+        "learner": "claude-code:claude-opus-5-5",
+        "grader": "claude-code:claude-opus-5-5",
+        "judge": "claude-code:claude-opus-5-5"
+      },
+      "costUsd": 0
+    }
+  ]
+}

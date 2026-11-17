@@ -1,0 +1,435 @@
+{
+  "date": "2026-11-17T19:38:52.853Z",
+  "runs": [
+    {
+      "case": "signals-new-learner",
+      "tutorPromptVersion": "tutor@b4c555be",
+      "judgePromptVersion": "judge-tutor@9e80c266",
+      "tutorModel": "claude-code:claude-opus-5-5",
+      "judgeModel": "claude-code:claude-opus-5-5",
+      "ended": true,
+      "learnerTurnsUsed": 6,
+      "code": [
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "all 2 finished task(s) had one"
+        },
+        {
+          "rule": "one_question",
+          "verdict": "fail",
+          "evidence": "turn 12 asks 2: \"Good guess. It's true that a system's output depends on its input, but that hold\""
+        }
+      ],
+      "judge": [
+        {
+          "rule": "predict_first",
+          "verdict": "pass",
+          "evidence": "Turn 10: \"Before I define them, take a guess... What do you think 'time-invariant' means for that system?\""
+        },
+        {
+          "rule": "one_question",
+          "verdict": "fail",
+          "evidence": "Turn 12: asks two questions in one message: \"How would the echo you hear at 5:00 compare to the one at 3:00?\" and \"what output do you think you'd get from the delayed input x(t − 2)?\""
+        },
+        {
+          "rule": "hints_before_solution",
+          "verdict": "pass",
+          "evidence": "Turn 16: \"You've had two hints on time-invariance, so here's the answer\". The hints came at turns 12 and 14."
+        },
+        {
+          "rule": "asks_why",
+          "verdict": "fail",
+          "evidence": "No turn asks why a step works. The questions only ask for recall or prediction, e.g. turn 14: \"When does the doubled beep come out...?\""
+        },
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "Turn 16–17: \"Now try it from memory:\" followed by the graded LTI question. The review task was itself a graded recall question (turn 3)."
+        },
+        {
+          "rule": "never_grades",
+          "verdict": "pass",
+          "evidence": "Turn 16: \"Now try it from memory:\". The tutor said nothing about correctness before the grader's verdicts at turns 5 and 19."
+        }
+      ],
+      "transcript": [
+        {
+          "type": "task",
+          "id": "e38c3c9a-46ad-49f5-abc2-71897a016f0f",
+          "label": "Review: Complex exponentials at depth 1"
+        },
+        {
+          "type": "tutor",
+          "id": "80446d1c-550a-45b7-9f3a-4d1c520866bb",
+          "text": "Welcome! Let's start with a quick warm-up on something you've seen before: complex exponentials. This will lead straight into today's new topic, LTI systems, where these signals come up all the time. Answer from memory, and don't worry about being polished."
+        },
+        {
+          "type": "question",
+          "id": "0f06f6ec-7cf3-4aec-8762-c7455727abfe",
+          "itemId": "6af83410-bb34-4665-a408-cd5c01c97e3d",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "Write Euler's formula for e^(jωt). Then say in a sentence what kind of signal e^(jωt) is, in terms of its real and imaginary parts.",
+          "step": "Euler's formula and meaning of e^(jωt)",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "4ecb8316-7886-4df9-a764-963f62e49511",
+          "text": "I think it has something to do with e^(jωt) and rotating in the complex plane?",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "86ffe521-1e63-4ad4-a06a-30342f730845",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You're right that e^(jωt) has to do with rotating in the complex plane. That's the correct picture. But the question asked for Euler's formula, and your answer doesn't include it. The formula is e^(jωt) = cos(ωt) + j·sin(ωt). This means e^(jωt) is a complex sinusoid at frequency ω: its real part is cos(ωt), its imaginary part is sin(ωt), and it traces the unit circle with constant magnitude 1."
+        },
+        {
+          "type": "tutor",
+          "id": "1e0ef6c5-0ed5-4860-9ead-f5bc9d743c46",
+          "text": "Your picture is correct. e^(jωt) does rotate in the complex plane. What was missing is the formula that tells you what that rotation looks like:\n\n**e^(jωt) = cos(ωt) + j·sin(ωt)**\n\nRead it like a point moving around a circle. The real part (horizontal position) is cos(ωt), and the imaginary part (vertical position) is sin(ωt). The point always stays on the unit circle, so its magnitude is 1, and it goes around at angular speed ω. That's why we call it a *complex sinusoid*: it's a cosine and a sine bundled into one signal.\n\nQuick check (not graded): use the formula to work out where the point is when ωt = π/2. What does e^(jπ/2) equal?"
+        },
+        {
+          "type": "answer",
+          "id": "a3076ba4-749d-4b5c-8922-be4915e65720",
+          "text": "e^(jθ) = cos θ + j sin θ"
+        },
+        {
+          "type": "tutor",
+          "id": "2394ecb3-de1d-435f-8a8d-0a047f5cf16f",
+          "text": "That's the formula, written in general form with θ in place of ωt. Now plug in θ = π/2: cos(π/2) = 0 and sin(π/2) = 1, so **e^(jπ/2) = 0 + j·1 = j**. On the circle, that's a quarter-turn counterclockwise from 1 (on the right) up to j (at the top).\n\nThat's the whole picture: e^(jωt) is a point going around the unit circle at speed ω, with real part cos(ωt) and imaginary part sin(ωt). Keep this in mind, because next we're starting LTI systems, and complex exponentials are the signals they handle most neatly."
+        },
+        {
+          "type": "task",
+          "id": "a1ea522e-77f5-4588-9857-bcc16b383dc6",
+          "label": "Learn: LTI systems to depth 1 (Orient)"
+        },
+        {
+          "type": "tutor",
+          "id": "11c351ee-4a94-47a4-b1b7-c6896239026c",
+          "text": "New topic: **LTI systems**. A *system* is anything that takes an input signal x(t) and produces an output signal y(t), like an amplifier, a filter, or a room echoing your voice. \"LTI\" stands for **Linear** and **Time-Invariant**. Those are two properties a system can have.\n\nBefore I define them, take a guess. Say a system turns input x(t) into output y(t). What do you think \"time-invariant\" means for that system? Think about what should happen if you feed in the same input, just delayed by 2 seconds."
+        },
+        {
+          "type": "answer",
+          "id": "442346a7-ffe5-46b4-86b6-a8387d481c1d",
+          "text": "I'm not sure. Maybe it means the output only depends on the input?"
+        },
+        {
+          "type": "tutor",
+          "id": "590e1cbb-384c-42f0-b750-8a51faeaf818",
+          "text": "Good guess. It's true that a system's output depends on its input, but that holds for every system, so it can't be what makes some systems special. Time-invariance is about **when** you give the input.\n\nHere's a hint. Picture yourself clapping once in a big empty hall and hearing the echo. You clap at 3:00 and again at 5:00. The hall hasn't changed in between. How would the echo you hear at 5:00 compare to the one at 3:00?\n\nNow use that idea on a system. If input x(t) gives output y(t), what output do you think you'd get from the delayed input x(t − 2)?"
+        },
+        {
+          "type": "answer",
+          "id": "a8558c5b-6923-4973-b1e4-6fcdcfa183ef",
+          "text": "Can I get a hint?"
+        },
+        {
+          "type": "tutor",
+          "id": "c8710866-88e0-4ff6-a3c2-8ec4ee835698",
+          "text": "Sure, here's a stronger one. The hall doesn't care what time it is, so a clap at 5:00 gives exactly the same echo as a clap at 3:00, just 2 hours later.\n\nNow a concrete system: a simple amplifier where **y(t) = 2·x(t)**. Say your input is a short beep that starts at t = 0, and the output is a beep twice as loud that also starts at t = 0. Next, you play the *same* beep 2 seconds late, so it starts at t = 2. When does the doubled beep come out, and does it look any different from before?\n\nOnce you've answered that, try the general question again: if x(t) gives y(t), what does x(t − 2) give?"
+        },
+        {
+          "type": "answer",
+          "id": "5ac98459-99d2-4604-ab28-46523981a679",
+          "text": "Linear means scaling and adding inputs scales and adds the outputs?"
+        },
+        {
+          "type": "tutor",
+          "id": "9ad3e79b-8150-4f9f-8b0a-0ae263addf5d",
+          "text": "Yes, that's what **linear** means. If x₁ gives y₁ and x₂ gives y₂, then a·x₁ + b·x₂ gives a·y₁ + b·y₂. Scaling and adding at the input turns into the same scaling and adding at the output.\n\nYou've had two hints on time-invariance, so here's the answer. In the amplifier example, the doubled beep starts at t = 2 and looks exactly the same as before, just 2 seconds later. That's what **time-invariant** means: **if x(t) gives y(t), then x(t − 2) gives y(t − 2)**, and the same holds for any delay. The system acts the same no matter when you use it, like the hall that gives the same echo at 3:00 and at 5:00.\n\nTogether, an **LTI system** is one that is both linear and time-invariant. Filters, amplifiers, simple circuits, and echoing rooms are common examples. The point of LTI is that these two properties are what let you predict the output for *any* input, and that's the goal of this course.\n\nNow try it from memory:"
+        },
+        {
+          "type": "question",
+          "id": "220d04ae-222f-4ac0-b660-1330f9ad4502",
+          "itemId": "11cab301-399b-435f-8d7d-ee8c58bc09db",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "What does 'LTI' stand for? In a sentence each, say what the two properties mean for a system with input x(t) and output y(t). Then give one real-world example of something that is usually modeled as an LTI system.",
+          "step": "Define LTI: linearity and time-invariance",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "54800df0-140f-47e9-a3f3-6793adc275c3",
+          "text": "Time-invariant means if you delay the input, the output is just delayed by the same amount.",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "b6be4e17-f3b1-47e4-9ad3-d1181b9a30c6",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You defined time-invariance correctly: if the input is delayed, the output is the same, just delayed by the same amount (x(t − T) → y(t − T)). The rest of the question is missing. You didn't spell out LTI as Linear Time-Invariant, you didn't define linearity, and you didn't give an example. Linearity means superposition: if x1 → y1 and x2 → y2, then a·x1 + b·x2 → a·y1 + b·y2. A common example of a system modeled as LTI is an RC circuit, an audio filter, or the echo in a room."
+        },
+        {
+          "type": "tutor",
+          "id": "57a64ea8-6f86-425d-9578-80acae70f4ae",
+          "text": "Your time-invariance definition is right: delay the input by T and the output is the same, just delayed by T.\n\nThe answer left out three pieces, and you actually said one of them yourself a few minutes ago:\n\n- **LTI** stands for **Linear, Time-Invariant**.\n- **Linear** means superposition: if x₁ → y₁ and x₂ → y₂, then a·x₁ + b·x₂ → a·y₁ + b·y₂. Scaling and adding at the input gives the same scaling and adding at the output.\n- **Example:** an audio filter, an RC circuit, or the echo in a room.\n\nWhen a question asks for several things, it helps to go through them one by one before you answer. Next time we'll pick up linearity and test whether a specific system has each property."
+        },
+        {
+          "type": "summary",
+          "id": "ea3bc18e-a234-441f-a1ba-cb2a61d70fb0",
+          "text": "We reviewed complex exponentials, then introduced LTI systems (definitions of linearity and time-invariance only, no testing yet). For e^(jωt), the learner had the right picture of rotation around the unit circle and could write Euler's formula in general form once prompted. They never worked out e^(jπ/2) = j themselves; the tutor did it. They gave the superposition definition of linearity on their own, without being asked. Time-invariance didn't come to them: their first guess was \"output depends only on input.\" The hall-echo hint and the amplifier-beep hint didn't get an answer, so the tutor gave the definition, which they then repeated correctly. Both graded answers were incomplete because they answered only one part of a multi-part question, so get them to go through every part before answering. Next session: test whether specific systems (e.g., y=x², y=t·x(t), y=x(t−1)) are linear and time-invariant, and have them write out the complete LTI definition with an example."
+        }
+      ],
+      "costUsd": 0
+    },
+    {
+      "case": "signals-new-learner",
+      "tutorPromptVersion": "tutor@b4c555be",
+      "judgePromptVersion": "judge-tutor@9e80c266",
+      "tutorModel": "claude-code:claude-opus-5-5",
+      "judgeModel": "claude-code:claude-opus-5-5",
+      "ended": true,
+      "learnerTurnsUsed": 10,
+      "code": [
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "all 2 finished task(s) had one"
+        },
+        {
+          "rule": "one_question",
+          "verdict": "fail",
+          "evidence": "turn 8 asks 2: \"Yes, that's Euler's formula. With θ = ωt, the point is (cos ωt, sin ωt) on the u\""
+        }
+      ],
+      "judge": [
+        {
+          "rule": "predict_first",
+          "verdict": "pass",
+          "evidence": "Turn 20: \"Make a quick guess before I explain (not graded)... Which one do you think is LTI?\" The explanation comes in turn 24. The spiral was also asked as a prediction in turn 6 before it was explained in turn 14."
+        },
+        {
+          "rule": "one_question",
+          "verdict": "fail",
+          "evidence": "Turn 8: \"What happens to e^(−t) as t grows? Given that, what shape does the spinning point trace out?\" This message asks two questions."
+        },
+        {
+          "rule": "hints_before_solution",
+          "verdict": "pass",
+          "evidence": "Turn 14 gives the spiral answer (\"It's a spiral that winds inward\") only after hints in turn 10 (plugging in e^(−t) values) and turn 12 (\"Here's a stronger hint\")."
+        },
+        {
+          "rule": "asks_why",
+          "verdict": "fail",
+          "evidence": "The tutor never asks the learner why a step works. Its questions are prompts like turn 22's \"is A LTI, yes or no?\" and turn 12's \"What do we call that curve?\""
+        },
+        {
+          "rule": "retrieval_at_end",
+          "verdict": "pass",
+          "evidence": "Turn 14 ends the review with \"One last card to close this warm-up. Answer from memory.\" (graded card in turn 15). The LTI task ends with the graded card in turn 29."
+        },
+        {
+          "rule": "never_grades",
+          "verdict": "pass",
+          "evidence": "Turns 16, 26 and 30: each learner answer to a graded card is followed directly by the grader's verdict, with no tutor message in between."
+        }
+      ],
+      "transcript": [
+        {
+          "type": "task",
+          "id": "bc48fd54-d92e-456f-8ce5-104a6cededee",
+          "label": "Review: Complex exponentials at depth 1"
+        },
+        {
+          "type": "tutor",
+          "id": "d9c6eb55-5004-4436-ac89-418ee02338ff",
+          "text": "Welcome! We'll start with a quick warm-up on something you've seen before: complex exponentials. After that we'll move on to LTI systems, which rely on them heavily. Answer the card below from memory, in your own words. Rough is fine."
+        },
+        {
+          "type": "question",
+          "id": "2ba43b60-04a4-4deb-95f4-c828c8aec2cc",
+          "itemId": "519657f5-5554-4fce-bd23-f1cba17cf17e",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "Write Euler's formula for e^(jωt). Then say in a sentence or two what kind of signal e^(jωt) is, and how it differs from a general e^(st) where s = σ + jω.",
+          "step": "Euler's formula and what e^(st) represents",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "a9d28001-b498-4d30-b1d7-d07bbeccf121",
+          "text": "I think it has something to do with e^(jωt) and rotating in the complex plane?",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "38bcca7b-0b68-4a6b-8ba2-a9f062cb90ca",
+          "correct": false,
+          "errorTag": "incomplete",
+          "explanation": "You're right that e^(jωt) rotates in the complex plane. It traces a point around the unit circle at angular frequency ω, always with magnitude 1. The answer is missing the other two parts. First, Euler's formula: e^(jωt) = cos(ωt) + j·sin(ωt). Second, how a general e^(st) differs: since e^(st) = e^(σt)·e^(jωt), the real part σ makes the oscillation's amplitude grow (σ>0) or decay (σ<0), and ω still sets how fast it oscillates."
+        },
+        {
+          "type": "tutor",
+          "id": "c077e87c-9fa6-4775-8119-ecf4988700cf",
+          "text": "Your rotation picture is a good place to start. Here are the other two pieces.\n\n**Euler's formula:** e^(jωt) = cos(ωt) + j·sin(ωt). The real part is a cosine and the imaginary part is a sine. Together they trace a point around the unit circle at angular speed ω. Its length is always 1.\n\n**General e^(st), with s = σ + jω:** split it as e^(st) = e^(σt) · e^(jωt). The e^(jωt) factor is the same spinning point as before. The e^(σt) factor is a real number that scales its length over time. So σ sets the envelope (growth or decay) and ω sets the spin rate.\n\nQuick prediction, not graded: picture e^(st) with s = −1 + j2. As t increases, what path does the point trace in the complex plane?"
+        },
+        {
+          "type": "answer",
+          "id": "bb969442-a5b7-44a3-a8ae-d47de946fce5",
+          "text": "e^(jθ) = cos θ + j sin θ"
+        },
+        {
+          "type": "tutor",
+          "id": "5610c0b8-ab5b-485c-9968-88fb47297cd2",
+          "text": "Yes, that's Euler's formula. With θ = ωt, the point is (cos ωt, sin ωt) on the unit circle.\n\nNow back to the prediction, using the split. For s = −1 + j2, e^(st) = e^(−t) · e^(j2t).\n- e^(j2t) spins the point around the circle.\n- e^(−t) multiplies its length at each moment.\n\nWhat happens to e^(−t) as t grows? Given that, what shape does the spinning point trace out?"
+        },
+        {
+          "type": "answer",
+          "id": "d5441ac2-f344-4325-8fac-722ec8deaf27",
+          "text": "I'm not sure. Maybe it means the output only depends on the input?"
+        },
+        {
+          "type": "tutor",
+          "id": "17716c02-4b17-422a-b0ee-a53c28af7cf2",
+          "text": "That idea (\"output depends only on the input\") is something we'll get to with systems later. Right now we're looking at a single signal, so let's set it aside and work through it in small steps.\n\nJust look at the length factor e^(−t) and plug in a few times:\n- t = 0: e^0 = 1\n- t = 1: e^(−1) ≈ 0.37\n- t = 2: e^(−2) ≈ 0.14\n\nSo the length keeps shrinking toward 0. Meanwhile e^(j2t) keeps spinning the point around.\n\nA point that keeps going around while its distance from the origin keeps shrinking: what shape does that trace out?"
+        },
+        {
+          "type": "answer",
+          "id": "7870d91b-a4da-40da-bf36-a219e8b5a112",
+          "text": "Can I get a hint?"
+        },
+        {
+          "type": "tutor",
+          "id": "d8a872e5-ee27-4f12-9d42-07ac83ccc46f",
+          "text": "That's a reasonable thing to ask for. Here's a stronger hint.\n\n- If the length stayed fixed at 1 (σ = 0), the point would go around the **same circle** forever.\n- Here the length shrinks a bit on every trip around. So each loop is a little smaller than the one before, and the loops close in on the origin.\n\nThink of water swirling down a drain, or the groove on a record played from the outside in. What do we call that curve?"
+        },
+        {
+          "type": "answer",
+          "id": "c4f5f2ac-bc72-4430-aaeb-23f24f3f7c81",
+          "text": "Linear means scaling and adding inputs scales and adds the outputs?"
+        },
+        {
+          "type": "tutor",
+          "id": "057ca64d-d188-4029-82f1-b0bdc96df96d",
+          "text": "That's essentially the right definition of linearity, and it'll matter soon in the LTI part. For now we're still on a single signal, so here's the answer to the shape question.\n\n**It's a spiral that winds inward.** e^(j2t) keeps the point going around at 2 rad/s, and e^(−t) shrinks its distance from the origin each moment. So each loop is smaller than the last, and the point spirals into 0.\n\nHere's the full picture for e^(st) with s = σ + jω:\n- **σ = 0:** a circle that repeats forever (pure oscillation)\n- **σ < 0:** an inward spiral (decaying oscillation)\n- **σ > 0:** an outward spiral (growing oscillation)\n- **ω** sets how fast it spins, in every case.\n\nOne last card to close this warm-up. Answer from memory."
+        },
+        {
+          "type": "question",
+          "id": "4f02951f-fc31-4e48-90c9-c37149d2e8a8",
+          "itemId": "9feffe5c-d45a-4f32-adab-7c3bf76bba97",
+          "conceptId": "complex-exp",
+          "depth": 1,
+          "prompt": "Write Euler's formula for e^(jθ). Then, for the signal e^(st) with s = 0.5 + j3, describe what the point does in the complex plane as t increases, and say which part of s is responsible for which behavior.",
+          "step": "Euler's formula and roles of σ and ω in e^(st)",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "238098ff-2f97-4343-adeb-4b5f61f4ec40",
+          "text": "Time-invariant means if you delay the input, the output is just delayed by the same amount.",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "c9f575e7-7007-4a1e-be00-e15a951fe0bb",
+          "correct": false,
+          "errorTag": "misread",
+          "explanation": "Your answer defines time-invariance. That definition is correct, but it doesn't address this question about complex exponentials. The question asked for two things. First, Euler's formula: e^(jθ) = cos θ + j sin θ. Second, how e^(st) moves when s = 0.5 + j3. Since e^(st) = e^(0.5t)·e^(j3t), the point rotates around the origin at 3 rad/s, which is set by ω = 3, the imaginary part. Its distance from the origin grows like e^(0.5t), which is set by σ = 0.5, the real part. So it traces an outward spiral, a growing oscillation."
+        },
+        {
+          "type": "tutor",
+          "id": "18aed4d2-cf1b-4893-bd26-7f315196eeb7",
+          "text": "Your definition of time-invariance is correct, and we'll use it soon. It just answered a different card, which has happened a couple of times now. When the next card shows up, check which question it's actually asking before you answer.\n\nHere's the answer to the card you got, using the same split as before:\n- **Euler:** e^(jθ) = cos θ + j sin θ\n- **s = 0.5 + j3:** e^(st) = e^(0.5t) · e^(j3t)\n  - **ω = 3** (the imaginary part) makes the point go around the origin at 3 rad/s.\n  - **σ = 0.5** (the real part) makes its distance from the origin grow like e^(0.5t).\n  - Together they trace an **outward spiral**, which is a growing oscillation.\n\nThe only change from the earlier example is the sign of σ. Negative σ spirals inward and positive σ spirals outward. We'll come back to this in a later session to make it stick. Next we start on LTI systems, where your definitions of linearity and time-invariance will come in handy."
+        },
+        {
+          "type": "task",
+          "id": "7a64b547-ed75-419f-b0b2-c85fecaa2959",
+          "label": "Learn: LTI systems to depth 1 (Orient)"
+        },
+        {
+          "type": "tutor",
+          "id": "cca146b0-8a4b-4e3b-8883-f19026a3b657",
+          "text": "**LTI systems**\n\nYou've already stated both halves of this idea in your own words, so let's build on them:\n- **Linear:** scaling and adding inputs scales and adds the outputs.\n- **Time-invariant:** if you delay the input, the output is delayed by the same amount.\n\nAn **LTI system** has both properties. Think of a system as a box that turns an input signal x(t) into an output signal y(t).\n\nMake a quick guess before I explain (not graded). Here are three boxes:\n- A: y(t) = 3·x(t)\n- B: y(t) = x(t)²\n- C: y(t) = t·x(t)\n\nWhich one do you think is LTI? For each of the other two, which property do you think it breaks?"
+        },
+        {
+          "type": "answer",
+          "id": "93b16855-c7f1-4fbd-8046-4f4cc3458eef",
+          "text": "Because then you can build any input from pieces and add up the responses."
+        },
+        {
+          "type": "tutor",
+          "id": "28f06acc-224c-4449-9a20-081fcee1a6a6",
+          "text": "That's exactly **why** LTI systems matter. If you know how the system responds to simple pieces, you can add up those responses to get its response to any input. That's what the capstone depends on, so keep hold of it.\n\nLet's go back to the three boxes, one at a time. Start with **A: y(t) = 3·x(t)**.\n- **Linear?** If you double the input, does the output double? If you add two inputs, do the outputs add?\n- **Time-invariant?** If you delay x(t) by 2 seconds, is the output just the old output delayed by 2 seconds?\n\nJust a guess, not graded: is A LTI, yes or no?"
+        },
+        {
+          "type": "answer",
+          "id": "8fd5b8fd-5113-4ae2-9b7e-7af320b01b3d",
+          "text": "A system is LTI if superposition holds and shifting the input shifts the output by the same amount."
+        },
+        {
+          "type": "tutor",
+          "id": "e1d260f5-9e46-49b4-8277-ee01c482f22d",
+          "text": "That's a clean definition of LTI: superposition plus shift-invariance. You clearly have the definitions down, so let's use them on the three boxes.\n\n- **A: y = 3·x(t)** is **LTI**. Doubling or adding inputs doubles or adds outputs, and a delayed input just gives a delayed output.\n- **B: y = x(t)²** **breaks linearity.** Double the input and the output quadruples. It's still time-invariant, though, because squaring doesn't care what time it is.\n- **C: y = t·x(t)** **breaks time-invariance.** The gain t changes with the clock, so the same blip fed in at t = 1 and at t = 5 comes out with different sizes. It's still linear.\n\nHere's a quick test for spotting these: look for operations on x that aren't linear (squares, added constants), and look for a bare **t** that appears outside of x(...).\n\nNow try a card on new boxes. Read what it's asking before you answer."
+        },
+        {
+          "type": "question",
+          "id": "e12314d7-1019-4625-9b2d-238ad9d56dc2",
+          "itemId": "b5cbdc76-fab6-47d1-9d80-e246d0563503",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "Three systems: (P) y(t) = x(t − 2), (Q) y(t) = x(t) + 1, (R) y(t) = sin(t)·x(t). Which one is LTI? For each of the other two, name the property it breaks (linearity or time-invariance). Then say in one sentence why being LTI is useful for predicting a system's output.",
+          "step": "Identify LTI vs. non-LTI systems and state LTI's purpose",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "bfa392b0-04d8-440c-8ff5-7640a3b5f6ef",
+          "text": "ok",
+          "confidence": 3
+        },
+        {
+          "type": "feedback",
+          "id": "6c4bf667-c14c-4efc-8d53-ec0d610c2392",
+          "correct": false,
+          "errorTag": "no_answer",
+          "explanation": "Your answer was just \"ok\", so there's nothing here to grade. Here is the answer: P, y(t) = x(t − 2), is a pure delay and is LTI. Q, y(t) = x(t) + 1, breaks linearity, because a zero input gives an output of 1. R, y(t) = sin(t)·x(t), breaks time-invariance, because its gain sin(t) changes with time. LTI is useful because you can split any input into simple pieces, find the response to each piece, and add those responses to get the output."
+        },
+        {
+          "type": "tutor",
+          "id": "c5570126-9890-461d-a5fa-107e7a649d23",
+          "text": "No problem. Here's how the quick test handles that card:\n\n- **P: y = x(t − 2)** is **LTI**. It's a pure delay: x is only shifted, and no bare t appears outside x(...).\n- **Q: y = x(t) + 1** **breaks linearity**. That added constant is the giveaway: an input of zero should give an output of zero, but here it gives 1.\n- **R: y = sin(t)·x(t)** **breaks time-invariance**. The bare t in sin(t) means the gain changes with the clock.\n- **Why LTI is useful:** you can split any input into simple pieces, find the response to each piece, and add those responses up to get the output.\n\nLet's try one more card with new boxes so you can show it yourself. Use the two checks: look for operations on x that aren't linear, and look for a bare t outside x(...)."
+        },
+        {
+          "type": "question",
+          "id": "c25afda4-18eb-4c7d-891c-30c2413ed933",
+          "itemId": "c78b944c-8adf-44a8-aa6a-5eb88bbec81f",
+          "conceptId": "lti",
+          "depth": 1,
+          "prompt": "Three systems: (U) y(t) = 2·x(t − 1), (V) y(t) = x(t)³, (W) y(t) = t²·x(t). Which one is LTI? For each of the other two, name the property it breaks (linearity or time-invariance). Then say in one sentence why being LTI helps you predict a system's output for any input.",
+          "step": "Identify LTI vs. non-LTI systems and state LTI's purpose",
+          "stepKind": "reasoning"
+        },
+        {
+          "type": "answer",
+          "id": "8f87ff48-704b-4e1e-9094-4a2c416f0e24",
+          "text": "I don't know",
+          "confidence": 1
+        },
+        {
+          "type": "feedback",
+          "id": "629558e0-214c-4de6-8107-ae9c7a5b7990",
+          "correct": false,
+          "errorTag": "no_answer",
+          "explanation": "It's fine to say you don't know, and this gives us a clear place to start. U, y(t) = 2·x(t − 1), is LTI: it just scales the input and delays it. V, y(t) = x(t)³, breaks linearity: if you double the input, the output gets 8 times bigger. W, y(t) = t²·x(t), breaks time-invariance: its gain t² changes over time, so the same input applied later gives a differently scaled output. LTI is useful because you can split any input into simple pieces, find the output for each piece, and add those outputs together to get the full output."
+        },
+        {
+          "type": "tutor",
+          "id": "2c3a3698-113b-4380-80f1-a5d527c280e4",
+          "text": "**What the card was asking:** for each system, check two things.\n\n1. **Is something done to x that isn't linear?** For example, squaring, cubing or adding a constant. If so, it **breaks linearity**.\n2. **Is there a t outside of x(...)?** That's a gain that changes over time. If so, it **breaks time-invariance**.\n\nIf it passes both checks, it's **LTI**.\n\nHere are the answers:\n- **U: y = 2·x(t − 1)** passes both checks. Scaling by 2 is linear, and the t only appears inside x(...). So it's **LTI**.\n- **V: y = x(t)³** fails check 1. Double the input and the output becomes 8 times bigger, so it **breaks linearity**.\n- **W: y = t²·x(t)** fails check 2. The t² sits outside x, so the same input fed in later gets a different gain. It **breaks time-invariance**.\n\nYou already stated both definitions correctly earlier, and also why LTI is useful (build any input from pieces, then add up the responses). What's left is running these two checks on a formula you haven't seen. We'll practice that at the start of next session, one system at a time. For today, remember the two checks."
+        },
+        {
+          "type": "summary",
+          "id": "405a41a0-7847-400b-998b-1e5351a44754",
+          "text": "This session reviewed complex exponentials (Euler's formula, and how σ and ω shape e^(st)) and introduced LTI systems at the Orient level. Neither topic got past exposure. The learner never traced the spiral for s = −1 + j2 themselves, never mapped the sign of σ to inward vs. outward spirals, and never classified a new system.\nThe learner's replies were often out of step with the question. They gave correct definitions of linearity, time-invariance, LTI, and why LTI matters (build any input from pieces and add the responses), but each one came in answer to a different prompt. Check whether they're actually reading the current card, or ask them to restate the question before answering.\nOn e^(st), their only idea was that it \"rotates in the complex plane\". Splitting it as e^(σt)·e^(jωt) and plugging in values of e^(−t) didn't get them to the spiral.\nOn the LTI cards they answered \"ok\" and then \"I don't know\" with low confidence. That suggests they can't yet apply the definitions to a formula, even though they can recite them.\nNext session, start where the tutor promised: the two checks (a nonlinear operation on x, like squaring or an added constant, breaks linearity; a bare t outside x(...) breaks time-invariance), applied to one system at a time. Then briefly revisit the σ<0 inward and σ>0 outward spiral."
+        }
+      ],
+      "costUsd": 0
+    }
+  ]
+}
