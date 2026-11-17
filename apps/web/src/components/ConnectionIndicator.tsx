@@ -10,14 +10,14 @@ export function ConnectionIndicator() {
   const label = { connecting: "Connecting…", connected: "Connected", reconnecting: "Reconnecting…" }[status];
 
   return (
-    <div className="border-t border-zinc-800 px-4 py-3 text-xs">
-      <div className="flex items-center gap-2 text-zinc-400">
-        <span className={`h-2 w-2 rounded-full ${connected ? "bg-emerald-400" : "bg-amber-400"}`} />
+    <div className="px-2 pt-1.5 text-xs text-fg-subtle" role="status">
+      <div className="flex items-center gap-2">
+        <span className={`size-1.5 rounded-full ${connected ? "bg-success" : "animate-pulse bg-warning"}`} />
         {label}
       </div>
       {lastPong && (
-        <div className="mt-1 truncate text-zinc-500">
-          pong: {lastPong.text} · {new Date(lastPong.receivedAt).toLocaleTimeString()}
+        <div className="mt-0.5 truncate pl-3.5 text-fg-subtle" title={lastPong.text}>
+          Pong: {lastPong.text} · {new Date(lastPong.receivedAt).toLocaleTimeString()}
         </div>
       )}
     </div>

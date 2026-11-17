@@ -1,16 +1,37 @@
-import type { TimelineItem } from "@helix/contracts";
+import type { ErrorTag, TimelineItem } from "@helix/contracts";
+import { CheckCircleIcon, XCircleIcon } from "../ui/icons.tsx";
 
 type Props = { item: Extract<TimelineItem, { type: "feedback" }> };
 
+// How each kind of mistake reads in the card's heading.
+const ERROR_LABEL: Record<ErrorTag, string> = {
+  misconception: "misconception",
+  wrong_method: "wrong method",
+  slip: "slip",
+  incomplete: "incomplete",
+  misread: "misread the question",
+  no_answer: "no answer",
+};
+
 // The grader's verdict on the answer above it.
 export function FeedbackCard({ item }: Props) {
+  const Icon = item.correct ? CheckCircleIcon : XCircleIcon;
   return (
-    <div className={`max-w-2xl rounded-lg border px-4 py-3 text-sm ${item.correct ? "border-emerald-900 bg-emerald-950/40" : "border-amber-900 bg-amber-950/40"}`}>
-      <div className={`mb-1 text-xs font-medium ${item.correct ? "text-emerald-300" : "text-amber-300"}`}>
-        {item.correct ? "✓ Right" : `✗ Not yet · ${item.errorTag?.replace("_", " ") ?? ""}`}
+    <div
+      className={`ml-10 min-w-0 flex-1 rounded-xl border px-4 py-3.5 ${item.correct ? "border-success/25 bg-success-soft" : "border-warning/25 bg-warning-soft"}`}
+    >
+      <div className={`mb-1.5 flex items-center gap-1.5 text-[13px] font-semibold ${item.correct ? "text-success" : "text-warning"}`}>
+        <Icon className="size-4" />
+        {item.correct ? "Right" : "Not yet"}
+        {!item.correct && item.errorTag && <span className="font-normal opacity-80">· {ERROR_LABEL[item.errorTag]}</span>}
       </div>
-      <div className="whitespace-pre-wrap text-zinc-200">{item.explanation}</div>
-      {item.misconception && <div className="mt-2 text-xs text-amber-200/80">Noted: {item.misconception}</div>}
+      <div className="text-[14px] leading-6 whitespace-pre-wrap text-fg">{item.explanation}</div>
+      {item.misconception && (
+        <div className="mt-3 rounded-lg border border-warning/20 bg-surface/60 px-3 py-2 text-[13px] text-fg-muted">
+          <span className="font-medium text-fg">Noted: </span>
+          {item.misconception}
+        </div>
+      )}
     </div>
   );
 }

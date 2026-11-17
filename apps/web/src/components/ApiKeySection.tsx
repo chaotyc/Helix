@@ -2,7 +2,10 @@
 // with the macOS keychain and restarts the server with it; it's never sent to the server as a message.
 import { useEffect, useState } from "react";
 import type { DesktopBridge, KeyStatus } from "../desktop.ts";
-import { BUTTON, INPUT, QUIET_BUTTON } from "./ui.tsx";
+import { Badge } from "./ui/Badge.tsx";
+import { Button } from "./ui/Button.tsx";
+import { Alert, Spinner } from "./ui/feedback.tsx";
+import { INPUT } from "./ui/form.tsx";
 
 export function ApiKeySection({ desktop }: { desktop: DesktopBridge }) {
   const [status, setStatus] = useState<KeyStatus | null>(null);
@@ -25,36 +28,57 @@ export function ApiKeySection({ desktop }: { desktop: DesktopBridge }) {
   }
 
   return (
-    <div className="mb-8">
-      <h2 className="mb-1 text-sm font-semibold text-zinc-300">Anthropic API key</h2>
-      <p className="mb-3 text-xs text-zinc-500">
-        {status === null
-          ? "Checking…"
-          : status.saved
-            ? "A key is saved, encrypted with your Mac's keychain. Enter a new one to replace it."
-            : "No key saved yet. Helix needs one to build maps, ask questions, and tutor."}
-      </p>
-      {status && !status.canEncrypt && <p className="mb-3 text-xs text-red-300">The macOS keychain isn't available, so a key can't be saved.</p>}
-      <div className="flex gap-2">
+    <div className="rounded-xl border border-line bg-raised p-4 shadow-xs">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-[13px] text-fg-muted">
+          {status === null
+            ? "Checking…"
+            : status.saved
+              ? "A key is saved, encrypted with your Mac's keychain. Enter a new one to replace it."
+              : "No key saved yet. Helix needs one to build maps, ask questions, and tutor."}
+        </p>
+        {status && <Badge tone={status.saved ? "success" : "warning"}>{status.saved ? "Saved" : "Not set"}</Badge>}
+      </div>
+      {status && !status.canEncrypt && (
+        <Alert tone="danger" className="mb-3">
+          The macOS keychain isn't available, so a key can't be saved.
+        </Alert>
+      )}
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (key.trim()) run(() => desktop.setKey(key));
+        }}
+      >
         <input
           type="password"
           value={key}
           onChange={(e) => setKey(e.target.value)}
           placeholder="sk-ant-…"
           autoComplete="off"
-          className={INPUT}
+          aria-label="API key"
+          className={`${INPUT} h-8 py-0 font-mono text-[13px]`}
         />
-        <button disabled={saving || key.trim() === ""} onClick={() => run(() => desktop.setKey(key))} className={BUTTON}>
+        <Button type="submit" variant="primary" disabled={saving || key.trim() === ""}>
           Save
-        </button>
+        </Button>
         {status?.saved && (
-          <button disabled={saving} onClick={() => run(() => desktop.clearKey())} className={QUIET_BUTTON}>
+          <Button variant="danger" disabled={saving} onClick={() => run(() => desktop.clearKey())}>
             Remove
-          </button>
+          </Button>
         )}
-      </div>
-      {saving && <p className="mt-2 text-xs text-zinc-500">Restarting Helix with the new key…</p>}
-      {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+      </form>
+      {saving && (
+        <p className="mt-3 flex items-center gap-2 text-xs text-fg-subtle">
+          <Spinner className="size-3.5" /> Restarting Helix with the new key…
+        </p>
+      )}
+      {error && (
+        <Alert tone="danger" className="mt-3">
+          {error}
+        </Alert>
+      )}
     </div>
   );
 }

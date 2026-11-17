@@ -3,14 +3,14 @@
 import { Graph, layout } from "@dagrejs/dagre";
 import type { GoalMap } from "@helix/contracts";
 
-export const NODE_WIDTH = 210;
-export const NODE_HEIGHT = 58;
+export const NODE_WIDTH = 244;
+export const NODE_HEIGHT = 62;
 
 export type Positions = Record<string, { x: number; y: number }>;
 
 export function layoutMap(map: GoalMap): Positions {
   const g = new Graph();
-  g.setGraph({ rankdir: "TB", nodesep: 30, ranksep: 70 });
+  g.setGraph({ rankdir: "TB", nodesep: 36, ranksep: 76 });
   g.setDefaultEdgeLabel(() => ({}));
   for (const entry of map.view) g.setNode(entry.conceptId, { width: NODE_WIDTH, height: NODE_HEIGHT });
   // Arrows run from what's needed to what needs it. A spiral (a@1 → b@2 → a@3) makes a
