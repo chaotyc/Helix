@@ -80,6 +80,10 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
           progress("thinking", call.thinkingDetail);
         },
         onText: call.onText,
+        onActivity: (activity) => {
+          thinkingShown = true; // the activity says more than the generic thinking line
+          progress("thinking", activity);
+        },
       });
     } catch (err) {
       log("error", undefined, [err instanceof Error ? err.message : String(err)]);
