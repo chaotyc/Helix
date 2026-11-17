@@ -147,7 +147,8 @@ function afterMapChange(db: DatabaseSync, reply: (msg: ServerMsg) => void): void
   reply(learnerStateMsg(db));
 }
 
-// Progress from an agent, sent on to the client.
+// Progress from an agent, sent on to the client with the time since the request started.
 function progressTo(reply: (msg: ServerMsg) => void, goalId: string) {
-  return (stage: ExtractionStage, detail: string) => reply({ type: "map.progress", goalId, stage, detail });
+  const started = Date.now();
+  return (stage: ExtractionStage, detail: string) => reply({ type: "map.progress", goalId, stage, detail, elapsedMs: Date.now() - started });
 }

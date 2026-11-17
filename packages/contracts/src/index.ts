@@ -95,7 +95,15 @@ export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("error"), message: z.string() }),
   z.object({ type: z.literal("goals"), goals: z.array(Goal) }),
   z.object({ type: z.literal("goal.created"), goal: Goal }),
-  z.object({ type: z.literal("map.progress"), goalId: z.string(), stage: ExtractionStage, detail: z.string() }),
+  // `elapsedMs`: how long ago the request (asking questions, or building the map) started, so the
+  // UI can show a running clock. Optional: older servers don't send it.
+  z.object({
+    type: z.literal("map.progress"),
+    goalId: z.string(),
+    stage: ExtractionStage,
+    detail: z.string(),
+    elapsedMs: z.number().int().nonnegative().optional(),
+  }),
   z.object({ type: z.literal("map.questions"), goalId: z.string(), roundId: z.string(), questions: z.array(ClarifyQuestion) }),
   // `nextUndo`: what Undo would take back, in words ("Remove “LTI systems” from this goal"),
   // or null when there's nothing to undo.
