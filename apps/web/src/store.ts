@@ -17,7 +17,8 @@ import type {
 export type ConnectionStatus = "connecting" | "connected" | "reconnecting";
 
 type Pong = { text: string; receivedAt: string };
-type Progress = { stage: ExtractionStage; detail: string };
+// The latest step of a map build. `startedAt`: when it started, by this window's clock.
+export type BuildProgress = { stage: ExtractionStage; detail: string; startedAt?: number };
 export type PendingQuestions = { roundId: string; questions: ClarifyQuestion[] };
 export type SessionStatus = { busy: boolean; detail: string };
 // A sign-in running from the settings tab: what the tool printed, and how it ended.
@@ -34,7 +35,7 @@ type AppState = {
   knowledge: Record<string, ConceptKnowledge>; // per concept: what the learner model says they know
   lastPong: Pong | null;
   maps: Record<string, GoalMap>; // each goal's slice of the global graph, from the server
-  extraction: Record<string, Progress>; // the latest extraction update per goal
+  extraction: Record<string, BuildProgress>; // the latest extraction update per goal
   settings: Settings | null; // null until the server sends them
   providers: ProviderStatus[] | null; // each connection's state, asked for when settings open
   signIns: Partial<Record<Connection, SignIn>>;
@@ -64,7 +65,7 @@ type AppState = {
   setEditError: (goalId: string, reason: string | null) => void;
   setServerError: (message: string | null) => void;
   setCreatedGoalId: (goalId: string | null) => void;
-  setProgress: (goalId: string, progress: Progress) => void;
+  setProgress: (goalId: string, progress: BuildProgress) => void;
   setSettings: (settings: Settings) => void;
   setProviders: (providers: ProviderStatus[]) => void;
   startSignIn: (connection: Connection) => void;

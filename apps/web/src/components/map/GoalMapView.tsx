@@ -3,8 +3,8 @@
 //   - no map yet, or rebuilding → paste the source
 //   - otherwise                 → the drawn map, with an inspector for whatever is selected
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, ExtractionStage, GoalMap, MapEdit, SharedWith } from "@helix/contracts";
-import type { PendingQuestions } from "../../store.ts";
+import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, GoalMap, MapEdit, SharedWith } from "@helix/contracts";
+import type { BuildProgress, PendingQuestions } from "../../store.ts";
 import { Button } from "../ui/Button.tsx";
 import { Alert, Spinner } from "../ui/feedback.tsx";
 import { PlusIcon, RefreshIcon, UndoIcon } from "../ui/icons.tsx";
@@ -14,6 +14,7 @@ import { ArrowInspector } from "./ArrowInspector.tsx";
 import { BuildMapPanel } from "./BuildMapPanel.tsx";
 import { ConceptInspector } from "./ConceptInspector.tsx";
 import { edgeKey, edgeLabel, edgeSharedWith } from "./edits.ts";
+import { ElapsedClock } from "./ElapsedClock.tsx";
 import { Inspector } from "./Inspector.tsx";
 import { MapCanvas } from "./MapCanvas.tsx";
 import { MapNotice, type Notice } from "./MapNotice.tsx";
@@ -24,7 +25,7 @@ type Props = {
   map: GoalMap | undefined;
   sharedWith: SharedWith;
   knowledge: Record<string, ConceptKnowledge>;
-  progress: { stage: ExtractionStage; detail: string } | undefined;
+  progress: BuildProgress | undefined;
   questions: PendingQuestions | undefined;
   editError: string | undefined;
   serverError: string | null;
@@ -158,7 +159,7 @@ export function GoalMapView(props: Props) {
       />
     );
   }
-  if (running && !hasMap) return <MapProgress stage={progress.stage} detail={progress.detail} step={props.step} />;
+  if (running && !hasMap) return <MapProgress stage={progress.stage} detail={progress.detail} startedAt={progress.startedAt} step={props.step} />;
   if (!hasMap || rebuilding) {
     return (
       <>
@@ -237,6 +238,7 @@ export function GoalMapView(props: Props) {
             <Spinner className="size-3.5 text-accent-text" />
             <span className="font-medium text-fg">{STAGE_LABEL[progress.stage]}</span>
             {progress.detail}
+            <ElapsedClock startedAt={progress.startedAt} className="text-fg-subtle" />
           </div>
         )}
         {failure && <div className="pointer-events-auto w-96 max-w-full">{failure}</div>}

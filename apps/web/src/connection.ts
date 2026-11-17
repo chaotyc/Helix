@@ -49,7 +49,11 @@ function handleMessage(raw: string): void {
       useAppStore.getState().setCreatedGoalId(msg.goal.id);
       return;
     case "map.progress":
-      useAppStore.getState().setProgress(msg.goalId, { stage: msg.stage, detail: msg.detail });
+      useAppStore.getState().setProgress(msg.goalId, {
+        stage: msg.stage,
+        detail: msg.detail,
+        startedAt: msg.elapsedMs === undefined ? undefined : Date.now() - msg.elapsedMs,
+      });
       return;
     case "map.questions":
       useAppStore.getState().setQuestions(msg.goalId, { roundId: msg.roundId, questions: msg.questions });
