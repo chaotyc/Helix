@@ -14,7 +14,7 @@ const OUTPUT_SCHEMA = outputSchema(Grade);
 export const MESSAGES_FILE = import.meta.filename;
 
 export type GradeInput = {
-  goalId?: string; // missing in the grader eval
+  goalId?: string; // missing outside a goal
   concept: Concept;
   depth: number;
   question: { prompt: string; rubric: string; expectedAnswer: string };

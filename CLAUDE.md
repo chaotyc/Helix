@@ -16,7 +16,7 @@ Helix is a personal AI tutor that runs locally on a Mac. It turns a goal (a cour
 | Package manager | pnpm workspaces |
 | Contracts | Zod schemas in `packages/contracts`, shared by server and UI |
 | Core logic | Pure TypeScript functions in `packages/core`, tested with Vitest |
-| Evaluations | `packages/evals`: scripts that score extraction (rule checks + a judge prompt) and agents (against labeled data) |
+| Evaluations | `packages/evals`: scripts that score extraction (rule checks + a judge prompt), the grader (simulated answers + a judge prompt), and the tutor (scripted learners + rule checks + a judge prompt) |
 | Server | Node + `ws` (WebSocket) in `apps/server`, listening on `127.0.0.1` only |
 | Storage | SQLite through the built-in `node:sqlite` |
 | UI | React + Vite + Tailwind in `apps/web` |
@@ -32,7 +32,7 @@ apps/web            React UI
 apps/desktop        Electron shell
 packages/contracts  Zod schemas for every message between UI and server
 packages/core       learner model, frontier, planner: pure functions + tests
-packages/evals      evaluation harnesses, gold data, results
+packages/evals      evaluation harnesses, eval cases, results
 ```
 
 ## Rules of the codebase
@@ -58,7 +58,7 @@ pnpm --filter @helix/core test        # run core tests
 pnpm --filter @helix/desktop start    # build and run the Mac app without packaging
 pnpm --filter @helix/desktop dist     # package the Mac app: apps/desktop/release/Helix-<version>-arm64.dmg
 pnpm --filter @helix/evals maps       # build maps for every eval case, judge them, compare runs
-pnpm --filter @helix/evals grader     # score the grader against labeled answers
+pnpm --filter @helix/evals grader     # grade simulated answers to generated questions, have a judge check each grade
 pnpm --filter @helix/evals tutor      # replay scripted learners, check the tutor's rules
 ```
 
