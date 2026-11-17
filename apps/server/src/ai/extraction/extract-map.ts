@@ -50,7 +50,7 @@ export async function extractMap(db: DatabaseSync, input: ExtractInput, deps: Ex
 
   // ---- Build the request ----
   const progress = deps.onProgress ?? (() => {});
-  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE]);
+  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE], ["source-is-data"]);
   const effort = input.effort ?? "high";
   const source = round.sourceId ? getSource(db, round.sourceId) : undefined;
   const graph = replayGraph(readMapEvents(db)); // the diary's graph: what the proposal is checked against

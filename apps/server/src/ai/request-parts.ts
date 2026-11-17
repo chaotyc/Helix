@@ -13,6 +13,14 @@ const KIND_LABEL: Record<SourceKind, string> = {
   other: "Other",
 };
 
+// Outside text (a pasted source, the learner's own words) inside <tag>…</tag>, so the model can
+// tell it apart from the request. A closing tag inside the text is defused (</source> becomes
+// <\/source>), so the text can't end its own block early and pass what follows as instructions.
+export function fenced(tag: string, text: string): string {
+  const closing = new RegExp(`<\\s*/\\s*${tag}\\s*>`, "gi");
+  return `<${tag}>\n${text.replace(closing, `<\\/${tag}>`)}\n</${tag}>`;
+}
+
 export function goalSection(goal: Goal): string {
   return [
     "# Goal",
@@ -21,13 +29,13 @@ export function goalSection(goal: Goal): string {
     `Capstone: ${goal.capstone || "not given"}`,
     `Exam date: ${goal.examDate ?? "none"}`,
     // The learner's own words from the new-goal form; older goals have none.
-    ...(goal.prompt ? ["In the learner's words:", `<learner_prompt>\n${goal.prompt}\n</learner_prompt>`] : []),
+    ...(goal.prompt ? ["In the learner's words:", fenced("learner_prompt", goal.prompt)] : []),
   ].join("\n");
 }
 
 export function sourceSection(source: SourceInput | undefined): string {
   const body = source
-    ? `Kind: ${KIND_LABEL[source.kind]}\n<source>\n${source.text}\n</source>`
+    ? `Kind: ${KIND_LABEL[source.kind]}\n${fenced("source", source.text)}`
     : "Kind: None\nNo source material. Work from the goal and the learner's answers.";
   return `# Source material\n${body}`;
 }

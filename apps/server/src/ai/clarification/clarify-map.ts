@@ -47,7 +47,7 @@ export async function clarifyMap(
     agent: AGENT,
     goalId: goal.id,
     model: input.model ?? getSettings(db).models.generation,
-    prompt: loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE]),
+    prompt: loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE], ["source-is-data"]),
     schema: OUTPUT_SCHEMA,
     effort: EFFORT,
     firstMessage: firstMessage(goal, source, answered),
