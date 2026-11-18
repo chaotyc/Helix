@@ -144,6 +144,7 @@ export const FileIcon = icon(
   </>,
 );
 // An arrow rising out of a tray: add files.
+export const PaperclipIcon = icon(<path d="M20 11.5l-8.1 8.1a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8" />);
 export const UploadIcon = icon(<path d="M12 15V4.5M7.5 9L12 4.5 16.5 9M5 14.5v3A2.5 2.5 0 007.5 20h9a2.5 2.5 0 002.5-2.5v-3" />);
 export const FlagIcon = icon(<path d="M5 21V4M5 4h11l-2 4 2 4H5" />);
 

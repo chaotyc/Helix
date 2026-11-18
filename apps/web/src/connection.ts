@@ -48,6 +48,9 @@ function handleMessage(raw: string): void {
       useAppStore.getState().addGoal(msg.goal);
       useAppStore.getState().setCreatedGoalId(msg.goal.id);
       return;
+    case "goal.updated":
+      useAppStore.getState().updateGoal(msg.goal);
+      return;
     case "map.progress":
       useAppStore.getState().setProgress(msg.goalId, {
         stage: msg.stage,

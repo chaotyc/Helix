@@ -1,16 +1,18 @@
 // A goal's map page (V3): building it (source → questions → map) and editing it by clicking.
-//   - questions waiting        → answer them
-//   - no map yet, or rebuilding → paste the source
+//   - no map yet               → the setup chat (GoalSetupChat): questions, then the build
+//   - rebuilding: questions waiting → answer them
+//   - rebuilding               → add the source
 //   - otherwise                 → the drawn map, with an inspector for whatever is selected
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, GoalMap, MapEdit, SharedWith } from "@helix/contracts";
-import type { BuildProgress, PendingQuestions } from "../../store.ts";
+import type { ClarifyAnswer, ConceptKnowledge, Edge, Effort, ExtractionStage, Goal, GoalMap, MapEdit, SharedWith } from "@helix/contracts";
+import { useAppStore, type BuildProgress, type ChatMessage, type PendingQuestions, type SetupChat } from "../../store.ts";
 import { Button } from "../ui/Button.tsx";
 import { Alert, Spinner } from "../ui/feedback.tsx";
 import { PlusIcon, RefreshIcon, UndoIcon } from "../ui/icons.tsx";
 import { AddArrowForm } from "./AddArrowForm.tsx";
 import { AddConceptForm } from "./AddConceptForm.tsx";
 import { ArrowInspector } from "./ArrowInspector.tsx";
+import { GoalSetupChat, type AnsweredRound } from "../goal/GoalSetupChat.tsx";
 import { BuildMapPanel } from "./BuildMapPanel.tsx";
 import { ConceptInspector } from "./ConceptInspector.tsx";
 import { edgeKey, edgeLabel, edgeSharedWith } from "./edits.ts";
@@ -18,25 +20,41 @@ import { ElapsedClock } from "./ElapsedClock.tsx";
 import { Inspector } from "./Inspector.tsx";
 import { MapCanvas } from "./MapCanvas.tsx";
 import { MapNotice, type Notice } from "./MapNotice.tsx";
-import { MapProgress, STAGE_LABEL } from "./MapProgress.tsx";
 import { QuestionsCard } from "./QuestionsCard.tsx";
 
 type Props = {
+  goal: Goal;
+  setup: SetupChat | undefined; // the setup chat, until the goal has a map
+  onAddAndAsk: (message: ChatMessage, sourceText: string | undefined) => boolean; // from the setup chat; false: not sent
+  onRetryQuestions: () => boolean;
+  onSubmitRound: (round: AnsweredRound, retry?: boolean) => boolean; // the setup chat's answers
   map: GoalMap | undefined;
   sharedWith: SharedWith;
   knowledge: Record<string, ConceptKnowledge>;
   progress: BuildProgress | undefined;
   questions: PendingQuestions | undefined;
   editError: string | undefined;
-  serverError: string | null;
   step: 1 | 2; // which job is running: writing questions (1) or building the map (2)
   onAsk: (sourceText: string | undefined) => void;
   onBuild: (roundId: string, answers: ClarifyAnswer[], effort: Effort) => void;
-  onEdit: (edits: MapEdit[]) => void;
+  onEdit: (edits: MapEdit[]) => boolean; // false: not sent (offline)
   nextUndo: string | null; // what Undo would take back, in words; null when there's nothing
   undone: { undid: string; n: number } | undefined; // the latest undo the server confirmed
-  onUndo: () => void;
+  onUndo: () => boolean; // false: not sent (offline)
+  onDismissFailure: () => void; // closes a failed build's note
   onDismissError: () => void;
+};
+
+// The build's stage, for the progress note over the map while a rebuild runs.
+const STAGE_LABEL: Record<ExtractionStage, string> = {
+  started: "Starting",
+  thinking: "Thinking",
+  writing: "Writing the map",
+  checking: "Checking the map",
+  retrying: "Fixing what the check found",
+  asked: "Questions ready",
+  saved: "Saved",
+  failed: "Failed",
 };
 
 const INSPECTOR_INSET = 340 + 12; // the inspector's width and its gap from the edge
@@ -76,6 +94,13 @@ export function GoalMapView(props: Props) {
     if (map) setSelection((current) => (stillThere(current, map) ? current : null));
   }, [map]); // a new map from the server: the edit was saved
 
+  // The connection dropped: whether a sent edit arrived is unknown, so stop waiting for its
+  // confirmation (the map fetched after reconnecting must not count as one). The form stays open.
+  const status = useAppStore((state) => state.status);
+  useEffect(() => {
+    if (status !== "connected") setAfterSave(null);
+  }, [status]);
+
   useEffect(() => {
     if (props.editError) setAfterSave(null); // rejected: stay where you are
   }, [props.editError]);
@@ -92,8 +117,8 @@ export function GoalMapView(props: Props) {
   function undo(restore?: string): void {
     if (!props.nextUndo) return;
     props.onDismissError();
+    if (!props.onUndo()) return; // not sent: the note (and its Undo) stays
     setNotice(null);
-    props.onUndo();
     setUndoing(true);
     if (restore) setAfterSave({ next: { kind: "concept", conceptId: restore } });
   }
@@ -133,9 +158,12 @@ export function GoalMapView(props: Props) {
   const running = progress !== undefined && !["asked", "saved", "failed"].includes(progress.stage);
   const failed = progress?.stage === "failed";
 
+  // Waits for the server's map as confirmation only when the edit went out; otherwise the
+  // form stays open with what was typed (a map that arrives for another reason, such as the
+  // refetch after a reconnect, must not count as "saved").
   function edit(edits: MapEdit[]): void {
     props.onDismissError();
-    props.onEdit(edits);
+    if (!props.onEdit(edits)) return;
     setUndoing(false);
     setNotice(null);
     const id = edits.length === 1 && edits[0]!.op === "remove_view_entry" ? edits[0]!.conceptId : undefined;
@@ -144,13 +172,36 @@ export function GoalMapView(props: Props) {
   }
 
   const failure = failed && (
-    <Alert tone="danger" title="Building the map failed">
+    <Alert tone="danger" title="Building the map failed" onDismiss={props.onDismissFailure}>
       {progress.detail}
-      {props.serverError && <div className="mt-1">{props.serverError}</div>}
     </Alert>
   );
 
-  // ---- Building ----
+  // ---- Building the first map: a chat ----
+  if (map === undefined && !running && !questions && !failed) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-20 text-[13px] text-fg-subtle">
+        <Spinner /> Loading the map…
+      </div>
+    );
+  }
+  if (!hasMap) {
+    return (
+      <GoalSetupChat
+        goal={props.goal}
+        setup={props.setup}
+        progress={progress}
+        step={props.step}
+        questions={questions}
+        onAsk={props.onAddAndAsk}
+        onRetryQuestions={props.onRetryQuestions}
+        onSubmit={props.onSubmitRound}
+        onChangeMaterial={props.onDismissFailure}
+      />
+    );
+  }
+
+  // ---- Rebuilding ----
   if (questions) {
     return (
       <QuestionsCard
@@ -159,8 +210,7 @@ export function GoalMapView(props: Props) {
       />
     );
   }
-  if (running && !hasMap) return <MapProgress stage={progress.stage} detail={progress.detail} startedAt={progress.startedAt} step={props.step} />;
-  if (!hasMap || rebuilding) {
+  if (rebuilding) {
     return (
       <>
         {failure && <div className="mx-auto w-full max-w-2xl px-8 pt-8">{failure}</div>}

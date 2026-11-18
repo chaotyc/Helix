@@ -48,6 +48,10 @@ export function useDocuments() {
     setEntries((list) => list.filter((e) => e.key !== key));
   }
 
+  function clear(): void {
+    setEntries([]);
+  }
+
   const docs = entries.flatMap((e) => (e.status === "ready" ? [e.doc] : []));
   return {
     entries,
@@ -55,6 +59,7 @@ export function useDocuments() {
     addFiles,
     addText,
     remove,
+    clear,
     reading: entries.some((e) => e.status === "reading"),
     sourceText: combineDocuments(docs),
   };
