@@ -220,6 +220,20 @@ ipcMain.handle("helix:clear-provider-key", async (event, provider: unknown) => {
   await clearKey(provider);
 });
 
+// Whether the first-run tutorial has been seen: a file in the data folder, since the page's own
+// storage is lost each launch (the server takes a new port, so the page has a new origin).
+const TUTORIAL_SEEN_FILE = join(DATA_DIR, "tutorial-seen");
+
+ipcMain.handle("helix:tutorial-seen", (event) => {
+  if (!fromHelix(event)) throw new Error("Not allowed.");
+  return existsSync(TUTORIAL_SEEN_FILE);
+});
+
+ipcMain.handle("helix:mark-tutorial-seen", (event) => {
+  if (!fromHelix(event)) throw new Error("Not allowed.");
+  writeFileSync(TUTORIAL_SEEN_FILE, "");
+});
+
 // ---- Updates ----
 
 // Once per launch, in the packaged app only. HELIX_UPDATE_REPO (owner/name) points the check at

@@ -5,6 +5,7 @@ import { hiddenTitleBar } from "./desktop.ts";
 import { dayAndTime, SESSION_KIND_LABEL } from "./format.ts";
 import { useAppStore, type ChatMessage } from "./store.ts";
 import { useShortcut } from "./hooks/useShortcut.ts";
+import { markTutorialSeen, tutorialSeen } from "./tutorial.ts";
 import { CommandPalette, type Command } from "./components/CommandPalette.tsx";
 import { GoalHome } from "./components/goal/GoalHome.tsx";
 import { GoalSetupChat, type AnsweredRound } from "./components/goal/GoalSetupChat.tsx";
@@ -15,10 +16,11 @@ import { SettingsPanel } from "./components/SettingsPanel.tsx";
 import { SessionView } from "./components/session/SessionView.tsx";
 import { Sidebar, type Page } from "./components/Sidebar.tsx";
 import { TopBar, type Crumb } from "./components/TopBar.tsx";
+import { Tutorial } from "./components/Tutorial.tsx";
 import { Badge, LiveDot } from "./components/ui/Badge.tsx";
 import { Button, IconButton } from "./components/ui/Button.tsx";
 import { Spinner } from "./components/ui/feedback.tsx";
-import { ChatIcon, GraphIcon, OverviewIcon, PanelRightIcon, PlusIcon, SlidersIcon, StopIcon, TargetIcon } from "./components/ui/icons.tsx";
+import { ChatIcon, GraphIcon, InfoIcon, OverviewIcon, PanelRightIcon, PlusIcon, SlidersIcon, StopIcon, TargetIcon } from "./components/ui/icons.tsx";
 
 // What the main panel shows. "session" is a goal's overview when no session is picked.
 type View = "session" | "map" | "settings" | "new-goal";
@@ -29,6 +31,7 @@ export function App() {
   // ---- App-wide state from the store (shared with the connection module). ----
   const status = useAppStore((state) => state.status);
   const goals = useAppStore((state) => state.goals);
+  const goalsLoaded = useAppStore((state) => state.goalsLoaded);
   const sessions = useAppStore((state) => state.sessions);
   const timelines = useAppStore((state) => state.timelines);
   const sessionStatus = useAppStore((state) => state.sessionStatus);
@@ -65,6 +68,10 @@ export function App() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // The first-run tutorial. `resumeTutorial`: it sent the learner to Settings to connect a model,
+  // so it comes back when they leave.
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [resumeTutorial, setResumeTutorial] = useState(false);
   // The first message on the New goal page, held until the server confirms the goal; then its
   // documents go to the clarifier. null: no goal being created.
   const [pendingGoal, setPendingGoal] = useState<(ChatMessage & { sourceText: string | undefined }) | null>(null);
@@ -142,6 +149,39 @@ export function App() {
     setSelectedSessionId(null);
     setView("session");
   }
+
+  // The tutorial opens by itself on a fresh install: when the server's goal list comes back empty
+  // and it hasn't been closed before. Someone who already has goals (an update, not an install)
+  // never gets it unasked.
+  useEffect(() => {
+    if (!goalsLoaded) return;
+    void tutorialSeen().then((seen) => {
+      if (seen) return;
+      if (useAppStore.getState().goals.length === 0) setTutorialOpen(true);
+      else markTutorialSeen();
+    });
+  }, [goalsLoaded]);
+
+  function closeTutorial(): void {
+    markTutorialSeen();
+    setTutorialOpen(false);
+    setResumeTutorial(false);
+  }
+
+  // Opens Settings at its connections. Not marked seen: if the learner leaves without connecting,
+  // it shows again next launch.
+  function tutorialToSettings(): void {
+    setTutorialOpen(false);
+    setResumeTutorial(true);
+    setView("settings");
+    requestAnimationFrame(() => document.getElementById("connections")?.scrollIntoView({ block: "start" }));
+  }
+  useEffect(() => {
+    if (view !== "settings" && resumeTutorial) {
+      setResumeTutorial(false);
+      setTutorialOpen(true);
+    }
+  }, [view]);
 
   // A goal this window created opens on its map page (where its setup chat carries on) once the
   // server confirms it, and the clarifier starts on the first message's documents right away.
@@ -318,8 +358,12 @@ export function App() {
   }
 
   // ---- Keyboard shortcuts, active anywhere on the page. ----
-  useShortcut("k", () => setPaletteOpen((open) => !open));
-  useShortcut("\\", () => setMapOpen((open) => !open)); // "\\" is how you write one backslash
+  useShortcut("k", () => {
+    if (!tutorialOpen) setPaletteOpen((open) => !open);
+  });
+  useShortcut("\\", () => {
+    if (!tutorialOpen) setMapOpen((open) => !open);
+  }); // "\\" is how you write one backslash
 
   const icon = "size-4";
   const commands: Command[] = [
@@ -343,6 +387,7 @@ export function App() {
         ]
       : []),
     { id: "settings", group: "Go to", label: "Settings", icon: <SlidersIcon className={icon} />, run: () => setView("settings") },
+    { id: "tutorial", group: "Help", label: "Show tutorial", icon: <InfoIcon className={icon} />, run: () => setTutorialOpen(true) },
     ...goals.map((goal) => ({
       id: `jump-${goal.id}`,
       group: "Goals",
@@ -513,6 +558,22 @@ export function App() {
         </main>
       </div>
 
+      {tutorialOpen && (
+        <Tutorial
+          connected={status === "connected"}
+          settings={settings}
+          providers={providers}
+          hasGoals={goals.length > 0}
+          onCheckProviders={refreshProviders}
+          onUseModel={(model) => changeSettings({ models: { generation: model, teaching: model, evaluation: model } })}
+          onOpenSettings={tutorialToSettings}
+          onNewGoal={() => {
+            closeTutorial();
+            openNewGoal();
+          }}
+          onClose={closeTutorial}
+        />
+      )}
       {paletteOpen && <CommandPalette commands={commands} onClose={() => setPaletteOpen(false)} />}
     </div>
   );
