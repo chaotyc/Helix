@@ -48,14 +48,24 @@ function handleMessage(raw: string): void {
       useAppStore.getState().addGoal(msg.goal);
       useAppStore.getState().setCreatedGoalId(msg.goal.id);
       return;
+    case "goal.updated":
+      useAppStore.getState().updateGoal(msg.goal);
+      return;
     case "map.progress":
-      useAppStore.getState().setProgress(msg.goalId, { stage: msg.stage, detail: msg.detail });
+      useAppStore.getState().setProgress(msg.goalId, {
+        stage: msg.stage,
+        detail: msg.detail,
+        startedAt: msg.elapsedMs === undefined ? undefined : Date.now() - msg.elapsedMs,
+      });
       return;
     case "map.questions":
       useAppStore.getState().setQuestions(msg.goalId, { roundId: msg.roundId, questions: msg.questions });
       return;
     case "map.updated":
-      useAppStore.getState().setMap(msg.map, msg.sharedWith);
+      useAppStore.getState().setMap(msg.map, msg.sharedWith, msg.nextUndo);
+      return;
+    case "map.undone":
+      useAppStore.getState().setUndone(msg.goalId, msg.undid);
       return;
     case "map.edit.rejected":
       useAppStore.getState().setEditError(msg.goalId, msg.reason);

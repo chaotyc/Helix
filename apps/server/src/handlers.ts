@@ -8,13 +8,20 @@ import { signIn } from "./ai/providers/sign-in.ts";
 import { providerStatuses } from "./ai/providers/status.ts";
 import { clarifyMap } from "./ai/clarification/clarify-map.ts";
 import { extractMap } from "./ai/extraction/extract-map.ts";
-import { createGoal, getGoal, listGoals } from "./db/goals.ts";
+import { nameGoal, standInTitle } from "./ai/naming/name-goal.ts";
+import { createGoal, getGoal, listGoals, nameGoalIfUnchanged, renameGoal } from "./db/goals.ts";
 import { applyEdits, mapUpdate } from "./db/map-edits.ts";
+import { undoLastEdit } from "./db/map-undo.ts";
 import { rebuildConceptState } from "./db/learner.ts";
 import { getSettings, saveSettings } from "./db/settings.ts";
 import { listSessions } from "./db/sessions.ts";
 import { learnerStateMsg } from "./sessions/context.ts";
 import { endSessionNow, replyToSession, resumeSession, startSession, timelineMsg } from "./sessions/runner.ts";
+
+// Goals the learner renamed while the model was still naming them: the model's name must not
+// replace theirs, even when they typed the stand-in itself (so the title alone can't tell).
+const naming = new Set<string>(); // goals whose name the model is writing now
+const renamedByLearner = new Set<string>();
 
 // `callModel`: the real models by default; tests pass a fake.
 export async function handle(
@@ -29,9 +36,33 @@ export async function handle(
       reply({ type: "pong", text: msg.text, receivedAt: new Date().toISOString() });
       return;
 
-    case "goal.create":
-      reply({ type: "goal.created", goal: createGoal(db, msg.goal) });
+    // Without a title, the goal gets a stand-in at once and the model's name when it comes.
+    // Naming is a nicety: if it fails, the stand-in stays and nothing is reported.
+    case "goal.create": {
+      const named = msg.goal.title !== undefined;
+      const goal = createGoal(db, { ...msg.goal, title: msg.goal.title ?? standInTitle(msg.goal.prompt ?? "") });
+      if (!named) naming.add(goal.id); // before the reply, so a rename right after it counts
+      reply({ type: "goal.created", goal });
+      if (named) return;
+      try {
+        const title = await nameGoal(db, goal, { callModel });
+        const renamed = renamedByLearner.has(goal.id) ? undefined : nameGoalIfUnchanged(db, goal.id, goal.title, title);
+        if (renamed) reply({ type: "goal.updated", goal: renamed });
+      } catch (err) {
+        console.warn(`Naming goal ${goal.id} failed; it keeps its stand-in title.`, err);
+      } finally {
+        naming.delete(goal.id);
+        renamedByLearner.delete(goal.id);
+      }
       return;
+    }
+
+    case "goal.rename": {
+      const goal = renameGoal(db, msg.goalId, msg.title);
+      if (naming.has(goal.id)) renamedByLearner.add(goal.id);
+      reply({ type: "goal.updated", goal });
+      return;
+    }
 
     case "goal.list":
       reply({ type: "goals", goals: listGoals(db) });
@@ -73,21 +104,32 @@ export async function handle(
       return;
     }
 
+    case "map.undo": {
+      if (!getGoal(db, msg.goalId)) throw new Error(`No goal with id ${msg.goalId}`);
+      let undid: string;
+      try {
+        undid = undoLastEdit(db, msg.goalId);
+      } catch (err) {
+        reply({ type: "map.edit.rejected", goalId: msg.goalId, reason: err instanceof Error ? err.message : String(err) });
+        return;
+      }
+      reply({ type: "map.undone", goalId: msg.goalId, undid });
+      afterMapChange(db, reply);
+      reply(mapUpdate(db, msg.goalId));
+      return;
+    }
+
     case "map.clarify": {
-      const { roundId, questions } = await clarifyMap(
-        db,
-        { goalId: msg.goalId, sourceText: msg.sourceText, sourceKind: msg.sourceKind },
-        { callModel, onProgress: progressTo(reply, msg.goalId) },
+      const { roundId, questions } = await failingVisibly(reply, msg.goalId, () =>
+        clarifyMap(db, { goalId: msg.goalId, sourceText: msg.sourceText, sourceKind: msg.sourceKind }, { callModel, onProgress: progressTo(reply, msg.goalId) }),
       );
       reply({ type: "map.questions", goalId: msg.goalId, roundId, questions });
       return;
     }
 
     case "map.extract": {
-      const map = await extractMap(
-        db,
-        { goalId: msg.goalId, roundId: msg.roundId, answers: msg.answers, effort: msg.effort },
-        { callModel, onProgress: progressTo(reply, msg.goalId) },
+      const map = await failingVisibly(reply, msg.goalId, () =>
+        extractMap(db, { goalId: msg.goalId, roundId: msg.roundId, answers: msg.answers, effort: msg.effort }, { callModel, onProgress: progressTo(reply, msg.goalId) }),
       );
       afterMapChange(db, reply);
       reply(mapUpdate(db, map.goalId));
@@ -131,7 +173,20 @@ function afterMapChange(db: DatabaseSync, reply: (msg: ServerMsg) => void): void
   reply(learnerStateMsg(db));
 }
 
-// Progress from an agent, sent on to the client.
+// A map job that fails before or after the model call (a stale round, no such goal) would leave
+// the goal's page waiting forever on its "started" progress: say it failed, for that goal, then
+// report the error as usual. (A failed model call already says so; saying it twice is harmless.)
+async function failingVisibly<T>(reply: (msg: ServerMsg) => void, goalId: string, run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (err) {
+    reply({ type: "map.progress", goalId, stage: "failed", detail: err instanceof Error ? err.message : String(err) });
+    throw err;
+  }
+}
+
+// Progress from an agent, sent on to the client with the time since the request started.
 function progressTo(reply: (msg: ServerMsg) => void, goalId: string) {
-  return (stage: ExtractionStage, detail: string) => reply({ type: "map.progress", goalId, stage, detail });
+  const started = Date.now();
+  return (stage: ExtractionStage, detail: string) => reply({ type: "map.progress", goalId, stage, detail, elapsedMs: Date.now() - started });
 }

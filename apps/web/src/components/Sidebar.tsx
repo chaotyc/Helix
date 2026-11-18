@@ -1,6 +1,6 @@
 // The left column: new goal and search, then each goal with its pages (overview, map) and
 // its sessions, newest first. Settings and the connection sit at the bottom.
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Goal, Session } from "@helix/contracts";
 import { dayAndTime, SESSION_KIND_LABEL, shortWhen } from "../format.ts";
 import { ConnectionIndicator } from "./ConnectionIndicator.tsx";
@@ -23,6 +23,7 @@ type Props = {
   selectedGoalId: string | null;
   onHome: () => void;
   onSelectGoal: (goalId: string) => void;
+  onRenameGoal: (goalId: string, title: string) => boolean; // false: not sent (offline)
   onOpenOverview: (goalId: string) => void;
   onOpenMap: (goalId: string) => void;
   onSelectSession: (session: Session) => void;
@@ -82,11 +83,14 @@ export function Sidebar(props: Props) {
             onToggle={() => toggle(goal.id)}
             onSelect={() => {
               setExpanded((open) => new Set(open).add(goal.id));
-              props.onSelectGoal(goal.id);
+              // Already on this goal: stay on the page (so the first click of a double-click
+              // to rename doesn't leave it). Its Overview row goes to the overview.
+              if (goal.id !== props.selectedGoalId || props.page.kind === "settings" || props.page.kind === "new-goal") props.onSelectGoal(goal.id);
             }}
             onOpenOverview={() => props.onOpenOverview(goal.id)}
             onOpenMap={() => props.onOpenMap(goal.id)}
             onSelectSession={props.onSelectSession}
+            onRename={(title) => props.onRenameGoal(goal.id, title)}
           />
         ))}
       </nav>
@@ -112,10 +116,12 @@ type GroupProps = {
   onOpenOverview: () => void;
   onOpenMap: () => void;
   onSelectSession: (session: Session) => void;
+  onRename: (title: string) => boolean;
 };
 
-function GoalGroup({ goal, sessions, open, selected, page, onToggle, onSelect, onOpenOverview, onOpenMap, onSelectSession }: GroupProps) {
+function GoalGroup({ goal, sessions, open, selected, page, onToggle, onSelect, onOpenOverview, onOpenMap, onSelectSession, onRename }: GroupProps) {
   const [showAll, setShowAll] = useState(false);
+  const [renaming, setRenaming] = useState(false);
   const shown = showAll ? sessions : sessions.slice(0, SESSIONS_SHOWN);
   const hidden = sessions.length - shown.length;
 
@@ -131,10 +137,30 @@ function GoalGroup({ goal, sessions, open, selected, page, onToggle, onSelect, o
         >
           <ChevronRightIcon className={`size-3.5 transition-transform ${open ? "rotate-90" : ""}`} />
         </button>
-        <button type="button" onClick={onSelect} className="flex h-full min-w-0 flex-1 items-center gap-2 pr-2 text-left">
-          <GoalAvatar title={goal.title} />
-          <span className={`truncate text-[13px] ${selected ? "font-semibold" : "font-medium"}`}>{goal.title}</span>
-        </button>
+        {renaming ? (
+          <span className="flex h-full min-w-0 flex-1 items-center gap-2 pr-1">
+            <GoalAvatar title={goal.title} />
+            <TitleInput
+              title={goal.title}
+              onDone={(title) => {
+                if (title !== null && !onRename(title)) return false; // not sent: keep the box open
+                setRenaming(false);
+                return true;
+              }}
+            />
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={onSelect}
+            onDoubleClick={() => setRenaming(true)}
+            title="Double-click to rename"
+            className="flex h-full min-w-0 flex-1 items-center gap-2 pr-2 text-left"
+          >
+            <GoalAvatar title={goal.title} />
+            <span className={`truncate text-[13px] ${selected ? "font-semibold" : "font-medium"}`}>{goal.title}</span>
+          </button>
+        )}
       </div>
 
       {open && (
@@ -205,6 +231,43 @@ function NavItem({ icon, children, onClick, active = false, small = false, trail
       <span className="flex min-w-0 flex-1 items-center">{children}</span>
       {trailing}
     </button>
+  );
+}
+
+// The goal's name in an editable box: Enter or clicking away saves, Esc cancels (null).
+// An empty name is a cancel too, and so is an unchanged one: compared, exactly as typed, with
+// the name the box opened with, so a new name arriving meanwhile (the model's) isn't overwritten
+// by the old one, and an older name longer than today's limit isn't cut by just looking at it.
+// `onDone` returns false when the name couldn't be sent; the box then stays open with it.
+function TitleInput({ title, onDone }: { title: string; onDone: (title: string | null) => boolean }) {
+  const [opened] = useState(title);
+  const [text, setText] = useState(title);
+  const done = useRef(false); // Enter or Esc already finished, so the blur that follows doesn't
+  const box = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    box.current?.focus();
+    box.current?.select();
+  }, []);
+  function finish(value: string | null): void {
+    if (done.current) return;
+    done.current = true;
+    const typed = value === null || value === opened ? null : value.replace(/\s+/g, " ").trim().slice(0, 120);
+    if (!onDone(typed || null)) done.current = false;
+  }
+  return (
+    <input
+      ref={box}
+      value={text}
+      aria-label="Goal name"
+      maxLength={120}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={() => finish(text)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.nativeEvent.isComposing) finish(text);
+        if (e.key === "Escape") finish(null);
+      }}
+      className="h-6 min-w-0 flex-1 rounded border border-accent/70 bg-raised px-1.5 text-[13px] font-medium text-fg outline-none select-text"
+    />
   );
 }
 

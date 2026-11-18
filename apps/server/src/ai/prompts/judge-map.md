@@ -6,7 +6,7 @@ You'll get the goal, the source material the map was built from (if any) and wha
 
 - Each concept has an id, a name, a kind (`concept`, `skill`, or `decision`), a role (`taught` by the goal, or `background` it assumes), a target depth, and a one-sentence description.
 - Depth runs from 1 to 5: 1 orient (recognize it), 2 explain, 3 apply (solve standard problems), 4 analyze (unfamiliar problems), 5 expert (teach it). The target depth is how deep this goal needs the concept.
-- A prerequisite reads "A@2 needs B@1": to learn A at depth 2, the learner first needs B at depth 1. Arrows should be direct; one implied by a longer chain is redundant, not wrong.
+- A prerequisite is shown as `<A>@<a> needs <B>@<b>`: to learn A at depth a, the learner first needs B at depth b. Arrows should be direct; one implied by a longer chain is redundant, not wrong.
 - Goals range from one specific problem to a whole textbook. Judge whether the map fits this goal's scope, not a typical course. Each concept should be something one to a few study sessions could cover.
 
 ## What to report

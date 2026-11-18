@@ -16,7 +16,7 @@ export type Check<T> = { ok: true; value: T } | { ok: false; problems: string[] 
 
 export type StructuredCall<T> = {
   agent: string; // "clarify-map", "extract-map", "grader", ...
-  goalId?: string; // missing when an eval grades a labeled answer outside any goal
+  goalId?: string; // missing for eval-only agents that work outside any goal
   model: ModelId;
   prompt: Prompt;
   schema: Record<string, unknown>;
@@ -80,6 +80,10 @@ export async function structuredCall<T>(db: DatabaseSync, call: StructuredCall<T
           progress("thinking", call.thinkingDetail);
         },
         onText: call.onText,
+        onActivity: (activity) => {
+          thinkingShown = true; // the activity says more than the generic thinking line
+          progress("thinking", activity);
+        },
       });
     } catch (err) {
       log("error", undefined, [err instanceof Error ? err.message : String(err)]);

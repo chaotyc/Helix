@@ -76,6 +76,10 @@ export type ConceptChanges = z.infer<typeof ConceptChanges>;
 
 const GoalEntry = z.object({ goalId: z.string(), entry: ViewEntry });
 
+// Set when a change takes back an earlier human edit (Undo): the diary seq of the entry it
+// undoes. Undo never deletes from the diary; it appends the inverse change, marked with this.
+const Undoes = { undoes: z.number().int().optional() };
+
 export const MapChange = z.discriminatedUnion("op", [
   // One extraction as one entry (D2): adds concepts and arrows the graph doesn't have yet,
   // and sets the goal's view. Concepts the graph already has are reused, not re-added.
@@ -92,35 +96,35 @@ export const MapChange = z.discriminatedUnion("op", [
   }),
   z.object({
     op: z.literal("add_concept"),
-    payload: z.object({ concept: Concept }),
+    payload: z.object({ concept: Concept, ...Undoes }),
     before: z.null(),
     after: Concept,
   }),
   z.object({
     op: z.literal("update_concept"),
-    payload: z.object({ conceptId: z.string(), changes: ConceptChanges }),
+    payload: z.object({ conceptId: z.string(), changes: ConceptChanges, ...Undoes }),
     before: Concept,
     after: Concept,
   }),
   // Deleting a concept also removes its arrows and its view entries, so `before` keeps them (D1).
   z.object({
     op: z.literal("delete_concept"),
-    payload: z.object({ conceptId: z.string() }),
+    payload: z.object({ conceptId: z.string(), ...Undoes }),
     before: z.object({ concept: Concept, edges: z.array(Edge), views: z.array(GoalEntry) }),
     after: z.null(),
   }),
-  z.object({ op: z.literal("add_edge"), payload: z.object({ edge: Edge }), before: z.null(), after: Edge }),
-  z.object({ op: z.literal("delete_edge"), payload: z.object({ edge: Edge }), before: Edge, after: z.null() }),
+  z.object({ op: z.literal("add_edge"), payload: z.object({ edge: Edge, ...Undoes }), before: z.null(), after: Edge }),
+  z.object({ op: z.literal("delete_edge"), payload: z.object({ edge: Edge, ...Undoes }), before: Edge, after: z.null() }),
   // Add a concept to a goal's view, or change its target depth or role.
   z.object({
     op: z.literal("set_view_entry"),
-    payload: GoalEntry,
+    payload: GoalEntry.extend(Undoes),
     before: ViewEntry.nullable(),
     after: ViewEntry,
   }),
   z.object({
     op: z.literal("remove_view_entry"),
-    payload: z.object({ goalId: z.string(), conceptId: z.string() }),
+    payload: z.object({ goalId: z.string(), conceptId: z.string(), ...Undoes }),
     before: ViewEntry,
     after: z.null(),
   }),

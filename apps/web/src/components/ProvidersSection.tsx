@@ -34,6 +34,10 @@ export function ProvidersSection({ providers, signIns, onRefresh, onSignIn }: Pr
   const status = (c: Connection) => providers?.find((p) => p.connection === c);
   return (
     <div className="flex flex-col gap-5">
+      <p className="text-xs text-fg-muted">
+        Your sources, answers, and tutoring chats are sent to the provider you pick for each job, under that provider's terms. Everything else stays on this
+        computer; Helix only contacts GitHub to check for updates.
+      </p>
       <Group
         title="Subscriptions"
         action={
@@ -67,13 +71,27 @@ function Group({ title, action, children }: { title: string; action?: ReactNode;
   );
 }
 
-function Row({ title, detail, status, children }: { title: ReactNode; detail?: string; status?: ProviderStatus; children?: ReactNode }) {
+// Shown on connections and buttons that have never been run for real (`tested` in contracts).
+function BetaBadge() {
+  return (
+    <span title="Not yet tested with real calls. Please report problems on GitHub.">
+      <Badge tone="accent" className="ml-1.5 align-middle">
+        Beta
+      </Badge>
+    </span>
+  );
+}
+
+function Row({ title, detail, status, beta, children }: { title: ReactNode; detail?: string; status?: ProviderStatus; beta?: boolean; children?: ReactNode }) {
   const badge = status && STATE_BADGE[status.state];
   return (
     <div className="flex flex-col gap-2.5 px-4 py-3.5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-[13px] font-medium text-fg">{title}</div>
+          <div className="text-[13px] font-medium text-fg">
+            {title}
+            {beta && <BetaBadge />}
+          </div>
           {detail && <div className="mt-0.5 text-xs text-fg-subtle">{detail}</div>}
         </div>
         {badge ? (
@@ -98,7 +116,7 @@ function CliRow({ connection, status, signIn, onSignIn }: { connection: Connecti
     </>
   );
   return (
-    <Row title={title} detail={status?.detail} status={status}>
+    <Row title={title} detail={status?.detail} status={status} beta={!info.tested}>
       {status?.state === "missing" ? (
         <p className="text-xs text-fg-muted">
           Install <code className={CODE}>{info.command}</code>:{" "}
@@ -115,6 +133,8 @@ function CliRow({ connection, status, signIn, onSignIn }: { connection: Connecti
                 {running ? "Signing in…" : "Sign in"}
               </Button>
             )}
+            {/* No in-app sign-in has been run for real yet: it could replace a working login. */}
+            {info.signInArgs && <BetaBadge />}
             <span>
               {info.signInArgs ? "or in Terminal: " : "Sign in from Terminal: "}
               <code className={CODE}>{info.signIn}</code>
@@ -157,7 +177,7 @@ function ApiRow({ connection, status }: { connection: Connection; status?: Provi
     </>
   );
   return (
-    <Row title={title} status={status}>
+    <Row title={title} status={status} beta={!info.tested}>
       {desktop ? (
         <ApiKeyField desktop={desktop} provider={connection as KeyProvider} placeholder={info.keyPlaceholder ?? ""} />
       ) : (

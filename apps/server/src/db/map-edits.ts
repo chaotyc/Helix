@@ -5,6 +5,7 @@ import type { MapEdit, ServerMsg, SharedWith } from "@helix/contracts";
 import { goalSlice, type MapCommand } from "@helix/core";
 import { listGoals } from "./goals.ts";
 import { readGraph, recordMapChange } from "./graph.ts";
+import { nextUndo } from "./map-undo.ts";
 import { inTransaction } from "./transaction.ts";
 
 // An edit as the UI sends it → a command for the graph. View edits belong to `goalId`.
@@ -43,7 +44,13 @@ export function sharedWith(db: DatabaseSync, goalId: string): SharedWith {
   return result;
 }
 
-// The reply every map change ends with: the goal's slice of the graph, and what it shares.
+// The reply every map change ends with: the goal's slice of the graph, what it shares, and
+// what Undo would take back.
 export function mapUpdate(db: DatabaseSync, goalId: string): ServerMsg {
-  return { type: "map.updated", map: goalSlice(readGraph(db), goalId), sharedWith: sharedWith(db, goalId) };
+  return {
+    type: "map.updated",
+    map: goalSlice(readGraph(db), goalId),
+    sharedWith: sharedWith(db, goalId),
+    nextUndo: nextUndo(db, goalId),
+  };
 }

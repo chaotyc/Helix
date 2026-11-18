@@ -3,13 +3,15 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { App } from "./App.tsx";
 import { connect } from "./connection.ts";
-import { desktop } from "./desktop.ts";
+import { desktop, hiddenTitleBar } from "./desktop.ts";
 
-// In the Mac app the window has no title bar. This flag lets the CSS leave room for the window's
-// buttons and turn the top strips into handles that move the window (see index.css).
-// In full screen the window buttons are hidden, so that room isn't needed.
+// In the desktop app on macOS the window has no title bar. The hidden-title-bar flag lets the CSS
+// leave room for the window's buttons and turn the top strips into handles that move the window
+// (see index.css). In full screen the window buttons are hidden, so that room isn't needed.
+// On Windows and Linux the window keeps the system's title bar, so neither is needed.
 if (desktop) {
   document.documentElement.dataset.desktop = "";
+  if (hiddenTitleBar) document.documentElement.dataset.hiddenTitleBar = "";
   desktop.onFullScreen?.((fullScreen) => {
     if (fullScreen) document.documentElement.dataset.fullScreen = "";
     else delete document.documentElement.dataset.fullScreen;

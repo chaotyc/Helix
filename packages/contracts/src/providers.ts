@@ -35,11 +35,15 @@ export type ConnectionInfo = {
   // the tool only signs in interactively, so the settings tab shows `signIn` instead.
   signInArgs?: string[];
   installUrl?: string; // cli: how to install the tool
+  // Whether Helix has been run for real through this connection (a map, a grade, a tutor turn).
+  // Untested ones show a Beta tag. Set it once a real run has worked.
+  tested: boolean;
 };
 
 export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   anthropic: {
     id: "anthropic",
+    tested: false,
     label: "Anthropic API",
     maker: "Anthropic",
     kind: "api",
@@ -49,6 +53,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   openai: {
     id: "openai",
+    tested: false,
     label: "OpenAI API",
     maker: "OpenAI",
     kind: "api",
@@ -58,6 +63,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   google: {
     id: "google",
+    tested: false,
     label: "Gemini API",
     maker: "Google",
     kind: "api",
@@ -67,6 +73,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   xai: {
     id: "xai",
+    tested: false,
     label: "xAI API",
     maker: "xAI",
     kind: "api",
@@ -76,6 +83,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   meta: {
     id: "meta",
+    tested: false,
     label: "Meta Model API",
     maker: "Meta",
     kind: "api",
@@ -85,6 +93,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   "claude-code": {
     id: "claude-code",
+    tested: true,
     label: "Claude Code (Claude plan)",
     maker: "Anthropic",
     kind: "cli",
@@ -96,6 +105,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   codex: {
     id: "codex",
+    tested: true,
     label: "Codex (ChatGPT plan)",
     maker: "OpenAI",
     kind: "cli",
@@ -107,6 +117,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   antigravity: {
     id: "antigravity",
+    tested: true,
     label: "Antigravity (Google AI plan)",
     maker: "Google",
     kind: "cli",
@@ -117,6 +128,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   grok: {
     id: "grok",
+    tested: false,
     label: "Grok CLI (Grok account)",
     maker: "xAI",
     kind: "cli",
@@ -128,6 +140,7 @@ export const CONNECTIONS: Record<Connection, ConnectionInfo> = {
   },
   muse: {
     id: "muse",
+    tested: false,
     label: "Muse Code (Meta account)",
     maker: "Meta",
     kind: "cli",

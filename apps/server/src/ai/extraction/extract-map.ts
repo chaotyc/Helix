@@ -50,13 +50,13 @@ export async function extractMap(db: DatabaseSync, input: ExtractInput, deps: Ex
 
   // ---- Build the request ----
   const progress = deps.onProgress ?? (() => {});
-  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE]);
+  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE], ["source-is-data"]);
   const effort = input.effort ?? "high";
   const source = round.sourceId ? getSource(db, round.sourceId) : undefined;
   const graph = replayGraph(readMapEvents(db)); // the diary's graph: what the proposal is checked against
 
   // ---- Ask, check, retry ----
-  let conceptsShown = 0;
+  let shown = "";
   const { value, result, aiCallIds } = await structuredCall(db, {
     agent: AGENT,
     goalId: goal.id,
@@ -74,11 +74,14 @@ export async function extractMap(db: DatabaseSync, input: ExtractInput, deps: Ex
     progress,
     thinkingDetail: "Claude is working out the map",
     onText: (textSoFar) => {
-      // A cheap running count: each finished concept has a "targetDepth" field.
-      const count = textSoFar.split('"targetDepth"').length - 1;
-      if (count > conceptsShown) {
-        conceptsShown = count;
-        progress("writing", `${count} concepts so far`);
+      // Cheap running counts: each concept has a "targetDepth" field, each arrow a "needsDepth".
+      // Arrows are shown in fives, so a long list doesn't send a message per arrow.
+      const concepts = textSoFar.split('"targetDepth"').length - 1;
+      const arrows = textSoFar.split('"needsDepth"').length - 1;
+      const detail = arrows >= 5 ? `${concepts} concepts, ${arrows - (arrows % 5)} arrows so far` : `${concepts} concepts so far`;
+      if (concepts > 0 && detail !== shown) {
+        shown = detail;
+        progress("writing", detail);
       }
     },
   });

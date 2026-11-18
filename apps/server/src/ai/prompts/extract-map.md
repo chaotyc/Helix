@@ -18,15 +18,15 @@ The learner answered a few questions about this goal before the map was built. T
 
 ## Concepts
 
-A concept is something a question can test: "convolution", "Nyquist sampling theorem", "choosing a controller type". Not a chapter title, not a whole field.
+A concept is something one exam question could test. Not a chapter title, not a whole field.
 
 - Cover what the goal needs. Goals range from one specific problem to a whole textbook, so let the number of concepts follow from the goal's scope: a single problem may need only a handful, a whole textbook a few hundred.
 - Keep the grain the same whatever the goal's size: each concept could take one to a few study sessions. A bigger goal gets more concepts, not broader ones. The same grain everywhere is what lets concepts be shared across goals.
-- Include **background** concepts: things the course assumes but doesn't teach, whether or not the source mentions them (complex numbers for a signals course). These are what let the tutor find gaps in what the learner arrived with. Mark them `"role": "background"`; everything the course teaches is `"taught"`.
+- Include **background** concepts: things the course assumes but doesn't teach, whether or not the source mentions them. These are what let the tutor find gaps in what the learner arrived with. Mark them `"role": "background"`; everything the course teaches is `"taught"`.
 - Name concepts the way the field does. You don't need to copy the source's wording.
 - `description`: one plain sentence saying what the concept is. This is how the same concept is recognized across courses, so make it specific.
 - `kind`: `concept` (an idea to understand), `skill` (a procedure to perform), or `decision` (a choice between approaches).
-- `id`: lowercase words joined by hyphens, like `fourier-series`.
+- `id`: the concept's name in lowercase words joined by hyphens.
 
 **Reuse existing concepts.** If a concept you need is already in the learner's map, use its exact `id`, even if this course names it differently. Only create a new id for something genuinely new. Reusing ids is what lets knowledge carry over between courses.
 
@@ -46,7 +46,7 @@ Depth runs from 1 to 5:
 
 Each prerequisite says: to learn `concept` at `depth`, the learner first needs `needs` at `needsDepth`.
 
-- Arrows are between depths, not just concepts. That allows spirals: complex exponentials at depth 1 are needed for LTI systems at depth 2, and LTI systems at depth 2 are needed to understand complex exponentials at depth 3. Use this when a course genuinely circles back.
+- Arrows are between depths, not just concepts. That allows spirals, where a course returns to a concept at a greater depth after using it to teach something else: A at depth 1 can be needed for B at depth 2, and B at depth 2 for A at depth 3. Use this when a course genuinely circles back.
 - Only include direct prerequisites. If A needs B and B needs C, don't also add A needs C.
 - Arrows must never form a loop at the same depths (A at 1 needs B at 1, B at 1 needs A at 1). Nothing in a loop can be learned first.
 - An arrow may point to a concept from the existing map that this goal doesn't otherwise list.
@@ -54,6 +54,6 @@ Each prerequisite says: to learn `concept` at `depth`, the learner first needs `
 
 ## Part-of
 
-Use `partOf` when one concept is a component of another ("convolution integral" is part of "convolution"). Use it sparingly; most structure belongs in prerequisites.
+Use `partOf` when one concept is a component of another: a piece of the whole, not just something learned before it. Use it sparingly; most structure belongs in prerequisites.
 
 Return only the map, in the required format.

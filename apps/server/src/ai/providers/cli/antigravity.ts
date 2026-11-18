@@ -12,8 +12,9 @@ import { join } from "node:path";
 import { Effort, MODELS, modelIdFor, parseModelId, type ModelId } from "@helix/contracts";
 import type { ModelCall, ModelResult } from "../../model-call.ts";
 import { pickEffort } from "../effort.ts";
+import { QUIET_LIMITS, timeoutMessage } from "./deadline.ts";
 import { oneShotPrompt } from "./prompt.ts";
-import { TOOL_TIMEOUT_MS, failureDetail, findCommand, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
+import { failureDetail, findCommand, requireCommand, runTool, toolEnv, withTempDir } from "./tools.ts";
 
 const SUFFIX = new RegExp(`^(.*)-(${Effort.options.join("|")})$`);
 
@@ -47,7 +48,8 @@ export const callAntigravity: ModelCall = async (request) => {
       cwd: work,
       env: toolEnv(command),
       stdin: `${JSON.stringify({ event: "user", message: { role: "user", content: prompt } })}\n`,
-      timeoutMs: TOOL_TIMEOUT_MS,
+      timeoutMs: QUIET_LIMITS.totalMs,
+      idleTimeoutMs: QUIET_LIMITS.idleMs,
       onLine: (line) => {
         const delta = streamedText(line);
         if (delta) {
@@ -57,7 +59,7 @@ export const callAntigravity: ModelCall = async (request) => {
       },
     });
   });
-  if (result.timedOut) throw new Error("Antigravity took too long and was stopped.");
+  if (result.timedOutBy) throw new Error(timeoutMessage("Antigravity", result.timedOutBy, QUIET_LIMITS));
   const parsed = parseAgyEvents(result.stdout, model);
   if (!parsed) throw new Error(`Antigravity failed: ${failureDetail(result)}`);
   return parsed;

@@ -16,6 +16,9 @@ export type ModelRequest = {
   effort: Effort;
   onThinking?: () => void; // called as thinking streams in
   onText?: (textSoFar: string) => void; // called as the answer streams in
+  // What the model is doing, in a few words, from routes that can't stream the answer itself
+  // (Codex's reasoning summaries: "Grouping the transforms").
+  onActivity?: (activity: string) => void;
 };
 
 export type ModelResult = {

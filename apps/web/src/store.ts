@@ -17,9 +17,24 @@ import type {
 export type ConnectionStatus = "connecting" | "connected" | "reconnecting";
 
 type Pong = { text: string; receivedAt: string };
-type Progress = { stage: ExtractionStage; detail: string };
+// The latest step of a map build. `startedAt`: when it started, by this window's clock.
+export type BuildProgress = { stage: ExtractionStage; detail: string; startedAt?: number };
 export type PendingQuestions = { roundId: string; questions: ClarifyQuestion[] };
 export type SessionStatus = { busy: boolean; detail: string };
+// What a learner sent in a goal's setup chat: their words and the names of attached documents.
+export type ChatMessage = { text: string; documents: string[] };
+// A goal's setup chat, kept here so it survives leaving the page (this window only):
+//   opening  the first message, sent from the New goal page
+//   added    material sent later from the chat's "Continue" box
+//   source   the text the clarifier was last given, sent again if asking fails
+//   round    the clarifying questions being answered (or answered, once `submitted`), so the
+//            answers stay on screen while the map builds and a failed build can be retried
+export type SetupChat = {
+  opening?: ChatMessage;
+  added?: ChatMessage;
+  source?: string;
+  round?: { roundId: string; questions: ClarifyQuestion[]; answers: Record<string, string>; submitted: boolean };
+};
 // A sign-in running from the settings tab: what the tool printed, and how it ended.
 export type SignIn = { output: string; done: { ok: boolean; detail: string } | null };
 
@@ -34,20 +49,24 @@ type AppState = {
   knowledge: Record<string, ConceptKnowledge>; // per concept: what the learner model says they know
   lastPong: Pong | null;
   maps: Record<string, GoalMap>; // each goal's slice of the global graph, from the server
-  extraction: Record<string, Progress>; // the latest extraction update per goal
+  extraction: Record<string, BuildProgress>; // the latest extraction update per goal
   settings: Settings | null; // null until the server sends them
   providers: ProviderStatus[] | null; // each connection's state, asked for when settings open
   signIns: Partial<Record<Connection, SignIn>>;
   sharedWith: Record<string, SharedWith>; // per goal: which other goals use each of its concepts
   questions: Record<string, PendingQuestions>; // per goal: clarifying questions waiting for answers
   editErrors: Record<string, string>; // per goal: why the last map edit was rejected
+  nextUndo: Record<string, string | null>; // per goal: what Undo would take back, in words
+  undone: Record<string, { undid: string; n: number }>; // per goal: the latest undo (n counts them, so a repeat still shows)
   serverError: string | null; // the latest error the server reported (e.g. a failed model call)
   createdGoalId: string | null; // the goal this window just created, to open it once it arrives
+  setup: Record<string, SetupChat>; // per goal without a map yet: its setup chat
 
   // ---- Actions: the only ways to change the data above ----
   setStatus: (status: ConnectionStatus) => void;
   setGoals: (goals: Goal[]) => void;
   addGoal: (goal: Goal) => void;
+  updateGoal: (goal: Goal) => void;
   setSessions: (sessions: Session[]) => void;
   upsertSession: (session: Session) => void;
   setStartedSessionId: (sessionId: string | null) => void;
@@ -56,12 +75,15 @@ type AppState = {
   setSessionStatus: (sessionId: string, status: SessionStatus) => void;
   setKnowledge: (knowledge: ConceptKnowledge[]) => void;
   setLastPong: (pong: Pong) => void;
-  setMap: (map: GoalMap, sharedWith: SharedWith) => void;
+  setMap: (map: GoalMap, sharedWith: SharedWith, nextUndo: string | null) => void;
+  setUndone: (goalId: string, undid: string) => void;
   setQuestions: (goalId: string, pending: PendingQuestions | null) => void;
   setEditError: (goalId: string, reason: string | null) => void;
   setServerError: (message: string | null) => void;
   setCreatedGoalId: (goalId: string | null) => void;
-  setProgress: (goalId: string, progress: Progress) => void;
+  patchSetup: (goalId: string, patch: Partial<SetupChat>) => void;
+  setProgress: (goalId: string, progress: BuildProgress) => void;
+  clearProgress: (goalId: string) => void; // forget a finished or failed build (its note closes)
   setSettings: (settings: Settings) => void;
   setProviders: (providers: ProviderStatus[]) => void;
   startSignIn: (connection: Connection) => void;
@@ -88,12 +110,16 @@ export const useAppStore = create<AppState>()((set) => ({
   sharedWith: {},
   questions: {},
   editErrors: {},
+  nextUndo: {},
+  undone: {},
   serverError: null,
   createdGoalId: null,
+  setup: {},
 
   setStatus: (status) => set({ status }),
   setGoals: (goals) => set({ goals }),
   addGoal: (goal) => set((state) => ({ goals: [...state.goals, goal] })),
+  updateGoal: (goal) => set((state) => ({ goals: state.goals.map((g) => (g.id === goal.id ? goal : g)) })),
   setSessions: (sessions) => set({ sessions }),
   // A new session is added; a known one (e.g. just ended) is replaced.
   upsertSession: (session) =>
@@ -115,19 +141,24 @@ export const useAppStore = create<AppState>()((set) => ({
   setKnowledge: (knowledge) => set({ knowledge: Object.fromEntries(knowledge.map((k) => [k.conceptId, k])) }),
   setLastPong: (pong) => set({ lastPong: pong }),
   // A fresh map from the server also clears that goal's last edit error.
-  setMap: (map, sharedWith) =>
+  setMap: (map, sharedWith, nextUndo) =>
     set((state) => ({
       maps: { ...state.maps, [map.goalId]: map },
       sharedWith: { ...state.sharedWith, [map.goalId]: sharedWith },
+      nextUndo: { ...state.nextUndo, [map.goalId]: nextUndo },
       editErrors: withoutKey(state.editErrors, map.goalId),
     })),
+  setUndone: (goalId, undid) =>
+    set((state) => ({ undone: { ...state.undone, [goalId]: { undid, n: (state.undone[goalId]?.n ?? 0) + 1 } } })),
   setQuestions: (goalId, pending) =>
     set((state) => ({ questions: pending ? { ...state.questions, [goalId]: pending } : withoutKey(state.questions, goalId) })),
   setEditError: (goalId, reason) =>
     set((state) => ({ editErrors: reason ? { ...state.editErrors, [goalId]: reason } : withoutKey(state.editErrors, goalId) })),
   setServerError: (message) => set({ serverError: message }),
   setCreatedGoalId: (goalId) => set({ createdGoalId: goalId }),
+  patchSetup: (goalId, patch) => set((state) => ({ setup: { ...state.setup, [goalId]: { ...state.setup[goalId], ...patch } } })),
   setProgress: (goalId, progress) => set((state) => ({ extraction: { ...state.extraction, [goalId]: progress } })),
+  clearProgress: (goalId) => set((state) => ({ extraction: withoutKey(state.extraction, goalId) })),
   setSettings: (settings) => set({ settings }),
   setProviders: (providers) => set({ providers }),
   startSignIn: (connection) => set((state) => ({ signIns: { ...state.signIns, [connection]: { output: "", done: null } } })),

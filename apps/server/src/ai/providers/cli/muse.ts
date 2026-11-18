@@ -7,8 +7,9 @@ import { MuseClient } from "@muse-code/sdk";
 import { modelIdFor, parseModelId } from "@helix/contracts";
 import type { ModelCall } from "../../model-call.ts";
 import { effortFor } from "../effort.ts";
+import { QUIET_LIMITS, startDeadline, timeoutMessage } from "./deadline.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
-import { TOOL_TIMEOUT_MS, requireCommand, toolEnv, withTempDir } from "./tools.ts";
+import { requireCommand, toolEnv, toolLaunch, withTempDir } from "./tools.ts";
 
 export const callMuse: ModelCall = async (request) => {
   const museBin = requireCommand("muse", "Muse Code");
@@ -17,9 +18,11 @@ export const callMuse: ModelCall = async (request) => {
   return withTempDir(async (cwd) => {
     let client: MuseClient;
     try {
+      // No shell: on Windows, an npm-installed muse.cmd runs as node <script> (windows-shim.ts).
+      const launch = toolLaunch(museBin, ["serve", "--disable-shell", "--disable-write"]);
       client = await MuseClient.spawn({
-        museBin,
-        args: ["serve", "--disable-shell", "--disable-write"],
+        museBin: launch.command,
+        args: launch.args,
         cwd,
         env: toolEnv(museBin), // without META_API_KEY, which Muse would use before your login
         clientInfo: { name: "helix", version: "0.1.0" },
@@ -32,10 +35,16 @@ export const callMuse: ModelCall = async (request) => {
       const prompt = oneShotPrompt(request.system, request.messages, { schema: request.schema });
       const turn = await session.sendUserTurn({ input: [{ type: "text", text: prompt }], ...(effort ? { reasoningEffort: effort } : {}) });
 
+      // Stopped when it goes quiet too long, or runs past the ceiling (deadline.ts).
+      let stop!: (err: Error) => void;
+      const stopped = new Promise<never>((_, reject) => (stop = reject));
+      const deadline = startDeadline(QUIET_LIMITS, (kind) => stop(new Error(timeoutMessage("Muse Code", kind, QUIET_LIMITS))));
+
       // The answer is the last finished agent message that isn't commentary (Muse's own rule).
       let finalText: string | undefined;
       const reading = (async () => {
         for await (const item of turn.items()) {
+          deadline.touch();
           if (item.kind === "reasoning") request.onThinking?.();
           if (item.kind === "agentMessage" && typeof item.text === "string" && item.messagePhase !== "commentary") {
             request.onText?.(item.text);
@@ -43,11 +52,7 @@ export const callMuse: ModelCall = async (request) => {
           }
         }
       })();
-      let timer: NodeJS.Timeout | undefined;
-      const outcome = await Promise.race([
-        turn.completed,
-        new Promise<never>((_, reject) => (timer = setTimeout(() => reject(new Error("Muse Code took too long and was stopped.")), TOOL_TIMEOUT_MS))),
-      ]).finally(() => clearTimeout(timer));
+      const outcome = await Promise.race([turn.completed, stopped]).finally(() => deadline.clear());
       await reading;
 
       if (outcome.kind !== "completed" || outcome.params.terminal !== "completed") {

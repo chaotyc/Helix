@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  What the macOS hardened runtime lets Helix do when it's signed with a Developer ID certificate
+  (electron-builder.config.mjs uses this file only then; ad-hoc builds run without the hardened runtime).
+  Electron's JavaScript engine compiles code as it runs, which needs the first two. Helix loads no
+  native Node add-ons, so library validation stays on (no disable-library-validation).
+-->
+<plist version="1.0">
+  <dict>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+  </dict>
+</plist>

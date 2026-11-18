@@ -71,7 +71,7 @@ describe("extractMap", () => {
     const [event] = readMapEvents(db);
     expect(event?.op).toBe("extract");
     expect(event?.actor).toBe("extractor");
-    expect(event?.promptVersion).toBe(loadPrompt("extract-map", [MESSAGES_FILE, REQUEST_PARTS_FILE]).version);
+    expect(event?.promptVersion).toBe(loadPrompt("extract-map", [MESSAGES_FILE, REQUEST_PARTS_FILE], ["source-is-data"]).version);
     expect(event?.model).toBe("claude-opus-5-5");
     expect(event?.sourceId).not.toBeNull();
 

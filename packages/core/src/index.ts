@@ -6,3 +6,4 @@ export * from "./knowledge.ts";
 export * from "./diagnostic.ts";
 export * from "./misconceptions.ts";
 export * from "./planner.ts";
+export * from "./undo.ts";

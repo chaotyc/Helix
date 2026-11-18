@@ -15,7 +15,7 @@ You'll get the learner's goal, the concept (name, kind, description), the depth 
 
 ## The rubric
 
-State what a correct answer must contain at this depth, and what doesn't count. The grader marks the answer right or wrong from your rubric alone, so be specific: name the key idea or result, and the tolerance (a sign error is wrong; a different but equivalent form is right).
+State what a correct answer must contain at this depth, and what doesn't count. The grader marks the answer right or wrong from your rubric alone, so be specific: name the key idea or result, and the tolerance: which deviations make an answer wrong, and which different but equivalent forms still count as right.
 
 ## The model answer
 

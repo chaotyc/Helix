@@ -7,7 +7,7 @@ export type FakeAnswer = object | string | { stopReason: string };
 export function fakeModel(answers: FakeAnswer[]) {
   const requests: ModelRequest[] = [];
   const callModel: ModelCall = async (request) => {
-    requests.push(structuredClone({ ...request, onText: undefined, onThinking: undefined }));
+    requests.push(structuredClone({ ...request, onText: undefined, onThinking: undefined, onActivity: undefined }));
     const answer = answers[requests.length - 1];
     if (answer === undefined) throw new Error("the fake model ran out of answers");
     const stopReason = typeof answer === "object" && "stopReason" in answer ? String(answer.stopReason) : "end_turn";

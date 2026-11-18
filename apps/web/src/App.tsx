@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import type { ClarifyAnswer, Confidence, Connection, Effort, GoalInput, MapEdit, Session, SessionKind, Settings } from "@helix/contracts";
+import type { ClarifyAnswer, Confidence, Connection, Effort, MapEdit, Session, SessionKind, Settings } from "@helix/contracts";
 import { send } from "./connection.ts";
-import { desktop } from "./desktop.ts";
+import { hiddenTitleBar } from "./desktop.ts";
 import { dayAndTime, SESSION_KIND_LABEL } from "./format.ts";
-import { useAppStore } from "./store.ts";
+import { useAppStore, type ChatMessage } from "./store.ts";
 import { useShortcut } from "./hooks/useShortcut.ts";
 import { CommandPalette, type Command } from "./components/CommandPalette.tsx";
 import { GoalHome } from "./components/goal/GoalHome.tsx";
-import { NewGoalForm } from "./components/goal/NewGoalForm.tsx";
+import { GoalSetupChat, type AnsweredRound } from "./components/goal/GoalSetupChat.tsx";
 import { Welcome } from "./components/goal/Welcome.tsx";
 import { GoalMapView } from "./components/map/GoalMapView.tsx";
 import { MapPanel } from "./components/MapPanel.tsx";
@@ -42,6 +42,8 @@ export function App() {
   const sharedWith = useAppStore((state) => state.sharedWith);
   const questions = useAppStore((state) => state.questions);
   const editErrors = useAppStore((state) => state.editErrors);
+  const nextUndo = useAppStore((state) => state.nextUndo);
+  const undone = useAppStore((state) => state.undone);
   const serverError = useAppStore((state) => state.serverError);
   const createdGoalId = useAppStore((state) => state.createdGoalId);
 
@@ -63,10 +65,13 @@ export function App() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [beforeNewGoal, setBeforeNewGoal] = useState<View>("session"); // where Cancel on New goal returns
-  // The documents from the New goal form, held until the server confirms the goal; then they go
-  // to the clarifier. null: no goal being created.
-  const [pendingSource, setPendingSource] = useState<{ text: string | undefined } | null>(null);
+  // The first message on the New goal page, held until the server confirms the goal; then its
+  // documents go to the clarifier. null: no goal being created.
+  const [pendingGoal, setPendingGoal] = useState<(ChatMessage & { sourceText: string | undefined }) | null>(null);
+  // The words of a first message that never reached the server (the connection dropped), put
+  // back in the New goal box.
+  const [newGoalDraft, setNewGoalDraft] = useState("");
+  const setup = useAppStore((state) => state.setup);
   // Per goal, which build job runs: writing questions (1) or building the map (2).
   const [buildStep, setBuildStep] = useState<Record<string, 1 | 2>>({});
 
@@ -129,8 +134,7 @@ export function App() {
   }
 
   function openNewGoal(): void {
-    if (view !== "new-goal") setBeforeNewGoal(view);
-    setView("new-goal");
+    if (!pendingGoal) setView("new-goal");
   }
 
   function goHome(): void {
@@ -139,17 +143,47 @@ export function App() {
     setView("session");
   }
 
-  // A goal this window created opens on its map page once the server confirms it, and the
-  // clarifier starts on the form's documents right away.
+  // A goal this window created opens on its map page (where its setup chat carries on) once the
+  // server confirms it, and the clarifier starts on the first message's documents right away.
   useEffect(() => {
     if (!createdGoalId || !goals.some((g) => g.id === createdGoalId)) return;
     useAppStore.getState().setCreatedGoalId(null);
     selectGoal(createdGoalId, true);
-    if (pendingSource) {
-      askQuestions(createdGoalId, pendingSource.text);
-      setPendingSource(null);
+    if (pendingGoal) {
+      const { sourceText, ...opening } = pendingGoal;
+      useAppStore.getState().patchSetup(createdGoalId, { opening });
+      askQuestions(createdGoalId, sourceText);
+      setPendingGoal(null);
+      setNewGoalDraft("");
     }
   }, [createdGoalId, goals]);
+
+  // The connection dropped: the server answers a running map job on the old connection, so this
+  // window would wait forever. Mark such jobs failed (Try again sends them anew). Once it's back,
+  // fetch the open goal's map again: a request made while offline never went out, and a job that
+  // finished meanwhile may have saved a map.
+  useEffect(() => {
+    const store = useAppStore.getState();
+    if (status === "connected") {
+      if (selectedGoalId) send({ type: "map.get", goalId: selectedGoalId });
+      return;
+    }
+    for (const [goalId, progress] of Object.entries(store.extraction)) {
+      if (!["asked", "saved", "failed"].includes(progress.stage)) {
+        store.setProgress(goalId, { stage: "failed", detail: "The connection to Helix dropped while this was running." });
+      }
+    }
+  }, [status]);
+
+  // The connection dropped before the server confirmed the goal: whether it was created is
+  // unknown, so the New goal page comes back with the words in the box (a goal that was created
+  // shows up in the sidebar once the connection is back).
+  useEffect(() => {
+    if (status !== "connected" && pendingGoal) {
+      setNewGoalDraft(pendingGoal.text);
+      setPendingGoal(null);
+    }
+  }, [status]);
 
   // A session this window started opens as soon as the server confirms it (under its own goal).
   useEffect(() => {
@@ -185,27 +219,63 @@ export function App() {
     sendOrWarn({ type: "provider.signIn", connection }, "the sign-in didn't start");
   }
 
-  function createGoal(goal: GoalInput, sourceText: string | undefined): void {
-    if (sendOrWarn({ type: "goal.create", goal }, "the goal wasn't created")) setPendingSource({ text: sourceText });
+  // No title: the server names the goal from the learner's words (goal.updated follows).
+  // Returns whether it was sent.
+  function createGoal(prompt: string, sourceText: string | undefined, documents: string[]): boolean {
+    useAppStore.getState().setServerError(null);
+    const sent = sendOrWarn({ type: "goal.create", goal: { kind: "course", prompt } }, "the goal wasn't created");
+    if (sent) setPendingGoal({ text: prompt, documents, sourceText });
+    return sent;
+  }
+
+  function renameGoal(goalId: string, title: string): boolean {
+    return sendOrWarn({ type: "goal.rename", goalId, title }, "the goal wasn't renamed");
   }
 
   // Building a map: the documents go to the clarifier first; the answers then build the map.
   // Uploaded documents can be anything (and several at once), so the extractor works out what
   // each one is from its text: kind "other".
-  function askQuestions(goalId: string, sourceText: string | undefined): void {
+  // Returns whether the request went out; if not, nothing changes (the chat keeps what was typed).
+  function askQuestions(goalId: string, sourceText: string | undefined): boolean {
     useAppStore.getState().setServerError(null);
+    if (!sendOrWarn({ type: "map.clarify", goalId, sourceText, sourceKind: sourceText ? "other" : undefined }, "the map wasn't started")) return false;
+    // A new round of questions: the last round's answers leave the chat.
+    useAppStore.getState().patchSetup(goalId, { source: sourceText, round: undefined });
     setBuildStep((steps) => ({ ...steps, [goalId]: 1 }));
-    if (sendOrWarn({ type: "map.clarify", goalId, sourceText, sourceKind: sourceText ? "other" : undefined }, "the map wasn't started")) {
-      showStarting(goalId);
-    }
+    showStarting(goalId);
+    return true;
   }
 
-  function buildMap(goalId: string, roundId: string, answers: ClarifyAnswer[], effort: Effort): void {
+  // Returns whether the request went out; if not, the questions stay open.
+  function buildMap(goalId: string, roundId: string, answers: ClarifyAnswer[], effort: Effort): boolean {
+    useAppStore.getState().setServerError(null);
+    if (!sendOrWarn({ type: "map.extract", goalId, roundId, answers, effort }, "the map wasn't built")) return false;
     useAppStore.getState().setQuestions(goalId, null); // answered: the card closes, progress shows
     setBuildStep((steps) => ({ ...steps, [goalId]: 2 }));
-    useAppStore.getState().setServerError(null);
-    if (sendOrWarn({ type: "map.extract", goalId, roundId, answers, effort }, "the map wasn't built")) showStarting(goalId);
+    showStarting(goalId);
+    return true;
   }
+
+  // A setup chat's answered round → the first map, at high effort. Each round is sent once
+  // (the store records it), unless `retry` (Try again after a failed build).
+  function submitRound(goalId: string, round: AnsweredRound, retry = false): boolean {
+    const saved = useAppStore.getState().setup[goalId]?.round;
+    if (!retry && saved?.roundId === round.roundId && saved.submitted) return true;
+    const answers = round.questions.map((q) => ({ questionId: q.id, answer: round.answers[q.id]! }));
+    const sent = buildMap(goalId, round.roundId, answers, "high");
+    const sentBefore = saved?.roundId === round.roundId && saved.submitted; // a retry that didn't go out
+    useAppStore.getState().patchSetup(goalId, { round: { ...round, submitted: sent || sentBefore } });
+    return sent;
+  }
+
+  // A round with no questions builds the first map straight away, whatever page is open.
+  // (A rebuild of an existing map shows its own "No questions needed" card instead.)
+  useEffect(() => {
+    for (const [goalId, pending] of Object.entries(questions)) {
+      const hasMap = (maps[goalId]?.view.length ?? 0) > 0;
+      if (pending.questions.length === 0 && !hasMap) submitRound(goalId, { roundId: pending.roundId, questions: [], answers: {} });
+    }
+  }, [questions]);
 
   // Shown until the server's first progress update, so the page goes straight to "Starting…"
   // instead of flashing the build form in between.
@@ -213,8 +283,12 @@ export function App() {
     useAppStore.getState().setProgress(goalId, { stage: "started", detail: "Sending to Helix…" });
   }
 
-  function editMap(goalId: string, edits: MapEdit[]): void {
-    sendOrWarn({ type: "map.edit", goalId, edits }, "the edit wasn't saved");
+  function editMap(goalId: string, edits: MapEdit[]): boolean {
+    return sendOrWarn({ type: "map.edit", goalId, edits }, "the edit wasn't saved");
+  }
+
+  function undoMapEdit(goalId: string): boolean {
+    return sendOrWarn({ type: "map.undo", goalId }, "nothing was undone");
   }
 
   // Sessions: the server runs them; the window sends what the learner does and shows what comes back.
@@ -300,8 +374,8 @@ export function App() {
 
   return (
     <div className="flex h-screen bg-canvas text-fg">
-      {/* In the Mac app, the strip along the window's top edge moves the window too. */}
-      {desktop && <div aria-hidden="true" className="app-drag fixed inset-x-0 top-0 z-40 h-2" />}
+      {/* In the desktop app on macOS (no title bar), the strip along the window's top edge moves the window too. */}
+      {hiddenTitleBar && <div aria-hidden="true" className="app-drag fixed inset-x-0 top-0 z-40 h-2" />}
       <Sidebar
         goals={goals}
         sessions={sessions}
@@ -309,6 +383,7 @@ export function App() {
         selectedGoalId={selectedGoalId}
         onHome={goHome}
         onSelectGoal={(goalId) => selectGoal(goalId)}
+        onRenameGoal={renameGoal}
         onOpenOverview={openOverview}
         onOpenMap={openMap}
         onSelectSession={selectSession}
@@ -368,21 +443,41 @@ export function App() {
                   onSignIn={signIn}
                 />
               ) : view === "new-goal" ? (
-                <NewGoalForm onCreate={createGoal} onCancel={() => setView(beforeNewGoal)} />
+                <GoalSetupChat
+                  goal={null}
+                  sending={pendingGoal}
+                  draft={newGoalDraft}
+                  onStart={createGoal}
+                />
               ) : view === "map" && selectedGoal ? (
                 <GoalMapView
                   key={selectedGoal.id}
+                  goal={selectedGoal}
+                  setup={setup[selectedGoal.id]}
+                  onAddAndAsk={(message, sourceText) => {
+                    const sent = askQuestions(selectedGoal.id, sourceText);
+                    if (sent) useAppStore.getState().patchSetup(selectedGoal.id, { added: message });
+                    return sent;
+                  }}
+                  onRetryQuestions={() => askQuestions(selectedGoal.id, setup[selectedGoal.id]?.source)}
+                  onSubmitRound={(round, retry) => submitRound(selectedGoal.id, round, retry)}
+                  onDismissFailure={() => {
+                    useAppStore.getState().clearProgress(selectedGoal.id);
+                    useAppStore.getState().patchSetup(selectedGoal.id, { round: undefined, added: undefined });
+                  }}
                   map={goalMap}
                   sharedWith={sharedWith[selectedGoal.id] ?? {}}
                   knowledge={knowledge}
                   progress={progress}
                   questions={questions[selectedGoal.id]}
                   editError={editErrors[selectedGoal.id]}
-                  serverError={serverError}
                   step={buildStep[selectedGoal.id] ?? 2}
                   onAsk={(text) => askQuestions(selectedGoal.id, text)}
                   onBuild={(roundId, answers, effort) => buildMap(selectedGoal.id, roundId, answers, effort)}
                   onEdit={(edits) => editMap(selectedGoal.id, edits)}
+                  nextUndo={nextUndo[selectedGoal.id] ?? null}
+                  undone={undone[selectedGoal.id]}
+                  onUndo={() => undoMapEdit(selectedGoal.id)}
                   onDismissError={() => useAppStore.getState().setEditError(selectedGoal.id, null)}
                 />
               ) : selectedSession ? (

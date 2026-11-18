@@ -93,7 +93,7 @@ export function SettingsPanel({ settings, providers, signIns, onChange, onRefres
                       const withCurrent = missing ? [{ id: current, label: modelLabel(current) }, ...list] : list;
                       if (withCurrent.length === 0) return null;
                       return (
-                        <optgroup key={connection} label={`${CONNECTIONS[connection].label}${setUp || !providers ? "" : " (not set up)"}`}>
+                        <optgroup key={connection} label={`${CONNECTIONS[connection].label}${CONNECTIONS[connection].tested ? "" : " (Beta)"}${setUp || !providers ? "" : " (not set up)"}`}>
                           {withCurrent.map((o) => (
                             <option key={o.id} value={o.id}>
                               {optionLabel(o)}

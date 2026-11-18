@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
-import { Goal, type GoalInput } from "@helix/contracts";
+import { Goal } from "@helix/contracts";
 
 // A goal row as SQLite returns it (snake_case, NULL for missing values).
 const GoalRow = z.object({
@@ -28,7 +28,10 @@ function toGoal(row: unknown): Goal {
   });
 }
 
-export function createGoal(db: DatabaseSync, input: GoalInput): Goal {
+// A goal as it's saved: the UI's input with its title settled (see GoalInput).
+export type NewGoal = Omit<Goal, "id" | "createdAt">;
+
+export function createGoal(db: DatabaseSync, input: NewGoal): Goal {
   const goal: Goal = { ...input, id: randomUUID(), createdAt: new Date().toISOString() };
   db.prepare(
     `INSERT INTO goal (id, title, kind, prompt, capstone, exam_date, created_at)
@@ -52,4 +55,19 @@ export function getGoal(db: DatabaseSync, id: string): Goal | undefined {
 
 export function listGoals(db: DatabaseSync): Goal[] {
   return db.prepare("SELECT * FROM goal ORDER BY created_at").all().map(toGoal);
+}
+
+// The learner's new title. Throws when there's no such goal.
+export function renameGoal(db: DatabaseSync, id: string, title: string): Goal {
+  db.prepare("UPDATE goal SET title = $title WHERE id = $id").run({ id, title });
+  const goal = getGoal(db, id);
+  if (!goal) throw new Error(`No goal with id ${id}`);
+  return goal;
+}
+
+// The namer's title, saved only if the title is still `expected` (the stand-in), so it never
+// replaces a name the learner typed meanwhile. Returns the goal if it changed.
+export function nameGoalIfUnchanged(db: DatabaseSync, id: string, expected: string, title: string): Goal | undefined {
+  const { changes } = db.prepare("UPDATE goal SET title = $title WHERE id = $id AND title = $expected").run({ id, expected, title });
+  return changes > 0 ? getGoal(db, id) : undefined;
 }

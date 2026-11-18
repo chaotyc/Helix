@@ -109,7 +109,9 @@ function request(model: string, effort: ModelRequest["effort"] = "medium"): Mode
 
 describe("Codex", () => {
   it("runs exec read-only with the schema file, the model, and the effort; prompt on stdin", async () => {
-    const result = await callCodex(request("codex:gpt-6-luna", "high"));
+    let thinking = false;
+    const activities: string[] = [];
+    const result = await callCodex({ ...request("codex:gpt-6-luna", "high"), onThinking: () => (thinking = true), onActivity: (a) => activities.push(a) });
     expect(result).toMatchObject({ text: '{"answer":"hi","n":3}', model: "codex:gpt-6-luna", inputTokens: 16872, outputTokens: 19 });
     const a = args("codex");
     expect(a.slice(0, 2)).toEqual(["exec", "--json"]);
@@ -117,6 +119,9 @@ describe("Codex", () => {
     expect(a.slice(a.indexOf("-s"), a.indexOf("-s") + 2)).toEqual(["-s", "read-only"]);
     expect(a.slice(a.indexOf("-m"), a.indexOf("-m") + 2)).toEqual(["-m", "gpt-6-luna"]);
     expect(a).toContain('model_reasoning_effort="high"');
+    expect(a).toContain('model_reasoning_summary="auto"'); // the summaries are its only progress
+    expect(thinking).toBe(true);
+    expect(activities).toEqual(["Checking primes below 250"]);
     expect(a[a.indexOf("--output-schema") + 1]).toMatch(/schema\.json$/);
     expect(a.at(-1)).toBe("-");
     expect(read("codex.stdin")).toMatch(/^<instructions>\nYou check things\.\n<\/instructions>\n\nCheck this\./);
@@ -126,13 +131,18 @@ describe("Codex", () => {
 
 describe("Claude Code", () => {
   it("replaces Claude Code's prompt with the agent's, gives it no tools, and enforces the schema", async () => {
-    const result = await callClaudeCode(request("claude-code:claude-haiku-5-5", "xhigh"));
-    expect(result).toMatchObject({ text: '{"answer":"hi","n":3}', model: "claude-code:claude-haiku-5-5" });
+    const streamed: string[] = [];
+    const result = await callClaudeCode({ ...request("claude-code:claude-opus-5-5", "xhigh"), onText: (t) => streamed.push(t) });
+    expect(result).toMatchObject({ text: '{"answer":"hi","n":3}', model: "claude-code:claude-opus-5-5" });
+    expect(streamed).toEqual(['{"answer": "h', '{"answer": "hi", "n', '{"answer": "hi", "n": 3}']);
     const a = args("claude");
     expect(a[0]).toBe("-p");
+    expect(a[a.indexOf("--output-format") + 1]).toBe("stream-json");
+    expect(a).toContain("--verbose");
+    expect(a).toContain("--include-partial-messages");
     expect(a[a.indexOf("--system-prompt") + 1]).toBe("You check things.");
     expect(a[a.indexOf("--tools") + 1]).toBe("");
-    expect(a[a.indexOf("--model") + 1]).toBe("claude-haiku-5-5");
+    expect(a[a.indexOf("--model") + 1]).toBe("claude-opus-5-5");
     expect(a[a.indexOf("--effort") + 1]).toBe("xhigh");
     expect(JSON.parse(a[a.indexOf("--json-schema") + 1]!)).toMatchObject({ required: ["ok"] });
     expect(a).toContain("--no-session-persistence");

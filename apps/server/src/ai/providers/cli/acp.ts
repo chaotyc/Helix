@@ -3,6 +3,7 @@
 // one reply and offers it nothing: no files, no terminal, and every permission request refused.
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
+import { toolLaunch } from "./tools.ts";
 
 type Message = {
   id?: number | string;
@@ -23,7 +24,8 @@ export class AcpClient {
   #exited: Error | null = null;
 
   constructor(options: AcpOptions) {
-    this.#child = spawn(options.command, options.args, { cwd: options.cwd, env: options.env, stdio: ["pipe", "pipe", "pipe"] });
+    const launch = toolLaunch(options.command, options.args); // no shell; on Windows, npm's .cmd shims run as node <script>
+    this.#child = spawn(launch.command, launch.args, { cwd: options.cwd, env: options.env, stdio: ["pipe", "pipe", "pipe"], windowsHide: true });
     this.#child.stderr.setEncoding("utf8");
     this.#child.stderr.on("data", (text: string) => (this.#stderr = (this.#stderr + text).slice(-4000)));
     this.#child.stdin.on("error", () => {});

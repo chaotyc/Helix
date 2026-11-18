@@ -3,7 +3,7 @@
 // kept for fast reads.
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
-import { Concept, MapEvent, ViewEntry, type ConceptGraph, type Edge, type MapActor } from "@helix/contracts";
+import { Concept, MapChange, MapEvent, ViewEntry, type ConceptGraph, type Edge, type MapActor } from "@helix/contracts";
 import { applyChange, describeChange, replayGraph, type MapCommand } from "@helix/core";
 import { inTransaction } from "./transaction.ts";
 
@@ -96,6 +96,7 @@ export type ChangeInfo = {
   sourceId?: string;
   promptVersion?: string;
   model?: string;
+  undoes?: number; // the diary seq of the human edit this change takes back (Undo)
 };
 
 function goalOf(command: MapCommand): string | undefined {
@@ -114,7 +115,10 @@ export function recordMapChange(db: DatabaseSync, command: MapCommand, info: Cha
     // Check against the graph the diary says is current, not the derived tables:
     // if those were ever wrong, a new change shouldn't be judged against them.
     const current = replayGraph(readMapEvents(db));
-    const change = describeChange(current, command);
+    const described = describeChange(current, command);
+    // An undo says which entry it takes back, in its payload (checked against the contract).
+    const change =
+      info.undoes === undefined ? described : MapChange.parse({ ...described, payload: { ...described.payload, undoes: info.undoes } });
 
     db.prepare(
       `INSERT INTO map_event (goal_id, op, payload, before, after, actor, request_id,

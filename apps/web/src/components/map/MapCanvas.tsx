@@ -1,14 +1,15 @@
 // The drawn map (V3): concepts as cards, prerequisite arrows labeled with their depths
 // ("1 → 2": the needed concept at depth 1, for the needing one at depth 2), part-of as dashed lines.
-// Clicking selects; all editing happens in the inspector beside it.
-import { useEffect, useMemo, type ReactNode } from "react";
+// Clicking selects; all editing happens in the inspector beside it. Cards can be dragged.
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Background, BackgroundVariant, MarkerType, Panel, ReactFlow, useReactFlow, useStore, type Edge as FlowEdge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { ConceptKnowledge, Edge, GoalMap, SharedWith } from "@helix/contracts";
 import { FitIcon, MinusIcon, PlusIcon } from "../ui/icons.tsx";
 import { ConceptNode, type ConceptNodeType } from "./ConceptNode.tsx";
 import { edgeKey } from "./edits.ts";
-import { layoutMap, NODE_HEIGHT, NODE_WIDTH, type Positions } from "./layout.ts";
+import { layoutKey, layoutMap, NODE_HEIGHT, NODE_WIDTH, type Positions } from "./layout.ts";
+import { arrowSides, sourceHandle, targetHandle } from "./routing.ts";
 
 type Props = {
   map: GoalMap;
@@ -28,7 +29,13 @@ const EDGE = "var(--hx-edge)";
 const SELECTED = "var(--hx-accent)";
 
 export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selectedEdgeKey, onSelectConcept, onSelectEdge, onClear, rightInset, children }: Props) {
-  const positions = useMemo(() => layoutMap(map), [map]);
+  // Laid out again only when concepts or arrows come or go; that also drops anything dragged.
+  // Dragged positions live here only (not saved): "Re-layout" or the next add/remove resets them.
+  const key = layoutKey(map);
+  const laidOut = useMemo(() => layoutMap(map), [key]);
+  const [moved, setMoved] = useState<{ key: string; positions: Positions }>({ key, positions: {} });
+  const dragged = moved.key === key ? moved.positions : {};
+  const positions: Positions = { ...laidOut, ...dragged };
   const name = (id: string) => map.concepts.find((c) => c.id === id)?.name ?? id;
 
   const nodes: ConceptNodeType[] = map.view.map((entry) => {
@@ -39,19 +46,26 @@ export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selec
       type: "concept",
       ariaLabel: `${concept?.name ?? entry.conceptId}, depth ${held} of ${entry.targetDepth}${entry.role === "background" ? ", background" : ""}`,
       position: positions[entry.conceptId] ?? { x: 0, y: 0 },
+      // Every card has the same known size. Saying so keeps React Flow from hiding the card to
+      // measure it again each time this list is rebuilt (each selection, each drag step), which
+      // would also drop keyboard focus from it.
+      measured: { width: NODE_WIDTH, height: NODE_HEIGHT },
       selected: entry.conceptId === selectedConceptId,
       data: { name: concept?.name ?? entry.conceptId, kind: concept?.kind ?? "concept", entry, shared: entry.conceptId in sharedWith, knowledge: knowledge[entry.conceptId] },
     };
   });
 
   const edges: (FlowEdge & { data: { edge: Edge } })[] = map.edges.map((e) => {
-    const key = edgeKey(e);
-    const selected = key === selectedEdgeKey;
+    const id = edgeKey(e);
+    const selected = id === selectedEdgeKey;
     const color = selected ? SELECTED : EDGE;
+    const sides = arrowSides(e.type, positions[e.src] ?? { x: 0, y: 0 }, positions[e.dst] ?? { x: 0, y: 0 });
     return {
-      id: key,
+      id,
       source: e.src,
       target: e.dst,
+      sourceHandle: sourceHandle(sides.from),
+      targetHandle: targetHandle(sides.to),
       ariaLabel:
         e.type === "prereq"
           ? `${name(e.src)} at depth ${e.srcDepth} is needed for ${name(e.dst)} at depth ${e.dstDepth}`
@@ -77,7 +91,10 @@ export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selec
       fitView
       fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
       minZoom={0.2}
-      nodesDraggable={false}
+      // Cards can be dragged (or moved with the arrow keys once selected); dragging doesn't select.
+      nodesDraggable
+      selectNodesOnDrag={false}
+      nodeDragThreshold={3}
       nodesConnectable={false}
       onNodeClick={(_, node) => onSelectConcept(node.id)}
       onEdgeClick={(_, edge) => onSelectEdge((edge.data as { edge: Edge }).edge)}
@@ -86,6 +103,8 @@ export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selec
       onNodesChange={(changes) => {
         const picked = changes.find((c) => c.type === "select" && c.selected);
         if (picked && "id" in picked) onSelectConcept(picked.id);
+        const moves = changes.flatMap((c) => (c.type === "position" && c.position ? [[c.id, c.position] as const] : []));
+        if (moves.length) setMoved({ key, positions: { ...dragged, ...Object.fromEntries(moves) } });
       }}
       onEdgesChange={(changes) => {
         const picked = changes.find((c) => c.type === "select" && c.selected);
@@ -97,9 +116,9 @@ export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selec
     >
       <Background variant={BackgroundVariant.Dots} gap={20} size={1.25} color="var(--hx-dots)" />
       {children}
-      <KeepInView nodeId={selectedConceptId} positions={positions} rightInset={rightInset} />
+      <KeepInView nodeId={selectedConceptId} positions={positions} layout={key} rightInset={rightInset} />
       <Panel position="bottom-left" className="!m-3 flex items-end gap-2">
-        <ZoomControls />
+        <ZoomControls onRelayout={Object.keys(dragged).length > 0 ? () => setMoved({ key, positions: {} }) : undefined} />
         {/* The legend steps aside when the inspector leaves too little room for it. */}
         <Legend className={rightInset > 0 ? "@max-[72rem]/map:hidden" : "@max-[44rem]/map:hidden"} />
       </Panel>
@@ -109,13 +128,16 @@ export function MapCanvas({ map, sharedWith, knowledge, selectedConceptId, selec
 
 // When a concept is selected, slide the drawing so it isn't under the inspector or off screen.
 // Draws nothing; it's inside <ReactFlow> so it can move the view.
-function KeepInView({ nodeId, positions, rightInset }: { nodeId: string | null; positions: Positions; rightInset: number }) {
+// `layout` changes when the map is laid out again; dragging a card doesn't move the view.
+function KeepInView({ nodeId, positions, layout, rightInset }: { nodeId: string | null; positions: Positions; layout: string; rightInset: number }) {
   const flow = useReactFlow();
   const width = useStore((s) => s.width);
   const height = useStore((s) => s.height);
+  const current = useRef(positions);
+  current.current = positions;
 
   useEffect(() => {
-    const pos = nodeId ? positions[nodeId] : undefined;
+    const pos = nodeId ? current.current[nodeId] : undefined;
     if (!pos) return;
     const { x, y, zoom } = flow.getViewport();
     const margin = 16;
@@ -130,17 +152,31 @@ function KeepInView({ nodeId, positions, rightInset }: { nodeId: string | null; 
     const dy = top < edge ? edge - top : bottom > height - edge ? height - edge - bottom : 0;
     if (dx === 0 && dy === 0) return;
     flow.setViewport({ x: x + dx, y: y + dy, zoom }, { duration: 250 });
-  }, [nodeId, width, height, rightInset, positions]); // not the viewport: panning by hand stays free
+  }, [nodeId, width, height, rightInset, layout]); // not the viewport: panning by hand stays free
 
   return null;
 }
 
 // Zoom in, out, and fit, matched to the rest of the UI. Inside <ReactFlow>, so it can reach its view.
-function ZoomControls() {
+// `onRelayout`, given once a card has been dragged, puts every card back where the layout had it.
+function ZoomControls({ onRelayout }: { onRelayout?: () => void }) {
   const flow = useReactFlow();
   const button = "flex size-8 items-center justify-center text-fg-muted hover:bg-fill hover:text-fg";
   return (
     <div className="flex divide-x divide-line overflow-hidden rounded-lg border border-line-strong bg-overlay shadow-sm">
+      {onRelayout && (
+        <button
+          type="button"
+          title="Put every card back where the layout had it"
+          onClick={() => {
+            onRelayout();
+            requestAnimationFrame(() => flow.fitView({ padding: 0.2, maxZoom: 1, duration: 200 }));
+          }}
+          className={`${button} w-auto px-2.5 text-xs font-medium whitespace-nowrap`}
+        >
+          Re-layout
+        </button>
+      )}
       <button type="button" aria-label="Zoom in" title="Zoom in" onClick={() => flow.zoomIn()} className={button}>
         <PlusIcon />
       </button>

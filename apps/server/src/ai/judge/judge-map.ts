@@ -46,7 +46,7 @@ export async function judgeMap(db: DatabaseSync, input: JudgeInput, deps: JudgeD
   const lastExtract = readMapEvents(db).findLast((e) => e.op === "extract" && e.goalId === goal.id);
   const source = lastExtract?.sourceId ? getSource(db, lastExtract.sourceId) : undefined;
 
-  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE]);
+  const prompt = loadPrompt(AGENT, [MESSAGES_FILE, REQUEST_PARTS_FILE], ["source-is-data"]);
   const { value, result, aiCallIds } = await structuredCall(db, {
     agent: AGENT,
     goalId: goal.id,

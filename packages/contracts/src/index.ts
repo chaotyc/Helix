@@ -34,9 +34,36 @@ export const Goal = z.object({
 });
 export type Goal = z.infer<typeof Goal>;
 
-// What the UI sends to create a goal: a goal without the parts the server fills in.
-export const GoalInput = Goal.omit({ id: true, createdAt: true });
+// A goal title from the UI (typed when renaming, or given when creating): one line.
+export const GoalTitleText = z
+  .string()
+  .trim()
+  .min(1)
+  .max(120)
+  .regex(/^[^\r\n]*$/, "A goal title is one line.")
+  .transform((title) => title.replace(/\s+/g, " ")); // runs of spaces → one
+
+// What the UI sends to create a goal: a goal without the parts the server fills in. Without a
+// title, the server makes a stand-in from the learner's words and has a model name the goal
+// (goal.updated follows), the way a chat app titles a new chat. So one of the two is required.
+export const GoalInput = Goal.omit({ id: true, createdAt: true })
+  .extend({
+    title: GoalTitleText.optional(),
+    prompt: z
+      .string()
+      .trim()
+      .transform((prompt) => prompt || undefined) // blank words are no words
+      .optional(),
+  })
+  .refine((goal) => goal.title !== undefined || Boolean(goal.prompt?.trim()), "A goal needs a title or the learner's words.");
 export type GoalInput = z.infer<typeof GoalInput>;
+
+// What the goal namer (a model) must return. Sent to the API as the output format, so the
+// length limit is checked in code after.
+export const GoalName = z.strictObject({
+  title: z.string().describe("the goal's name for the sidebar: 2-6 words, at most 40 characters"),
+});
+export type GoalName = z.infer<typeof GoalName>;
 
 // Messages over websocket
 
@@ -45,6 +72,8 @@ export const ClientMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("ping"), text: z.string() }),
   z.object({ type: z.literal("goal.create"), goal: GoalInput }),
   z.object({ type: z.literal("goal.list") }),
+  // A new title for a goal, typed by the learner (reply: goal.updated).
+  z.object({ type: z.literal("goal.rename"), goalId: z.string(), title: GoalTitleText }),
   // Building a map takes two steps. First, the clarifier reads the goal and source and asks
   // up to 3 questions (reply: map.questions). No source text: Claude works from the goal and answers.
   z.object({
@@ -64,6 +93,10 @@ export const ClientMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("map.get"), goalId: z.string() }),
   // One or more click edits, applied together or not at all. Reply: map.updated or map.edit.rejected.
   z.object({ type: z.literal("map.edit"), goalId: z.string(), edits: z.array(MapEdit).min(1) }),
+  // Take back the most recent human edit on this goal's map that isn't undone yet (one click
+  // edit, all its parts), by appending its inverse to the diary. Repeatable.
+  // Reply: map.undone then map.updated, or map.edit.rejected.
+  z.object({ type: z.literal("map.undo"), goalId: z.string() }),
   // Which model does each job (J1). Both reply with `settings`.
   z.object({ type: z.literal("settings.get") }),
   z.object({ type: z.literal("settings.set"), settings: Settings }),
@@ -91,9 +124,23 @@ export const ServerMsg = z.discriminatedUnion("type", [
   z.object({ type: z.literal("error"), message: z.string() }),
   z.object({ type: z.literal("goals"), goals: z.array(Goal) }),
   z.object({ type: z.literal("goal.created"), goal: Goal }),
-  z.object({ type: z.literal("map.progress"), goalId: z.string(), stage: ExtractionStage, detail: z.string() }),
+  // A goal changed: the model named it, or the learner renamed it.
+  z.object({ type: z.literal("goal.updated"), goal: Goal }),
+  // `elapsedMs`: how long ago the request (asking questions, or building the map) started, so the
+  // UI can show a running clock. Optional: older servers don't send it.
+  z.object({
+    type: z.literal("map.progress"),
+    goalId: z.string(),
+    stage: ExtractionStage,
+    detail: z.string(),
+    elapsedMs: z.number().int().nonnegative().optional(),
+  }),
   z.object({ type: z.literal("map.questions"), goalId: z.string(), roundId: z.string(), questions: z.array(ClarifyQuestion) }),
-  z.object({ type: z.literal("map.updated"), map: GoalMap, sharedWith: SharedWith }),
+  // `nextUndo`: what Undo would take back, in words ("Remove “LTI systems” from this goal"),
+  // or null when there's nothing to undo.
+  z.object({ type: z.literal("map.updated"), map: GoalMap, sharedWith: SharedWith, nextUndo: z.string().nullable() }),
+  // An edit was undone; `undid` names it in the same words `nextUndo` used.
+  z.object({ type: z.literal("map.undone"), goalId: z.string(), undid: z.string() }),
   // An edit broke a rule (a loop, a missing concept, ...); nothing was changed.
   z.object({ type: z.literal("map.edit.rejected"), goalId: z.string(), reason: z.string() }),
   z.object({ type: z.literal("settings"), settings: Settings }),

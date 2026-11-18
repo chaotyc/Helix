@@ -1,0 +1,2087 @@
+{
+  "date": "2026-11-17T19:38:50.727Z",
+  "effort": "high",
+  "judgeEffort": "xhigh",
+  "runs": [
+    {
+      "case": "signals-demo",
+      "run": 1,
+      "extractPromptVersion": "extract-map@f1a36b43",
+      "judgePromptVersion": "judge-map@266a38a7",
+      "extractModel": "claude-code:claude-opus-5-5",
+      "judgeModel": "claude-code:claude-opus-5-5",
+      "score": {
+        "concepts": 75,
+        "arrows": 148,
+        "majors": 2,
+        "minors": 12,
+        "majorsPer10": 0.26666666666666666,
+        "byType": {
+          "wrong_arrow_depth": {
+            "major": 1,
+            "minor": 6
+          },
+          "reversed_arrow": {
+            "major": 1,
+            "minor": 0
+          },
+          "missing_prerequisite": {
+            "major": 0,
+            "minor": 4
+          },
+          "missing_concept": {
+            "major": 0,
+            "minor": 1
+          },
+          "wrong_role": {
+            "major": 0,
+            "minor": 1
+          }
+        },
+        "warnings": 7
+      },
+      "problems": [
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "major",
+          "conceptIds": [
+            "magnitude-and-phase-response",
+            "frequency-response"
+          ],
+          "reason": "Only mag-phase@4 needs frequency-response, yet linear-phase, decibel scale, ideal-filters and moving-average all need mag-phase@3, so it can be taught with no frequency response; make it magnitude-and-phase-response@3 needs frequency-response@3."
+        },
+        {
+          "type": "reversed_arrow",
+          "severity": "major",
+          "conceptIds": [
+            "continuous-time-fourier-transform",
+            "sinc-function"
+          ],
+          "reason": "Sinc as the transform pair of a rect and the ideal-LPF impulse response comes from the CTFT. Sinc@3 should need continuous-time-fourier-transform@3, not the other way, and not only trig identities."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "fir-filters",
+            "discrete-time-transfer-function"
+          ],
+          "reason": "All of FIR filters' prerequisites are at @4, but fir-vs-iir-selection needs fir-filters@3, which leaves FIR@3 with none; its transfer-function, impulse-response and linear-phase arrows should start at fir-filters@3."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "windowing-method",
+            "ideal-filters"
+          ],
+          "reason": "Windowing's prerequisites (ideal filters, FIR filters, convolution theorem, Gibbs) are only at @4, but window-function-selection needs windowing-method@3; the ideal-filter and FIR arrows should apply at windowing-method@3."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "filter-specifications",
+            "ideal-filters"
+          ],
+          "reason": "Filter specifications' prerequisites are only at @4, but window-function-selection needs filter-specifications@3; the ideal-filters and decibel-scale arrows should apply at filter-specifications@3."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "causality-stability-from-z-roc",
+            "z-transform-region-of-convergence"
+          ],
+          "reason": "iir-filters needs causality-stability-from-z-roc@3, but its ROC and LTI-property arrows apply only at @4; they should apply at @3 (ROC@3, lti-properties-from-impulse-response@3)."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "nyquist-sampling-theorem",
+            "impulse-train-sampling"
+          ],
+          "reason": "Aliasing, reconstruction and frequency mapping need Nyquist@3, which assumes the spectral-copy picture; nyquist-sampling-theorem@3 (not only @4) should need impulse-train-sampling@3."
+        },
+        {
+          "type": "wrong_arrow_depth",
+          "severity": "minor",
+          "conceptIds": [
+            "aliasing",
+            "nyquist-sampling-theorem"
+          ],
+          "reason": "anti-aliasing-filter needs aliasing@3, but aliasing has prerequisites only at @4; the Nyquist arrow should apply at aliasing@3."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "minor",
+          "conceptIds": [
+            "sinc-function",
+            "continuous-time-fourier-transform"
+          ],
+          "reason": "The sinc concept is defined as the CTFT pair of a rect pulse, so sinc-function@3 should need continuous-time-fourier-transform@3."
+        },
+        {
+          "type": "missing_concept",
+          "severity": "minor",
+          "conceptIds": [
+            "discrete-time-fourier-transform",
+            "continuous-time-fourier-series"
+          ],
+          "reason": "The map has the CT Fourier series but no discrete-time Fourier series (DTFS), which the syllabus's Fourier-series week and the learner's discrete-time emphasis call for."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "minor",
+          "conceptIds": [
+            "signal-energy-and-power",
+            "discrete-time-signals"
+          ],
+          "reason": "Signal energy and power has no arrow to any signal concept; it should need discrete-time-signals and continuous-time-signals."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "minor",
+          "conceptIds": [
+            "lti-properties-from-impulse-response",
+            "system-memory"
+          ],
+          "reason": "Deciding from h whether a system is memoryless needs the memory property, so lti-properties-from-impulse-response@3 should need system-memory@2."
+        },
+        {
+          "type": "missing_prerequisite",
+          "severity": "minor",
+          "conceptIds": [
+            "linear-phase-and-group-delay",
+            "dtft-properties"
+          ],
+          "reason": "Linear phase as a pure delay comes from the DTFT time-shift property; linear-phase-and-group-delay@3 should need dtft-properties@3."
+        },
+        {
+          "type": "wrong_role",
+          "severity": "minor",
+          "conceptIds": [
+            "linear-differential-equations"
+          ],
+          "reason": "The syllabus only requires Calculus II, which doesn't usually cover differential equations, so constant-coefficient ODEs should be taught (briefly), not assumed as background."
+        }
+      ],
+      "warnings": [
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "linear-differential-equations",
+            "difference-equations"
+          ],
+          "message": "\"Linear constant-coefficient differential equations\" and \"Linear constant-coefficient difference equations\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-fourier-series",
+            "continuous-time-fourier-transform"
+          ],
+          "message": "\"Continuous-time Fourier series\" and \"Continuous-time Fourier transform\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "laplace-transform",
+            "inverse-laplace-transform"
+          ],
+          "message": "\"Laplace transform\" and \"Inverse Laplace transform\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "s-plane-poles-and-zeros",
+            "z-plane-poles-and-zeros"
+          ],
+          "message": "\"Poles and zeros in the s-plane\" and \"Poles and zeros in the z-plane\" share 75% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "continuous-time-transfer-function",
+            "discrete-time-transfer-function"
+          ],
+          "message": "\"Continuous-time transfer function\" and \"Discrete-time transfer function\" share 60% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "z-transform",
+            "z-transform-properties"
+          ],
+          "message": "\"Z-transform\" and \"Z-transform properties\" share 67% of their words."
+        },
+        {
+          "rule": "similar_names",
+          "conceptIds": [
+            "z-transform",
+            "inverse-z-transform"
+          ],
+          "message": "\"Z-transform\" and \"Inverse z-transform\" share 67% of their words."
+        }
+      ],
+      "costUsd": 0,
+      "map": {
+        "goalId": "aab9fef5-eb5a-4cde-bd38-978d8b702679",
+        "concepts": [
+          {
+            "id": "complex-numbers",
+            "name": "Complex numbers",
+            "description": "Numbers of the form a+jb, with their arithmetic, conjugates, magnitude, and plotting in the complex plane.",
+            "kind": "concept"
+          },
+          {
+            "id": "eulers-formula",
+            "name": "Euler's formula and polar form",
+            "description": "The identity e^{jθ}=cosθ+j sinθ and its use to write complex numbers in magnitude-phase (polar) form.",
+            "kind": "concept"
+          },
+          {
+            "id": "trigonometric-identities",
+            "name": "Trigonometric identities",
+            "description": "Standard identities for sums, products, and angle shifts of sines and cosines.",
+            "kind": "concept"
+          },
+          {
+            "id": "integration-techniques",
+            "name": "Integration techniques",
+            "description": "Evaluating definite integrals, including substitution and integration by parts, as taught in Calculus II.",
+            "kind": "skill"
+          },
+          {
+            "id": "improper-integrals",
+            "name": "Improper integrals",
+            "description": "Integrals over infinite limits and the conditions under which they converge.",
+            "kind": "concept"
+          },
+          {
+            "id": "summation-notation",
+            "name": "Summation notation",
+            "description": "Writing and manipulating finite and infinite sums with sigma notation, including index shifts.",
+            "kind": "skill"
+          },
+          {
+            "id": "geometric-series",
+            "name": "Geometric series",
+            "description": "Closed-form sums of finite and infinite geometric series and the condition |r|<1 for convergence.",
+            "kind": "skill"
+          },
+          {
+            "id": "partial-fraction-decomposition",
+            "name": "Partial fraction decomposition",
+            "description": "Splitting a rational function into a sum of simpler fractions with first- or second-order denominators.",
+            "kind": "skill"
+          },
+          {
+            "id": "linear-differential-equations",
+            "name": "Linear constant-coefficient differential equations",
+            "description": "Ordinary differential equations with constant coefficients that describe continuous-time systems.",
+            "kind": "concept"
+          },
+          {
+            "id": "continuous-time-signals",
+            "name": "Continuous-time signals",
+            "description": "Functions x(t) defined for every real value of time, used to model physical quantities.",
+            "kind": "concept"
+          },
+          {
+            "id": "discrete-time-signals",
+            "name": "Discrete-time signals",
+            "description": "Sequences x[n] defined only at integer indices, such as sampled data.",
+            "kind": "concept"
+          },
+          {
+            "id": "signal-time-transformations",
+            "name": "Time shifting, scaling, and reversal",
+            "description": "Transforming a signal's independent variable by shifting, time-reversing, or scaling it, including the order in which to apply these operations.",
+            "kind": "skill"
+          },
+          {
+            "id": "even-odd-decomposition",
+            "name": "Even and odd decomposition",
+            "description": "Writing any signal as the sum of an even part (x(t)+x(-t))/2 and an odd part (x(t)-x(-t))/2.",
+            "kind": "skill"
+          },
+          {
+            "id": "signal-periodicity",
+            "name": "Signal periodicity",
+            "description": "Whether a continuous- or discrete-time signal repeats, and finding its fundamental period, including the integer-period condition for discrete sinusoids.",
+            "kind": "concept"
+          },
+          {
+            "id": "signal-energy-and-power",
+            "name": "Signal energy and power",
+            "description": "Total energy and average power of a signal, computed by integrating or summing its squared magnitude.",
+            "kind": "concept"
+          },
+          {
+            "id": "discrete-unit-impulse-and-step",
+            "name": "Discrete-time unit impulse and unit step",
+            "description": "The sequences δ[n] and u[n], how they relate, and how any sequence can be written as a sum of shifted impulses.",
+            "kind": "concept"
+          },
+          {
+            "id": "dirac-delta-function",
+            "name": "Dirac delta function",
+            "description": "The continuous-time unit impulse δ(t), defined by its sifting property under integration.",
+            "kind": "concept"
+          },
+          {
+            "id": "complex-exponential-signals",
+            "name": "Complex exponential and sinusoidal signals",
+            "description": "Signals of the form e^{st} or z^n and the real sinusoids built from them, in continuous and discrete time.",
+            "kind": "concept"
+          },
+          {
+            "id": "linearity",
+            "name": "Linearity",
+            "description": "The system property that the response to a weighted sum of inputs equals the same weighted sum of the individual responses.",
+            "kind": "concept"
+          },
+          {
+            "id": "time-invariance",
+            "name": "Time invariance",
+            "description": "The system property that shifting the input in time shifts the output by the same amount and changes nothing else.",
+            "kind": "concept"
+          },
+          {
+            "id": "causality",
+            "name": "Causality",
+            "description": "The system property that the output at any time depends only on present and past inputs.",
+            "kind": "concept"
+          },
+          {
+            "id": "bibo-stability",
+            "name": "BIBO stability",
+            "description": "The system property that every bounded input produces a bounded output.",
+            "kind": "concept"
+          },
+          {
+            "id": "system-memory",
+            "name": "System memory",
+            "description": "Whether a system's output depends only on the current input (memoryless) or also on other times (with memory).",
+            "kind": "concept"
+          },
+          {
+            "id": "lti-systems",
+            "name": "Linear time-invariant (LTI) systems",
+            "description": "Systems that are both linear and time-invariant, so that their impulse response fully describes them.",
+            "kind": "concept"
+          },
+          {
+            "id": "impulse-response",
+            "name": "Impulse response",
+            "description": "The output h of an LTI system when the input is a unit impulse. It fully determines how the system responds to any input.",
+            "kind": "concept"
+          },
+          {
+            "id": "discrete-time-convolution",
+            "name": "Discrete-time convolution",
+            "description": "Computing an LTI system's output with the convolution sum y[n]=Σ x[k]h[n−k].",
+            "kind": "skill"
+          },
+          {
+            "id": "continuous-time-convolution",
+            "name": "Continuous-time convolution",
+            "description": "Computing an LTI system's output with the convolution integral y(t)=∫x(τ)h(t−τ)dτ, using the flip-and-slide method.",
+            "kind": "skill"
+          },
+          {
+            "id": "convolution-properties",
+            "name": "Properties of convolution",
+            "description": "The commutative, associative, and distributive properties of convolution and what they mean for systems in series and in parallel.",
+            "kind": "concept"
+          },
+          {
+            "id": "lti-properties-from-impulse-response",
+            "name": "LTI system properties from the impulse response",
+            "description": "Deciding whether an LTI system is causal, stable, or memoryless by examining its impulse response, for example by checking absolute summability for stability.",
+            "kind": "skill"
+          },
+          {
+            "id": "eigenfunctions-of-lti-systems",
+            "name": "Complex exponentials as eigenfunctions of LTI systems",
+            "description": "The fact that a complex exponential input to an LTI system produces the same exponential at the output, scaled by a complex gain.",
+            "kind": "concept"
+          },
+          {
+            "id": "continuous-time-fourier-series",
+            "name": "Continuous-time Fourier series",
+            "description": "Writing a periodic signal as a weighted sum of harmonically related complex exponentials, and computing the coefficients.",
+            "kind": "skill"
+          },
+          {
+            "id": "gibbs-phenomenon",
+            "name": "Gibbs phenomenon",
+            "description": "The overshoot and ripple that stay near a jump discontinuity when a Fourier representation is truncated.",
+            "kind": "concept"
+          },
+          {
+            "id": "parsevals-theorem",
+            "name": "Parseval's theorem",
+            "description": "The equality between a signal's energy or power in the time domain and in the frequency domain.",
+            "kind": "concept"
+          },
+          {
+            "id": "continuous-time-fourier-transform",
+            "name": "Continuous-time Fourier transform",
+            "description": "The transform X(jω)=∫x(t)e^{−jωt}dt and its inverse, which represent aperiodic continuous-time signals in frequency.",
+            "kind": "concept"
+          },
+          {
+            "id": "sinc-function",
+            "name": "Sinc function",
+            "description": "The function sin(πx)/(πx), which is the Fourier pair of a rectangular pulse and the impulse response of an ideal lowpass filter.",
+            "kind": "concept"
+          },
+          {
+            "id": "fourier-transform-properties",
+            "name": "Fourier transform properties",
+            "description": "Properties such as linearity, time shift, frequency shift (modulation), scaling, duality, and differentiation, used to compute transforms without integrating.",
+            "kind": "skill"
+          },
+          {
+            "id": "convolution-theorem",
+            "name": "Convolution theorem",
+            "description": "Convolution in time corresponds to multiplication in frequency, and multiplication in time corresponds to convolution in frequency.",
+            "kind": "concept"
+          },
+          {
+            "id": "discrete-time-fourier-transform",
+            "name": "Discrete-time Fourier transform (DTFT)",
+            "description": "The transform X(e^{jω})=Σx[n]e^{−jωn}, which is 2π-periodic and represents discrete-time signals in frequency.",
+            "kind": "concept"
+          },
+          {
+            "id": "dtft-properties",
+            "name": "DTFT properties",
+            "description": "Properties of the DTFT such as linearity, time shift, modulation, and 2π-periodicity, used to compute transforms of sequences.",
+            "kind": "skill"
+          },
+          {
+            "id": "frequency-response",
+            "name": "Frequency response",
+            "description": "The function H(e^{jω}) or H(jω) that gives an LTI system's complex gain at each frequency, equal to the Fourier transform of its impulse response.",
+            "kind": "concept"
+          },
+          {
+            "id": "magnitude-and-phase-response",
+            "name": "Magnitude and phase response",
+            "description": "Splitting a frequency response into |H| (gain) and ∠H (phase shift), then computing and plotting each against frequency.",
+            "kind": "skill"
+          },
+          {
+            "id": "linear-phase-and-group-delay",
+            "name": "Linear phase and group delay",
+            "description": "A phase response that is linear in frequency delays every frequency component by the same amount, and group delay measures that delay.",
+            "kind": "concept"
+          },
+          {
+            "id": "decibel-magnitude-scale",
+            "name": "Decibel magnitude scale",
+            "description": "Expressing gain as 20·log10|H| in decibels to read attenuation and ripple on frequency-response plots.",
+            "kind": "skill"
+          },
+          {
+            "id": "impulse-train-sampling",
+            "name": "Impulse-train sampling model",
+            "description": "Modeling sampling as multiplication by a periodic impulse train, which makes copies of the spectrum at multiples of the sampling frequency.",
+            "kind": "concept"
+          },
+          {
+            "id": "nyquist-sampling-theorem",
+            "name": "Nyquist sampling theorem",
+            "description": "A bandlimited signal can be recovered exactly from its samples if the sampling rate is greater than twice its highest frequency.",
+            "kind": "concept"
+          },
+          {
+            "id": "aliasing",
+            "name": "Aliasing",
+            "description": "When a signal is sampled too slowly, its spectral copies overlap and high frequencies show up as false low frequencies.",
+            "kind": "concept"
+          },
+          {
+            "id": "signal-reconstruction",
+            "name": "Reconstruction from samples",
+            "description": "Recovering a continuous-time signal from its samples by ideal lowpass filtering, which is the same as sinc interpolation.",
+            "kind": "concept"
+          },
+          {
+            "id": "continuous-discrete-frequency-mapping",
+            "name": "Continuous-to-discrete frequency mapping",
+            "description": "The relation ω=ΩT between analog frequency in rad/s or Hz and digital frequency in radians per sample, used to convert specifications.",
+            "kind": "skill"
+          },
+          {
+            "id": "anti-aliasing-filter",
+            "name": "Anti-aliasing filter",
+            "description": "An analog lowpass filter applied before sampling to remove frequencies above half the sampling rate.",
+            "kind": "concept"
+          },
+          {
+            "id": "laplace-transform",
+            "name": "Laplace transform",
+            "description": "The transform X(s)=∫x(t)e^{−st}dt, which extends the Fourier transform to complex frequencies s=σ+jω.",
+            "kind": "concept"
+          },
+          {
+            "id": "laplace-region-of-convergence",
+            "name": "Laplace region of convergence",
+            "description": "The set of s-values where the Laplace integral converges, and what it says about whether a signal is right-sided, left-sided, causal, or stable.",
+            "kind": "concept"
+          },
+          {
+            "id": "s-plane-poles-and-zeros",
+            "name": "Poles and zeros in the s-plane",
+            "description": "The roots of the denominator and numerator of a rational Laplace transform, plotted in the s-plane, and how their locations relate to time-domain behavior.",
+            "kind": "concept"
+          },
+          {
+            "id": "inverse-laplace-transform",
+            "name": "Inverse Laplace transform",
+            "description": "Recovering a time signal from a rational X(s) and its ROC, using partial fractions and known transform pairs.",
+            "kind": "skill"
+          },
+          {
+            "id": "continuous-time-transfer-function",
+            "name": "Continuous-time transfer function",
+            "description": "The system function H(s), the Laplace transform of the impulse response, found from a system's differential equation.",
+            "kind": "concept"
+          },
+          {
+            "id": "z-transform",
+            "name": "Z-transform",
+            "description": "The transform X(z)=Σx[n]z^{−n}, which generalizes the DTFT to complex values of z.",
+            "kind": "concept"
+          },
+          {
+            "id": "z-transform-region-of-convergence",
+            "name": "Z-transform region of convergence",
+            "description": "The ring of z-values where the z-transform sum converges, and how its shape shows whether a sequence is right-sided, left-sided, or two-sided.",
+            "kind": "concept"
+          },
+          {
+            "id": "z-transform-properties",
+            "name": "Z-transform properties",
+            "description": "Properties such as linearity, time shift (multiplying by z^{−k}), convolution, and scaling, used to manipulate z-transforms.",
+            "kind": "skill"
+          },
+          {
+            "id": "inverse-z-transform",
+            "name": "Inverse z-transform",
+            "description": "Recovering a sequence from a rational X(z) and its ROC, using partial fractions, standard pairs, or power-series expansion.",
+            "kind": "skill"
+          },
+          {
+            "id": "z-plane-poles-and-zeros",
+            "name": "Poles and zeros in the z-plane",
+            "description": "The roots of the numerator and denominator of a rational H(z), plotted relative to the unit circle.",
+            "kind": "concept"
+          },
+          {
+            "id": "causality-stability-from-z-roc",
+            "name": "Causality and stability from the z-domain",
+            "description": "A causal LTI system is stable exactly when all its poles lie inside the unit circle, which means its ROC includes the unit circle.",
+            "kind": "concept"
+          },
+          {
+            "id": "z-transform-dtft-relationship",
+            "name": "Relationship between the z-transform and the DTFT",
+            "description": "The DTFT equals the z-transform evaluated on the unit circle z=e^{jω}, provided the ROC contains the unit circle.",
+            "kind": "concept"
+          },
+          {
+            "id": "geometric-frequency-response-evaluation",
+            "name": "Geometric evaluation of frequency response from pole-zero plots",
+            "description": "Estimating magnitude and phase response from the distances and angles between a point on the unit circle and the system's poles and zeros.",
+            "kind": "skill"
+          },
+          {
+            "id": "difference-equations",
+            "name": "Linear constant-coefficient difference equations",
+            "description": "Equations that relate current and past outputs to current and past inputs, used to describe and compute discrete-time LTI systems recursively.",
+            "kind": "concept"
+          },
+          {
+            "id": "discrete-time-transfer-function",
+            "name": "Discrete-time transfer function",
+            "description": "The rational system function H(z)=Y(z)/X(z), found from a difference equation or an impulse response.",
+            "kind": "concept"
+          },
+          {
+            "id": "block-diagram-realization",
+            "name": "System block diagrams and realizations",
+            "description": "Building a difference equation or transfer function from adders, multipliers, and delays, for example in Direct Form I or II.",
+            "kind": "skill"
+          },
+          {
+            "id": "ideal-filters",
+            "name": "Ideal frequency-selective filters",
+            "description": "Ideal lowpass, highpass, and bandpass filters with brick-wall magnitude responses, and why their infinite, noncausal impulse responses can't be built.",
+            "kind": "concept"
+          },
+          {
+            "id": "filter-specifications",
+            "name": "Filter specifications",
+            "description": "Describing a practical filter by its passband and stopband edges, transition width, passband ripple, and stopband attenuation.",
+            "kind": "concept"
+          },
+          {
+            "id": "fir-filters",
+            "name": "FIR filters",
+            "description": "Finite impulse response filters, which are nonrecursive, always stable, and can have exactly linear phase.",
+            "kind": "concept"
+          },
+          {
+            "id": "iir-filters",
+            "name": "IIR filters",
+            "description": "Infinite impulse response filters, which use feedback (poles) to get sharp responses with few coefficients but can be unstable and have nonlinear phase.",
+            "kind": "concept"
+          },
+          {
+            "id": "moving-average-filter",
+            "name": "Moving-average filter",
+            "description": "The FIR lowpass filter that averages the last M samples, and its sinc-like (Dirichlet) magnitude response.",
+            "kind": "concept"
+          },
+          {
+            "id": "fir-vs-iir-selection",
+            "name": "Choosing between FIR and IIR",
+            "description": "Choosing an FIR or IIR filter by weighing phase linearity, guaranteed stability, filter order, and computational cost against the specification.",
+            "kind": "decision"
+          },
+          {
+            "id": "windowing-method",
+            "name": "Windowing method for FIR design",
+            "description": "Designing an FIR filter by truncating and delaying the ideal filter's sinc impulse response and multiplying it by a finite window.",
+            "kind": "skill"
+          },
+          {
+            "id": "window-function-selection",
+            "name": "Window function selection",
+            "description": "Choosing among rectangular, Hann, Hamming, and similar windows, and choosing the window length, by trading main-lobe width (transition width) against side-lobe level (stopband attenuation).",
+            "kind": "decision"
+          },
+          {
+            "id": "pole-zero-placement-filter-design",
+            "name": "Filter design by pole-zero placement",
+            "description": "Designing a simple IIR or FIR filter by placing poles near the passband and zeros in the stopband, for example a first-order recursive lowpass filter.",
+            "kind": "skill"
+          },
+          {
+            "id": "digital-lowpass-filter-design",
+            "name": "Digital lowpass filter design and analysis",
+            "description": "The full process of turning lowpass specifications into a working digital filter: picking FIR or IIR, finding the coefficients, and checking the frequency response, stability, and realization.",
+            "kind": "skill"
+          }
+        ],
+        "view": [
+          {
+            "conceptId": "complex-numbers",
+            "targetDepth": 3,
+            "role": "background"
+          },
+          {
+            "conceptId": "eulers-formula",
+            "targetDepth": 3,
+            "role": "background"
+          },
+          {
+            "conceptId": "trigonometric-identities",
+            "targetDepth": 2,
+            "role": "background"
+          },
+          {
+            "conceptId": "integration-techniques",
+            "targetDepth": 3,
+            "role": "background"
+          },
+          {
+            "conceptId": "improper-integrals",
+            "targetDepth": 2,
+            "role": "background"
+          },
+          {
+            "conceptId": "summation-notation",
+            "targetDepth": 2,
+            "role": "background"
+          },
+          {
+            "conceptId": "geometric-series",
+            "targetDepth": 3,
+            "role": "background"
+          },
+          {
+            "conceptId": "partial-fraction-decomposition",
+            "targetDepth": 3,
+            "role": "background"
+          },
+          {
+            "conceptId": "linear-differential-equations",
+            "targetDepth": 2,
+            "role": "background"
+          },
+          {
+            "conceptId": "continuous-time-signals",
+            "targetDepth": 2,
+            "role": "taught"
+          },
+          {
+            "conceptId": "discrete-time-signals",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "signal-time-transformations",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "even-odd-decomposition",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "signal-periodicity",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "signal-energy-and-power",
+            "targetDepth": 2,
+            "role": "taught"
+          },
+          {
+            "conceptId": "discrete-unit-impulse-and-step",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "dirac-delta-function",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "complex-exponential-signals",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "linearity",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "time-invariance",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "causality",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "bibo-stability",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "system-memory",
+            "targetDepth": 2,
+            "role": "taught"
+          },
+          {
+            "conceptId": "lti-systems",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "impulse-response",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "discrete-time-convolution",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "continuous-time-convolution",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "convolution-properties",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "lti-properties-from-impulse-response",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "eigenfunctions-of-lti-systems",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "continuous-time-fourier-series",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "gibbs-phenomenon",
+            "targetDepth": 2,
+            "role": "taught"
+          },
+          {
+            "conceptId": "parsevals-theorem",
+            "targetDepth": 2,
+            "role": "taught"
+          },
+          {
+            "conceptId": "continuous-time-fourier-transform",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "sinc-function",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "fourier-transform-properties",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "convolution-theorem",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "discrete-time-fourier-transform",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "dtft-properties",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "frequency-response",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "magnitude-and-phase-response",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "linear-phase-and-group-delay",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "decibel-magnitude-scale",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "impulse-train-sampling",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "nyquist-sampling-theorem",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "aliasing",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "signal-reconstruction",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "continuous-discrete-frequency-mapping",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "anti-aliasing-filter",
+            "targetDepth": 2,
+            "role": "taught"
+          },
+          {
+            "conceptId": "laplace-transform",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "laplace-region-of-convergence",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "s-plane-poles-and-zeros",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "inverse-laplace-transform",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "continuous-time-transfer-function",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "z-transform",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "z-transform-region-of-convergence",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "z-transform-properties",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "inverse-z-transform",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "z-plane-poles-and-zeros",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "causality-stability-from-z-roc",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "z-transform-dtft-relationship",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "geometric-frequency-response-evaluation",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "difference-equations",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "discrete-time-transfer-function",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "block-diagram-realization",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "ideal-filters",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "filter-specifications",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "fir-filters",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "iir-filters",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "moving-average-filter",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "fir-vs-iir-selection",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "windowing-method",
+            "targetDepth": 4,
+            "role": "taught"
+          },
+          {
+            "conceptId": "window-function-selection",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "pole-zero-placement-filter-design",
+            "targetDepth": 3,
+            "role": "taught"
+          },
+          {
+            "conceptId": "digital-lowpass-filter-design",
+            "targetDepth": 4,
+            "role": "taught"
+          }
+        ],
+        "edges": [
+          {
+            "type": "prereq",
+            "src": "complex-numbers",
+            "srcDepth": 3,
+            "dst": "eulers-formula",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "eulers-formula",
+            "srcDepth": 3,
+            "dst": "complex-exponential-signals",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "trigonometric-identities",
+            "srcDepth": 2,
+            "dst": "complex-exponential-signals",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-signals",
+            "srcDepth": 2,
+            "dst": "discrete-time-signals",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-signals",
+            "srcDepth": 2,
+            "dst": "signal-time-transformations",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 3,
+            "dst": "signal-time-transformations",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "signal-time-transformations",
+            "srcDepth": 3,
+            "dst": "even-odd-decomposition",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "signal-time-transformations",
+            "srcDepth": 3,
+            "dst": "signal-periodicity",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "complex-exponential-signals",
+            "srcDepth": 3,
+            "dst": "signal-periodicity",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "improper-integrals",
+            "srcDepth": 2,
+            "dst": "signal-energy-and-power",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "summation-notation",
+            "srcDepth": 2,
+            "dst": "signal-energy-and-power",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 3,
+            "dst": "discrete-unit-impulse-and-step",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "integration-techniques",
+            "srcDepth": 3,
+            "dst": "dirac-delta-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-signals",
+            "srcDepth": 2,
+            "dst": "dirac-delta-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 3,
+            "dst": "linearity",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "signal-time-transformations",
+            "srcDepth": 3,
+            "dst": "time-invariance",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 3,
+            "dst": "causality",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 3,
+            "dst": "bibo-stability",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 2,
+            "dst": "system-memory",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "linearity",
+            "srcDepth": 3,
+            "dst": "lti-systems",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "time-invariance",
+            "srcDepth": 3,
+            "dst": "lti-systems",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "lti-systems",
+            "srcDepth": 3,
+            "dst": "impulse-response",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-unit-impulse-and-step",
+            "srcDepth": 3,
+            "dst": "impulse-response",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "dirac-delta-function",
+            "srcDepth": 3,
+            "dst": "impulse-response",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "impulse-response",
+            "srcDepth": 3,
+            "dst": "discrete-time-convolution",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "summation-notation",
+            "srcDepth": 2,
+            "dst": "discrete-time-convolution",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-convolution",
+            "srcDepth": 3,
+            "dst": "impulse-response",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-convolution",
+            "srcDepth": 3,
+            "dst": "continuous-time-convolution",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "integration-techniques",
+            "srcDepth": 3,
+            "dst": "continuous-time-convolution",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-convolution",
+            "srcDepth": 3,
+            "dst": "convolution-properties",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-convolution",
+            "srcDepth": 3,
+            "dst": "convolution-properties",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "impulse-response",
+            "srcDepth": 3,
+            "dst": "lti-properties-from-impulse-response",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "causality",
+            "srcDepth": 3,
+            "dst": "lti-properties-from-impulse-response",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "bibo-stability",
+            "srcDepth": 3,
+            "dst": "lti-properties-from-impulse-response",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "complex-exponential-signals",
+            "srcDepth": 3,
+            "dst": "eigenfunctions-of-lti-systems",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-convolution",
+            "srcDepth": 3,
+            "dst": "eigenfunctions-of-lti-systems",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "eigenfunctions-of-lti-systems",
+            "srcDepth": 3,
+            "dst": "continuous-time-fourier-series",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "signal-periodicity",
+            "srcDepth": 3,
+            "dst": "continuous-time-fourier-series",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "integration-techniques",
+            "srcDepth": 3,
+            "dst": "continuous-time-fourier-series",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-fourier-series",
+            "srcDepth": 3,
+            "dst": "gibbs-phenomenon",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-fourier-series",
+            "srcDepth": 3,
+            "dst": "parsevals-theorem",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "signal-energy-and-power",
+            "srcDepth": 2,
+            "dst": "parsevals-theorem",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-fourier-series",
+            "srcDepth": 3,
+            "dst": "continuous-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "improper-integrals",
+            "srcDepth": 2,
+            "dst": "continuous-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "sinc-function",
+            "srcDepth": 2,
+            "dst": "continuous-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "trigonometric-identities",
+            "srcDepth": 2,
+            "dst": "sinc-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "fourier-transform-properties",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "fourier-transform-properties",
+            "srcDepth": 3,
+            "dst": "convolution-theorem",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "convolution-properties",
+            "srcDepth": 3,
+            "dst": "convolution-theorem",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "convolution-theorem",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "discrete-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-signals",
+            "srcDepth": 3,
+            "dst": "discrete-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "geometric-series",
+            "srcDepth": 3,
+            "dst": "discrete-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "complex-exponential-signals",
+            "srcDepth": 3,
+            "dst": "discrete-time-fourier-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "dtft-properties",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "eigenfunctions-of-lti-systems",
+            "srcDepth": 3,
+            "dst": "frequency-response",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "convolution-theorem",
+            "srcDepth": 4,
+            "dst": "frequency-response",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "frequency-response",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "dtft-properties",
+            "srcDepth": 3,
+            "dst": "discrete-time-fourier-transform",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "frequency-response",
+            "srcDepth": 4,
+            "dst": "magnitude-and-phase-response",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "eulers-formula",
+            "srcDepth": 3,
+            "dst": "magnitude-and-phase-response",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "magnitude-and-phase-response",
+            "srcDepth": 3,
+            "dst": "linear-phase-and-group-delay",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "magnitude-and-phase-response",
+            "srcDepth": 3,
+            "dst": "decibel-magnitude-scale",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "dirac-delta-function",
+            "srcDepth": 3,
+            "dst": "impulse-train-sampling",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "convolution-theorem",
+            "srcDepth": 4,
+            "dst": "impulse-train-sampling",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "impulse-train-sampling",
+            "srcDepth": 3,
+            "dst": "nyquist-sampling-theorem",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "nyquist-sampling-theorem",
+            "srcDepth": 3,
+            "dst": "aliasing",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "signal-periodicity",
+            "srcDepth": 3,
+            "dst": "aliasing",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "nyquist-sampling-theorem",
+            "srcDepth": 3,
+            "dst": "signal-reconstruction",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "sinc-function",
+            "srcDepth": 3,
+            "dst": "signal-reconstruction",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "ideal-filters",
+            "srcDepth": 2,
+            "dst": "signal-reconstruction",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "nyquist-sampling-theorem",
+            "srcDepth": 3,
+            "dst": "continuous-discrete-frequency-mapping",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "continuous-discrete-frequency-mapping",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "aliasing",
+            "srcDepth": 3,
+            "dst": "anti-aliasing-filter",
+            "dstDepth": 2
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "laplace-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "complex-numbers",
+            "srcDepth": 3,
+            "dst": "laplace-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "improper-integrals",
+            "srcDepth": 2,
+            "dst": "laplace-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "laplace-transform",
+            "srcDepth": 3,
+            "dst": "laplace-region-of-convergence",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "laplace-transform",
+            "srcDepth": 3,
+            "dst": "s-plane-poles-and-zeros",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "laplace-region-of-convergence",
+            "srcDepth": 3,
+            "dst": "inverse-laplace-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "partial-fraction-decomposition",
+            "srcDepth": 3,
+            "dst": "inverse-laplace-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "s-plane-poles-and-zeros",
+            "srcDepth": 3,
+            "dst": "continuous-time-transfer-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "linear-differential-equations",
+            "srcDepth": 2,
+            "dst": "continuous-time-transfer-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-fourier-transform",
+            "srcDepth": 3,
+            "dst": "z-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "geometric-series",
+            "srcDepth": 3,
+            "dst": "z-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "laplace-transform",
+            "srcDepth": 2,
+            "dst": "z-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform",
+            "srcDepth": 3,
+            "dst": "z-transform-region-of-convergence",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-region-of-convergence",
+            "srcDepth": 3,
+            "dst": "z-transform",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "z-plane-poles-and-zeros",
+            "srcDepth": 3,
+            "dst": "z-transform-region-of-convergence",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform",
+            "srcDepth": 3,
+            "dst": "z-transform-properties",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-region-of-convergence",
+            "srcDepth": 3,
+            "dst": "inverse-z-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "partial-fraction-decomposition",
+            "srcDepth": 3,
+            "dst": "inverse-z-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-properties",
+            "srcDepth": 3,
+            "dst": "inverse-z-transform",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform",
+            "srcDepth": 3,
+            "dst": "z-plane-poles-and-zeros",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "complex-numbers",
+            "srcDepth": 3,
+            "dst": "z-plane-poles-and-zeros",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "s-plane-poles-and-zeros",
+            "srcDepth": 2,
+            "dst": "z-plane-poles-and-zeros",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-region-of-convergence",
+            "srcDepth": 4,
+            "dst": "causality-stability-from-z-roc",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "lti-properties-from-impulse-response",
+            "srcDepth": 3,
+            "dst": "causality-stability-from-z-roc",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-region-of-convergence",
+            "srcDepth": 3,
+            "dst": "z-transform-dtft-relationship",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-fourier-transform",
+            "srcDepth": 4,
+            "dst": "z-transform-dtft-relationship",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "z-plane-poles-and-zeros",
+            "srcDepth": 4,
+            "dst": "geometric-frequency-response-evaluation",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-dtft-relationship",
+            "srcDepth": 4,
+            "dst": "geometric-frequency-response-evaluation",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "magnitude-and-phase-response",
+            "srcDepth": 4,
+            "dst": "geometric-frequency-response-evaluation",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "lti-systems",
+            "srcDepth": 3,
+            "dst": "difference-equations",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-unit-impulse-and-step",
+            "srcDepth": 3,
+            "dst": "difference-equations",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-properties",
+            "srcDepth": 3,
+            "dst": "difference-equations",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "difference-equations",
+            "srcDepth": 3,
+            "dst": "discrete-time-transfer-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "z-transform-properties",
+            "srcDepth": 3,
+            "dst": "discrete-time-transfer-function",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "causality-stability-from-z-roc",
+            "srcDepth": 4,
+            "dst": "discrete-time-transfer-function",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-transfer-function",
+            "srcDepth": 3,
+            "dst": "block-diagram-realization",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "difference-equations",
+            "srcDepth": 3,
+            "dst": "block-diagram-realization",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "magnitude-and-phase-response",
+            "srcDepth": 3,
+            "dst": "ideal-filters",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "sinc-function",
+            "srcDepth": 3,
+            "dst": "ideal-filters",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "ideal-filters",
+            "srcDepth": 3,
+            "dst": "filter-specifications",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "decibel-magnitude-scale",
+            "srcDepth": 3,
+            "dst": "filter-specifications",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "continuous-discrete-frequency-mapping",
+            "srcDepth": 4,
+            "dst": "filter-specifications",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-convolution",
+            "srcDepth": 3,
+            "dst": "moving-average-filter",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "magnitude-and-phase-response",
+            "srcDepth": 3,
+            "dst": "moving-average-filter",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "geometric-series",
+            "srcDepth": 3,
+            "dst": "moving-average-filter",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-transfer-function",
+            "srcDepth": 3,
+            "dst": "fir-filters",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "impulse-response",
+            "srcDepth": 4,
+            "dst": "fir-filters",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "linear-phase-and-group-delay",
+            "srcDepth": 3,
+            "dst": "fir-filters",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "moving-average-filter",
+            "srcDepth": 3,
+            "dst": "fir-filters",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "discrete-time-transfer-function",
+            "srcDepth": 3,
+            "dst": "iir-filters",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "causality-stability-from-z-roc",
+            "srcDepth": 3,
+            "dst": "iir-filters",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "fir-filters",
+            "srcDepth": 3,
+            "dst": "fir-vs-iir-selection",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "iir-filters",
+            "srcDepth": 3,
+            "dst": "fir-vs-iir-selection",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "ideal-filters",
+            "srcDepth": 3,
+            "dst": "windowing-method",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "fir-filters",
+            "srcDepth": 4,
+            "dst": "windowing-method",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "convolution-theorem",
+            "srcDepth": 4,
+            "dst": "windowing-method",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "gibbs-phenomenon",
+            "srcDepth": 2,
+            "dst": "windowing-method",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "windowing-method",
+            "srcDepth": 3,
+            "dst": "window-function-selection",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "filter-specifications",
+            "srcDepth": 3,
+            "dst": "window-function-selection",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "geometric-frequency-response-evaluation",
+            "srcDepth": 4,
+            "dst": "pole-zero-placement-filter-design",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "iir-filters",
+            "srcDepth": 3,
+            "dst": "pole-zero-placement-filter-design",
+            "dstDepth": 3
+          },
+          {
+            "type": "prereq",
+            "src": "filter-specifications",
+            "srcDepth": 4,
+            "dst": "digital-lowpass-filter-design",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "fir-vs-iir-selection",
+            "srcDepth": 3,
+            "dst": "digital-lowpass-filter-design",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "windowing-method",
+            "srcDepth": 4,
+            "dst": "digital-lowpass-filter-design",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "window-function-selection",
+            "srcDepth": 3,
+            "dst": "digital-lowpass-filter-design",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "pole-zero-placement-filter-design",
+            "srcDepth": 3,
+            "dst": "digital-lowpass-filter-design",
+            "dstDepth": 4
+          },
+          {
+            "type": "prereq",
+            "src": "block-diagram-realization",
+            "srcDepth": 3,
+            "dst": "digital-lowpass-filter-design",
+            "dstDepth": 4
+          },
+          {
+            "type": "part_of",
+            "src": "laplace-region-of-convergence",
+            "dst": "laplace-transform"
+          },
+          {
+            "type": "part_of",
+            "src": "z-transform-region-of-convergence",
+            "dst": "z-transform"
+          },
+          {
+            "type": "part_of",
+            "src": "magnitude-and-phase-response",
+            "dst": "frequency-response"
+          },
+          {
+            "type": "part_of",
+            "src": "window-function-selection",
+            "dst": "windowing-method"
+          },
+          {
+            "type": "part_of",
+            "src": "filter-specifications",
+            "dst": "digital-lowpass-filter-design"
+          },
+          {
+            "type": "part_of",
+            "src": "linearity",
+            "dst": "lti-systems"
+          },
+          {
+            "type": "part_of",
+            "src": "time-invariance",
+            "dst": "lti-systems"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -7,8 +7,9 @@ import { parseModelId, modelIdFor, type Effort } from "@helix/contracts";
 import type { ModelCall } from "../../model-call.ts";
 import { pickEffort } from "../effort.ts";
 import { AcpClient } from "./acp.ts";
+import { QUIET_LIMITS, startDeadline, timeoutMessage, type TimeoutKind } from "./deadline.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
-import { TOOL_TIMEOUT_MS, requireCommand, toolEnv, withTempDir } from "./tools.ts";
+import { requireCommand, toolEnv, withTempDir } from "./tools.ts";
 
 type InitializeResult = { authMethods?: { id?: string }[] };
 type AvailableModel = { modelId: string; _meta?: { reasoningEfforts?: { value?: string }[] } };
@@ -21,9 +22,14 @@ export const callGrokCli: ModelCall = async (request) => {
   const { model } = parseModelId(request.model);
   return withTempDir(async (cwd) => {
     const acp = new AcpClient({ command, args: ["--no-auto-update", "--permission-mode", "default", "agent", "stdio"], cwd, env: toolEnv(command) });
-    const timer = setTimeout(() => acp.close(), TOOL_TIMEOUT_MS);
+    let timedOutBy: TimeoutKind | null = null;
+    const deadline = startDeadline(QUIET_LIMITS, (kind) => {
+      timedOutBy = kind;
+      acp.close();
+    });
     let text = "";
     acp.onNotification((method, params) => {
+      deadline.touch();
       if (method !== "session/update") return;
       const update = params.update as Update | undefined;
       if (update?.sessionUpdate === "agent_message_chunk" && update.content?.type === "text") {
@@ -63,9 +69,10 @@ export const callGrokCli: ModelCall = async (request) => {
         outputTokens: done.usage?.outputTokens ?? 0,
       };
     } catch (err) {
+      if (timedOutBy) throw new Error(timeoutMessage("Grok CLI", timedOutBy, QUIET_LIMITS));
       throw new Error(`Grok CLI failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
-      clearTimeout(timer);
+      deadline.clear();
       acp.close();
     }
   });

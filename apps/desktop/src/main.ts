@@ -1,21 +1,24 @@
-// The Mac app. Electron's main process:
+// The desktop app (macOS, Windows, Linux). Electron's main process:
 //   1. starts the Helix server as a background process (Electron's own Node runs it),
 //   2. waits until the server says it's listening, then opens a window on it,
-//   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted with the macOS keychain
-//      (safeStorage), and hands them to the server when starting it. Keys never travel over the
-//      WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
+//   3. keeps the API keys (Anthropic, OpenAI, Gemini, xAI, Meta), encrypted by the system's secret
+//      store (safeStorage: the macOS keychain, Windows' DPAPI, or a Linux keyring such as GNOME
+//      Keyring or KWallet), and hands them to the server when starting it. Keys never travel over
+//      the WebSocket. Subscription tools (Codex, Claude Code, ...) keep their own logins.
 //   4. on launch, checks GitHub Releases for a newer version and offers the download (updates.ts).
-// Data lives in ~/Library/Application Support/Helix (HELIX_DATA_DIR overrides it, for testing).
+// Data lives in the system's per-user app folder: ~/Library/Application Support/Helix on macOS,
+// %APPDATA%\Helix on Windows, ~/.config/Helix on Linux (HELIX_DATA_DIR overrides it, for testing).
 import { BrowserWindow, app, dialog, ipcMain, nativeTheme, safeStorage, shell, utilityProcess, type UtilityProcess } from "electron";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { RELEASES_REPO, isNewer, latestRelease, skipVersion, skippedVersion } from "./updates.ts";
+import { RELEASES_REPO, currentInstall, isNewer, latestRelease, skipVersion, skippedVersion, updateSteps } from "./updates.ts";
 
-app.setName("Helix");
+app.setName("Helix"); // also names the data folder, so it stays "Helix" whatever the app ID
+const MAC = process.platform === "darwin";
 const DATA_DIR = process.env.HELIX_DATA_DIR ?? app.getPath("userData");
-// Each provider's key, encrypted; useless without this Mac's keychain. The Anthropic key keeps the
-// file name it had before other providers existed.
+// Each provider's key, encrypted; useless without this computer's secret store (and this user's
+// login). The Anthropic key keeps the file name it had before other providers existed.
 const KEYS = {
   anthropic: { file: "api-key.bin", env: "ANTHROPIC_API_KEY" },
   openai: { file: "openai-key.bin", env: "OPENAI_API_KEY" },
@@ -41,18 +44,28 @@ let window: BrowserWindow | null = null;
 
 // ---- The API keys ----
 
+// Whether a key can be stored safely. On Linux without a keyring (no GNOME Keyring, KWallet, or
+// other Secret Service), Electron falls back to "basic_text": a fixed, publicly known password,
+// which is obfuscation, not encryption. Helix treats that as "can't encrypt" and stores nothing.
+function canEncrypt(): boolean {
+  if (!safeStorage.isEncryptionAvailable()) return false;
+  if (process.platform !== "linux") return true;
+  const backend = safeStorage.getSelectedStorageBackend();
+  return backend !== "basic_text" && backend !== "unknown";
+}
+
 function savedKey(provider: KeyProvider): string | null {
   const file = keyFile(provider);
-  if (!existsSync(file) || !safeStorage.isEncryptionAvailable()) return null;
+  if (!existsSync(file) || !canEncrypt()) return null;
   try {
     return safeStorage.decryptString(readFileSync(file));
   } catch {
-    return null; // written on another Mac, or the keychain entry is gone
+    return null; // written on another computer or user account, or the stored secret is gone
   }
 }
 
 function saveKey(provider: KeyProvider, key: string): void {
-  if (!safeStorage.isEncryptionAvailable()) throw new Error("The macOS keychain isn't available, so the key can't be stored safely.");
+  if (!canEncrypt()) throw new Error("This computer's secure storage (keychain or keyring) isn't available, so the key can't be stored safely.");
   writeFileSync(keyFile(provider), safeStorage.encryptString(key), { mode: 0o600 });
 }
 
@@ -113,6 +126,14 @@ async function startAndShow(): Promise<void> {
 
 // ---- The window ----
 
+// macOS: no title bar. The UI runs to the top edge, and the window buttons sit in the sidebar's top
+// row, centered on it (the row is 48px tall, 8px down; see .app-drag in apps/web/src/index.css).
+// Windows and Linux: the system's own title bar and frame, which follow the system's light or dark
+// setting and never cover the UI. The menu bar (Edit, View, ...) hides until Alt is pressed.
+const WINDOW_CHROME: Electron.BrowserWindowConstructorOptions = MAC
+  ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 20, y: 25 } }
+  : { autoHideMenuBar: true, ...(process.platform === "linux" ? { icon: join(HERE, "..", "assets", "icon.png") } : {}) };
+
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1400,
@@ -120,11 +141,8 @@ function createWindow(): BrowserWindow {
     minWidth: 900,
     minHeight: 600,
     title: "Helix",
-    // No title bar: the UI runs to the top edge, and the window buttons sit in the sidebar's top row,
-    // centered on it (the row is 48px tall, 8px down; see .app-drag in apps/web/src/index.css).
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 20, y: 25 },
-    // The UI's window color in the Mac's current appearance (--hx-canvas in apps/web/src/index.css),
+    ...WINDOW_CHROME,
+    // The UI's window color in the system's current appearance (--hx-canvas in apps/web/src/index.css),
     // so there's no flash of the wrong color before the UI paints.
     backgroundColor: nativeTheme.shouldUseDarkColors ? "#09090b" : "#f2f2f4",
     webPreferences: {
@@ -172,7 +190,7 @@ function clearKey(provider: unknown): Promise<void> {
 // The Anthropic key alone: the bridge's first version, still used by its settings section.
 ipcMain.handle("helix:key-status", (event) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
-  return { saved: savedKey("anthropic") !== null, canEncrypt: safeStorage.isEncryptionAvailable() };
+  return { saved: savedKey("anthropic") !== null, canEncrypt: canEncrypt() };
 });
 
 ipcMain.handle("helix:set-key", async (event, key: unknown) => {
@@ -189,7 +207,7 @@ ipcMain.handle("helix:clear-key", async (event) => {
 ipcMain.handle("helix:keys-status", (event) => {
   if (!fromHelix(event)) throw new Error("Not allowed.");
   const saved = Object.fromEntries((Object.keys(KEYS) as KeyProvider[]).map((p) => [p, savedKey(p) !== null]));
-  return { saved, canEncrypt: safeStorage.isEncryptionAvailable() };
+  return { saved, canEncrypt: canEncrypt() };
 });
 
 ipcMain.handle("helix:set-provider-key", async (event, provider: unknown, key: unknown) => {
@@ -221,7 +239,7 @@ async function checkForUpdates(): Promise<void> {
     detail: [
       `You have ${current}.`,
       notes,
-      "To update, download it, quit Helix, and drag the new Helix into Applications. Your goals and settings are kept. macOS may ask once whether the new version can use your saved API keys.",
+      updateSteps(currentInstall()),
     ]
       .filter(Boolean)
       .join("\n\n"),

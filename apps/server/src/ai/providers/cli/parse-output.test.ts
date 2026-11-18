@@ -1,8 +1,8 @@
 // The parsers read each tool's real output (test-fixtures.ts).
 import { describe, expect, it } from "vitest";
 import { geminiSafeSchema, groupAgyModels, parseAgyEvents } from "./antigravity.ts";
-import { parseClaudeOutput } from "./claude-code.ts";
-import { parseCodexEvents } from "./codex.ts";
+import { followClaudeStream, parseClaudeStream, readClaudeLine } from "./claude-stream.ts";
+import { parseCodexEvents, readCodexLine, summaryTitle } from "./codex.ts";
 import { extractJson, oneShotPrompt } from "./prompt.ts";
 import { AGY_OUTPUT, CLAUDE_OUTPUT, CODEX_OUTPUT } from "./test-fixtures.ts";
 
@@ -32,30 +32,83 @@ describe("Codex output", () => {
     expect(() => parseCodexEvents('{"type":"turn.failed","error":{"message":"usage limit reached"}}', "m")).toThrow("usage limit reached");
     expect(parseCodexEvents('{"type":"thread.started"}', "m")).toBeNull();
   });
+
+  it("reports an error event only when no answer followed it", () => {
+    const reconnect = '{"type":"error","message":"Reconnecting... 1/5"}';
+    expect(parseCodexEvents(`${reconnect}\n${CODEX_OUTPUT}`, "m")?.text).toBe('{"answer":"hi","n":3}');
+    expect(() => parseCodexEvents(`{"type":"turn.started"}\n${reconnect}`, "m")).toThrow("Reconnecting... 1/5");
+  });
+
+  it("reads each line through its schema, ignoring what doesn't fit", () => {
+    expect(readCodexLine('{"type":"item.completed","item":{"type":"reasoning","text":"**Plan**"}}')?.item).toEqual({ type: "reasoning", text: "**Plan**" });
+    expect(readCodexLine("not json")).toBeNull();
+    expect(readCodexLine('{"no":"type"}')).toBeNull();
+    // An odd field is dropped, the event kept.
+    expect(readCodexLine('{"type":"turn.completed","usage":"lots"}')).toEqual({ type: "turn.completed" });
+  });
+
+  it("turns a reasoning summary into a short title", () => {
+    expect(summaryTitle("**Checking primes below 250**")).toBe("Checking primes below 250");
+    expect(summaryTitle("**Grouping transforms**\n\nI'm putting the Laplace and Fourier...")).toBe("Grouping transforms");
+  });
 });
 
-describe("Claude Code output", () => {
-  it("takes the structured output, the model that answered, and every input token", () => {
-    expect(parseClaudeOutput(CLAUDE_OUTPUT, "claude-haiku-5-5")).toEqual({
+describe("Claude Code stream", () => {
+  it("takes the structured output, the model that wrote it, and every input token", () => {
+    expect(parseClaudeStream(CLAUDE_OUTPUT, "claude-opus-5-5")).toEqual({
       stopReason: "end_turn",
       text: '{"answer":"hi","n":3}',
-      model: "claude-code:claude-haiku-5-5",
-      inputTokens: 1477,
-      outputTokens: 74,
+      model: "claude-code:claude-opus-5-5",
+      inputTokens: 1522,
+      outputTokens: 720,
     });
   });
 
-  it("names the requested model, not the Haiku that Claude Code runs on the side", () => {
-    const out = JSON.parse(CLAUDE_OUTPUT) as Record<string, unknown>;
-    out.modelUsage = { "claude-haiku-5-5": { outputTokens: 40 }, "claude-opus-5-5": { outputTokens: 900 } };
-    expect(parseClaudeOutput(JSON.stringify(out), "claude-opus-5-5")?.model).toBe("claude-code:claude-opus-5-5");
-    // An alias it resolved: the model that wrote the most.
-    expect(parseClaudeOutput(JSON.stringify(out), "opus")?.model).toBe("claude-code:claude-opus-5-5");
+  it("names the model from the assistant messages, not the Haiku that Claude Code runs on the side", () => {
+    // The requested name is an alias and Haiku is listed first in modelUsage.
+    expect(parseClaudeStream(CLAUDE_OUTPUT, "opus")?.model).toBe("claude-code:claude-opus-5-5");
+    // A Haiku request is logged as Haiku.
+    const haiku = CLAUDE_OUTPUT.replaceAll('"model":"claude-opus-5-5"', '"model":"claude-haiku-5-5"');
+    expect(parseClaudeStream(haiku, "claude-haiku-5-5")?.model).toBe("claude-code:claude-haiku-5-5");
+  });
+
+  it("falls back to modelUsage when no assistant message names a model", () => {
+    const resultOnly = CLAUDE_OUTPUT.split("\n").at(-1)!;
+    expect(parseClaudeStream(resultOnly, "claude-opus-5-5")?.model).toBe("claude-code:claude-opus-5-5");
+    expect(parseClaudeStream(resultOnly, "opus")?.model).toBe("claude-code:claude-opus-5-5"); // the one that wrote the most
   });
 
   it("reports an error result, and nothing printed as null", () => {
-    expect(() => parseClaudeOutput(JSON.stringify({ type: "result", subtype: "error_during_execution", is_error: true, result: "Not logged in" }), "m")).toThrow("Not logged in");
-    expect(parseClaudeOutput("", "m")).toBeNull();
+    const failed = JSON.stringify({ type: "result", subtype: "error_during_execution", is_error: true, result: "Not logged in" });
+    expect(() => parseClaudeStream(failed, "m")).toThrow("Not logged in");
+    expect(parseClaudeStream("", "m")).toBeNull();
+  });
+
+  it("streams the answer's JSON as it's written, and thinking as ticks and token counts", () => {
+    const texts: string[] = [];
+    const activities: string[] = [];
+    let ticks = 0;
+    const follow = followClaudeStream({ onText: (t) => texts.push(t), onThinking: () => (ticks += 1), onActivity: (a) => activities.push(a) });
+    for (const line of CLAUDE_OUTPUT.split("\n")) follow(line);
+    expect(texts).toEqual(['{"answer": "h', '{"answer": "hi", "n', '{"answer": "hi", "n": 3}']);
+    expect(ticks).toBe(1);
+    expect(activities).toEqual(["Thinking (about 1,000 tokens so far)"]);
+  });
+
+  it("starts the JSON over when Claude Code asks for the answer again", () => {
+    const texts: string[] = [];
+    const follow = followClaudeStream({ onText: (t) => texts.push(t) });
+    const lines = CLAUDE_OUTPUT.split("\n");
+    const start = lines.find((l) => l.includes('"content_block":{"type":"tool_use"'))!;
+    const piece = lines.find((l) => l.includes('{\\"answer\\": \\"h'))!;
+    for (const line of [start, piece, start, piece]) follow(line);
+    expect(texts).toEqual(['{"answer": "h', '{"answer": "h']);
+  });
+
+  it("ignores lines that fail their schema", () => {
+    expect(readClaudeLine('{"type":"assistant","message":{"model":42}}')).toBeNull();
+    expect(readClaudeLine('{"type":"system","subtype":"init"}')).toBeNull();
+    expect(readClaudeLine('{"type":"something_new"}')).toBeNull();
   });
 });
 
