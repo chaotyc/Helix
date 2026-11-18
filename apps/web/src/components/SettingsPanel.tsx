@@ -111,6 +111,7 @@ export function SettingsPanel({ settings, providers, signIns, onChange, onRefres
       </Section>
 
       <Section
+        id="connections"
         icon={<KeyIcon />}
         title="Connections"
         description="A subscription tool is the maker's own command-line app, signed in with your plan; Helix runs it and never sees the login. An API key is billed per token."
@@ -121,9 +122,9 @@ export function SettingsPanel({ settings, providers, signIns, onChange, onRefres
   );
 }
 
-function Section({ icon, title, description, children }: { icon: ReactNode; title: string; description: string; children: ReactNode }) {
+function Section({ id, icon, title, description, children }: { id?: string; icon: ReactNode; title: string; description: string; children: ReactNode }) {
   return (
-    <section className="mt-9">
+    <section id={id} className="mt-9 scroll-mt-6">
       <div className="mb-3 flex items-start gap-2.5">
         <span className="mt-0.5 text-fg-subtle">{icon}</span>
         <div>

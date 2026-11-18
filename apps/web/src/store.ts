@@ -42,6 +42,7 @@ type AppState = {
   // ---- Data ----
   status: ConnectionStatus;
   goals: Goal[]; // real goals, loaded from the server on connect
+  goalsLoaded: boolean; // whether the server has sent the goals yet (so an empty list means none)
   sessions: Session[]; // every session, from the server
   timelines: Record<string, TimelineItem[]>; // per session, loaded when it's opened
   sessionStatus: Record<string, SessionStatus>; // per session: is the server working on it, and what failed
@@ -96,6 +97,7 @@ type AppState = {
 export const useAppStore = create<AppState>()((set) => ({
   status: "connecting",
   goals: [],
+  goalsLoaded: false,
   sessions: [],
   timelines: {},
   sessionStatus: {},
@@ -117,7 +119,7 @@ export const useAppStore = create<AppState>()((set) => ({
   setup: {},
 
   setStatus: (status) => set({ status }),
-  setGoals: (goals) => set({ goals }),
+  setGoals: (goals) => set({ goals, goalsLoaded: true }),
   addGoal: (goal) => set((state) => ({ goals: [...state.goals, goal] })),
   updateGoal: (goal) => set((state) => ({ goals: state.goals.map((g) => (g.id === goal.id ? goal : g)) })),
   setSessions: (sessions) => set({ sessions }),

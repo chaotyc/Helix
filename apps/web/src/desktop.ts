@@ -17,6 +17,9 @@ export type DesktopBridge = {
   setProviderKey: (provider: KeyProvider, key: string) => Promise<void>;
   clearProviderKey: (provider: KeyProvider) => Promise<void>;
   onFullScreen?: (listener: (fullScreen: boolean) => void) => void; // optional: older app builds lack it
+  // Whether the first-run tutorial was seen, kept in the app's data folder. Optional: older builds lack it.
+  tutorialSeen?: () => Promise<boolean>;
+  markTutorialSeen?: () => Promise<void>;
 };
 
 export const desktop: DesktopBridge | null = (window as { helixDesktop?: DesktopBridge }).helixDesktop ?? null;
