@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="apps/web/public/brand/helix-mark.svg" alt="" width="72" height="72">
+  <img src="apps/web/public/brand/helix-mark-on-dark.svg" alt="" width="72" height="72">
 </p>
 
 # Helix
