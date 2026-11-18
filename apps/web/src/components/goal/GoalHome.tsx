@@ -22,7 +22,7 @@ const KINDS: { kind: SessionKind; title: string; text: string; icon: ReactNode }
   {
     kind: "diagnostic",
     title: "Diagnostic",
-    text: "Up to 15 questions to find what you already know. The map colors in as you answer.",
+    text: "Questions to find what you already know, until the map is settled. The map colors in as you answer; stop whenever you like.",
     icon: <TargetIcon className="size-[18px]" />,
   },
   {

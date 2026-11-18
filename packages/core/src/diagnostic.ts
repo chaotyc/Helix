@@ -14,8 +14,6 @@ import { isHeld, type MasteryMap } from "./knowledge.ts";
 import type { LearnerState } from "./mastery.ts";
 import { closure, goalPairs, pairKey, type Pair } from "./pairs.ts";
 
-export const DIAGNOSTIC_LENGTH = 15; // questions per diagnostic (from the build plan)
-
 // A concept-depth answered directly whose estimate is below this counts as a known gap
 // (one wrong answer from the prior lands at about 0.13).
 export const LIKELY_GAP = 0.15;

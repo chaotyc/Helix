@@ -1,7 +1,8 @@
-// A diagnostic session (Step 12): up to 15 questions, each picked by @helix/core's nextProbe,
-// written by the item writer, and graded into evidence. The map recolors after each answer.
+// A diagnostic session (Step 12): questions picked by @helix/core's nextProbe, written by the item
+// writer, and graded into evidence. It runs until nextProbe has nothing left to ask (every
+// concept-depth asked, held, or blocked by a known gap) or the learner ends it. The map recolors after each answer.
 import type { Confidence } from "@helix/contracts";
-import { DIAGNOSTIC_LENGTH, goalSlice, implies, nextProbe, pairKey } from "@helix/core";
+import { goalSlice, implies, nextProbe, pairKey } from "@helix/core";
 import { writeItem } from "../ai/items/write-item.ts";
 import { getGoal } from "../db/goals.ts";
 import { getItem, insertItem, learnerSnapshot, promptsAsked } from "../db/learner.ts";
@@ -14,11 +15,11 @@ export function openDiagnostic(ctx: SessionCtx): void {
   pushTurn(ctx, {
     type: "task",
     id: newId(),
-    label: `Diagnostic: up to ${DIAGNOSTIC_LENGTH} questions to find what you already know. Answer from memory; "I don't know" is a fine answer.`,
+    label: `Diagnostic: questions to find what you already know, until the map is settled. Answer from memory; "I don't know" is a fine answer. End the session whenever you like.`,
   });
 }
 
-// Ask the next question, or finish when the diagnostic has asked enough or has nothing left to ask.
+// Ask the next question, or finish when there's nothing left to ask.
 export async function askNext(ctx: SessionCtx): Promise<void> {
   const { db, session } = ctx;
   const questions = readTurns(db, session.id).flatMap((t) => (t.item.type === "question" ? [t.item] : []));
@@ -30,7 +31,7 @@ export async function askNext(ctx: SessionCtx): Promise<void> {
   if (map.view.length === 0) throw new Error("This goal has no map yet. Build its map first.");
 
   const asked = new Set(questions.map((q) => pairKey(q.conceptId, q.depth)));
-  const pair = questions.length < DIAGNOSTIC_LENGTH ? nextProbe(map, snap.state, snap.mastery, asked) : null;
+  const pair = nextProbe(map, snap.state, snap.mastery, asked);
   if (!pair) {
     await finishSession(ctx);
     return;
