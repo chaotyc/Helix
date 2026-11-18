@@ -1,110 +1,99 @@
 <p align="center">
-  <img src="apps/web/public/brand/helix-mark-on-dark.svg" alt="" width="72" height="72">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/brand/helix-mark-on-dark.svg">
+    <img src="apps/web/public/brand/helix-mark.svg" alt="" width="64" height="64">
+  </picture>
 </p>
 
-# Helix
+<h1 align="center">Helix</h1>
 
-Helix is a personal AI tutor that runs on your own computer. Give it a goal (a course, an exam,
-a project) and its source material (a syllabus, notes, a textbook chapter). It builds a
-**concept map** of what there is to learn, finds out what you already know with a short
-diagnostic, and runs tutoring sessions that keep a lasting record of what you've mastered.
+<p align="center">
+  <b>Learn anything, to the depth you need.</b><br>
+  A personal AI tutor that maps what there is to learn, finds what you already know,
+  and teaches you the rest, one step at a time. A desktop app for Mac, Windows, and Linux
+  that works with the AI plan or API key you already have.
+</p>
 
-> **Early release.** Helix works end to end, but it's young. Expect rough edges, and please
-> report problems in [Issues](https://github.com/chaotyc/Helix/issues).
+<p align="center">
+  <a href="https://github.com/chaotyc/Helix/releases/latest/download/Helix-arm64.dmg"><img alt="Download for Mac with Apple silicon (M1 or later)" src="https://img.shields.io/badge/Download-Mac%20M1%2B-5b5bd6?style=for-the-badge"></a>
+  <a href="https://github.com/chaotyc/Helix/releases/latest/download/Helix-x64.dmg"><img alt="Download for Mac with Intel" src="https://img.shields.io/badge/Download-Mac%20Intel-5b5bd6?style=for-the-badge"></a>
+  <a href="https://github.com/chaotyc/Helix/releases/latest/download/Helix-Setup-x64.exe"><img alt="Download for Windows" src="https://img.shields.io/badge/Download-Windows-5b5bd6?style=for-the-badge"></a>
+  <a href="https://github.com/chaotyc/Helix/releases/latest/download/Helix-amd64.deb"><img alt="Download for Linux (Debian or Ubuntu)" src="https://img.shields.io/badge/Download-Linux%20.deb-5b5bd6?style=for-the-badge"></a>
+</p>
 
-## What it does
+<p align="center">
+  <img src=".github/assets/concept-map.png" alt="A Helix concept map for Bayes' theorem and medical tests: concepts linked by prerequisite arrows, each with a meter for how deep the learner knows it" width="900">
+</p>
 
-- **Builds a concept map from your material.** Helix asks a few questions to pin down scope,
-  then maps the concepts, how deep you need each one, and which ones depend on which. You can
-  fix the map by hand: add, rename, remove, connect, drag, and undo.
-- **Measures what you know.** A diagnostic asks one question at a time and colors the map as it
-  learns where you stand, from just knowing what a concept is up to using it in new situations.
-- **Tutors you on what's next.** Each session reviews earlier material, then teaches the next
-  concept you're ready for: it asks you to predict before it explains, gives hints before
-  solutions, and checks your understanding with a question at the end.
-- **Remembers.** Every graded answer and every change to the map is kept in a log on your
-  computer, and what Helix believes you know is worked out from that log.
+## How it works
 
-## Install
+### 1. Tell it what you want to learn
 
-Download the file for your computer from the
-[latest release](https://github.com/chaotyc/Helix/releases/latest):
+Describe your goal in a sentence: a course you're taking, an exam, a job, a project. Attach a
+syllabus, notes, or a textbook chapter if you have them. Helix asks a few quick questions to pin
+down the scope, then builds a **concept map**: every idea you need, how deep you need it, and
+which ideas build on which.
 
-| Computer | File |
-| --- | --- |
-| Mac with Apple silicon (M1 or later) | `Helix-<version>-arm64.dmg` |
-| Mac with Intel | `Helix-<version>-x64.dmg` |
-| Windows (64-bit) | `Helix-Setup-<version>-x64.exe` |
-| Linux (64-bit) | `Helix-<version>-x86_64.AppImage` or `Helix-<version>-amd64.deb` |
+<p align="center">
+  <img src=".github/assets/new-goal.png" alt="Helix asking a clarifying question about a new goal, with suggested answers to pick from" width="800">
+</p>
 
-The builds aren't signed with a paid developer certificate yet, so your system warns you the
-first time you open Helix:
+The map is yours to edit: add, rename, connect, or remove concepts, and undo your own edits.
 
-- **macOS:** the first open is blocked. Open **System Settings → Privacy & Security**, scroll
-  down, click **Open Anyway** next to the message about Helix, and confirm.
-- **Windows:** SmartScreen says "Windows protected your PC". Click **More info → Run anyway**.
-- **Linux:** make the AppImage executable (`chmod +x Helix-*.AppImage`), or install the deb with
-  `sudo apt install ./Helix-*-amd64.deb`. Saving API keys needs a keyring (GNOME Keyring or
-  KWallet, which most desktops already run).
+### 2. Find out where you stand
 
-More detail, including Ubuntu 24.04 notes, is in [apps/desktop/README.md](apps/desktop/README.md#first-launch-of-an-unsigned-build).
-When a new version is out, Helix tells you on launch and links to the download.
+A diagnostic asks one question at a time, grades each answer with an explanation, and fills in
+the map as it goes. Say "I don't know" whenever you don't; that's useful too. Stop whenever
+you like, or keep going until the map is settled.
 
-## Connect a model
+<p align="center">
+  <img src=".github/assets/diagnostic.png" alt="A diagnostic question about false positive and false negative rates, the learner's answer, and the grade: Right, with an explanation" width="640">
+</p>
 
-Helix doesn't come with a model. In **Settings**, connect at least one of:
+### 3. Learn the next thing
 
-- **A subscription you already have**, through its command-line tool, signed in once in a
-  terminal: Claude Code (Claude Pro or Max), Codex (ChatGPT plans), or Antigravity (Google AI
-  plans). Use counts against your plan's limits; there's no per-call bill.
-- **An API key** from Anthropic, OpenAI, Google (Gemini), xAI, or Meta. You pay the provider per
-  use. Settings shows each model's price per million tokens.
+A tutoring session usually starts with a quick review of something you learned earlier, then
+teaches the next concept you're ready for. Helix asks you to predict before it explains, gives
+hints before answers, and checks your understanding at the end. Everything you answer updates
+your map, so the next session picks up where this one left off.
 
-Then choose a model for each job (building maps, teaching, evaluating).
+## Five depths of knowing
 
-Connections marked **Beta** haven't yet been tested with real calls: all API keys, the Grok CLI,
-Muse Code, and the in-app **Sign in** buttons (signing in from a terminal is the tested path).
-They should work; please report it if one doesn't.
+Knowing what something is differs from being able to use it. Helix tracks each concept on a
+five-step scale:
 
-## Your data and privacy
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/depths-dark.svg">
+    <img src=".github/assets/depths-light.svg" alt="The five depths. 1 Orient: recognize it and say what it is for. 2 Explain: explain why it works, in your own words. 3 Apply: carry it out on a standard problem. 4 Analyze: handle unfamiliar problems and spot errors. 5 Expert: design with it, extend it, or teach it." width="880">
+  </picture>
+</p>
 
-- Your goals, maps, answers, and learner record are stored in a SQLite database on your computer
-  (`~/Library/Application Support/Helix` on macOS, `%APPDATA%\Helix` on Windows,
-  `~/.config/Helix` on Linux).
-- **What leaves your computer:** the source material you add, your answers, and your tutoring
-  chats are sent to the model provider you choose, to do the work, under that provider's terms.
-  Helix also asks GitHub whether a newer version exists. Nothing else is sent anywhere; there
-  are no accounts, analytics, or telemetry.
-- API keys are encrypted with your system's keychain (macOS Keychain, Windows DPAPI, or the Linux
-  keyring) and are handed only to the local Helix server. Subscription tools keep their own
-  logins; Helix never sees them.
-- The Helix server listens only on `127.0.0.1` and accepts connections only from local pages.
+Each concept on your map gets a target depth for your goal. Helix measures where you stand and
+teaches toward it. On the map, an arrow labeled `3 → 4` means you need the concept it starts from
+at depth 3 before the one it points to at depth 4.
 
-## Develop
+## Get started
 
-Helix is a TypeScript monorepo: Node 26 (running TypeScript directly), pnpm workspaces, a
-WebSocket server with `node:sqlite`, a React + Vite + Tailwind UI, and an Electron shell.
+1. **Download and install** Helix for your computer:
+   [Mac, Apple silicon (M1 or later)](https://github.com/chaotyc/Helix/releases/latest/download/Helix-arm64.dmg) ·
+   [Mac, Intel](https://github.com/chaotyc/Helix/releases/latest/download/Helix-x64.dmg) ·
+   [Windows](https://github.com/chaotyc/Helix/releases/latest/download/Helix-Setup-x64.exe) ·
+   [Linux AppImage](https://github.com/chaotyc/Helix/releases/latest/download/Helix-x86_64.AppImage) ·
+   [Linux .deb (Debian, Ubuntu)](https://github.com/chaotyc/Helix/releases/latest/download/Helix-amd64.deb).
+   On Linux, the AppImage needs FUSE 2 and `chmod +x`; on Debian or Ubuntu, the .deb is simpler.
+2. **Connect a model.** Use a plan you already pay for, such as Claude, ChatGPT, or Google AI,
+   through its command-line tool (Claude Code, Codex, Antigravity, and others), installed and
+   signed in once. Or add an API key from Anthropic, OpenAI, Google, xAI, or Meta in **Settings**.
+   On first launch, Helix finds what's set up on your computer and uses it for every job in one
+   click.
+3. **Create a goal** and start learning.
 
-```bash
-pnpm install                          # install all dependencies
-pnpm --filter @helix/server dev       # the server (put API keys in apps/server/.env, see .env.example)
-pnpm --filter @helix/web dev          # the UI, at http://localhost:5173
-pnpm typecheck                        # type-check everything
-pnpm --filter @helix/core test        # learner model and planner tests (also: @helix/server, @helix/evals)
-pnpm --filter @helix/desktop start    # build and run the desktop app without packaging
-```
+Helix checks for new versions when it opens and links you to the download.
 
-| Folder | What's in it |
-| --- | --- |
-| `apps/server` | WebSocket API, database, model calls, versioned agent prompts (`src/ai/prompts/`) |
-| `apps/web` | the React UI |
-| `apps/desktop` | the Electron app, packaging, and release notes ([README](apps/desktop/README.md)) |
-| `packages/contracts` | Zod schemas for every message between the UI and the server |
-| `packages/core` | the learner model, frontier, planner, and map logic: pure functions with tests |
-| `packages/evals` | evaluations for the map builder, the grader, and the tutor |
+---
 
-[CLAUDE.md](CLAUDE.md) lists the rules the codebase follows.
-
-## License
-
-[MIT](LICENSE)
+<p align="center">
+  <a href="https://github.com/chaotyc/Helix/issues">Report a problem</a> ·
+  <a href="LICENSE">MIT License</a>
+</p>

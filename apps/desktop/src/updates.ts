@@ -14,7 +14,7 @@ const SKIP_FILE = "skipped-update.json"; // in the data folder: the version the 
 export type Release = {
   version: string; // "0.2.0", without the tag's "v"
   notes: string; // the release description as plain text, possibly empty
-  downloadUrl: string; // the Apple silicon .dmg, or the release page if there's none
+  downloadUrl: string; // the file for this OS and processor, or the release page if there's none
 };
 
 // "v1.2.3" or "1.2.3" → [1, 2, 3]; anything else (pre-releases included) → null.
