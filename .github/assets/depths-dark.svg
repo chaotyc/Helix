@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 140" width="880" height="140" role="img" aria-label="Five depths of knowing a concept: Orient, Explain, Apply, Analyze, Expert">
+  <style>
+    .bg { fill: #111114; stroke: rgb(255 255 255 / 0.07); }
+    .title { font: 600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #f4f4f5; }
+    .num { font: 600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #9a9aa4; }
+    .desc { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #b4b4bd; }
+    .seg { fill: #7c7cf0; }
+    .track { fill: rgb(255 255 255 / 0.12); }
+  </style>
+  <rect class="bg" x="0.5" y="0.5" width="879" height="139" rx="14"/>
+
+  <!-- One column per depth: a five-segment meter filled up to that depth, a name, and what it means. -->
+  <g transform="translate(31 28)">
+    <rect class="seg" x="0" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="30" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="60" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="90" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="120" y="0" width="26" height="8" rx="4"/>
+    <text class="num" x="0" y="40">1</text>
+    <text class="title" x="14" y="40">Orient</text>
+    <text class="desc" x="0" y="66">Recognize it and say</text>
+    <text class="desc" x="0" y="85">what it is for</text>
+  </g>
+  <g transform="translate(199 28)">
+    <rect class="seg" x="0" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="30" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="60" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="90" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="120" y="0" width="26" height="8" rx="4"/>
+    <text class="num" x="0" y="40">2</text>
+    <text class="title" x="14" y="40">Explain</text>
+    <text class="desc" x="0" y="66">Explain why it works,</text>
+    <text class="desc" x="0" y="85">in your own words</text>
+  </g>
+  <g transform="translate(367 28)">
+    <rect class="seg" x="0" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="30" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="60" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="90" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="120" y="0" width="26" height="8" rx="4"/>
+    <text class="num" x="0" y="40">3</text>
+    <text class="title" x="14" y="40">Apply</text>
+    <text class="desc" x="0" y="66">Carry it out on a</text>
+    <text class="desc" x="0" y="85">standard problem</text>
+  </g>
+  <g transform="translate(535 28)">
+    <rect class="seg" x="0" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="30" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="60" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="90" y="0" width="26" height="8" rx="4"/>
+    <rect class="track" x="120" y="0" width="26" height="8" rx="4"/>
+    <text class="num" x="0" y="40">4</text>
+    <text class="title" x="14" y="40">Analyze</text>
+    <text class="desc" x="0" y="66">Handle unfamiliar</text>
+    <text class="desc" x="0" y="85">problems, spot errors</text>
+  </g>
+  <g transform="translate(703 28)">
+    <rect class="seg" x="0" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="30" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="60" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="90" y="0" width="26" height="8" rx="4"/>
+    <rect class="seg" x="120" y="0" width="26" height="8" rx="4"/>
+    <text class="num" x="0" y="40">5</text>
+    <text class="title" x="14" y="40">Expert</text>
+    <text class="desc" x="0" y="66">Design with it, extend</text>
+    <text class="desc" x="0" y="85">it, or teach it</text>
+  </g>
+</svg>

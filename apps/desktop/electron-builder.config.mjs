@@ -1,9 +1,10 @@
 // How electron-builder packages Helix for each OS (see the dist scripts in package.json).
 //
-// Release files, named so an update check can pick the one for its OS and processor:
-//   Helix-<version>-arm64.dmg, Helix-<version>-x64.dmg   macOS (Apple silicon, Intel)
-//   Helix-Setup-<version>-x64.exe                        Windows installer
-//   Helix-<version>-x86_64.AppImage, Helix-<version>-amd64.deb   Linux
+// Release files, named so an update check can pick the one for its OS and processor. No version
+// in the names, so the README can link to releases/latest/download/<name>:
+//   Helix-arm64.dmg, Helix-x64.dmg            macOS (Apple silicon, Intel)
+//   Helix-Setup-x64.exe                       Windows installer
+//   Helix-x86_64.AppImage, Helix-amd64.deb    Linux
 //
 // Signing switches on by itself when certificates are in the environment (the release workflow
 // passes them from repository secrets):
@@ -49,7 +50,7 @@ export default {
   },
   dmg: {
     title: "Helix",
-    artifactName: "${productName}-${version}-${arch}.${ext}",
+    artifactName: "${productName}-${arch}.${ext}",
     writeUpdateInfo: false,
   },
 
@@ -58,7 +59,7 @@ export default {
     icon: "assets/icon.png", // electron-builder makes the .ico from it
   },
   nsis: {
-    artifactName: "${productName}-Setup-${version}-${arch}.${ext}",
+    artifactName: "${productName}-Setup-${arch}.${ext}",
     oneClick: true, // installs for this user only, no administrator rights; data stays on uninstall
     shortcutName: "Helix",
   },
@@ -76,6 +77,6 @@ export default {
     maintainer: "chaotyc <60454330+chaotyc@users.noreply.github.com>",
     // The icon is made from assets/icon.icns.
   },
-  appImage: { artifactName: "${productName}-${version}-x86_64.${ext}" },
-  deb: { artifactName: "${productName}-${version}-amd64.${ext}" },
+  appImage: { artifactName: "${productName}-x86_64.${ext}" },
+  deb: { artifactName: "${productName}-amd64.${ext}" },
 };

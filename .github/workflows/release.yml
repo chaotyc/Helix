@@ -108,12 +108,11 @@ jobs:
           path: dist
           merge-multiple: true
       - name: Check the files
-        env:
-          VERSION: ${{ needs.version.outputs.version }}
-        # These names are the contract with the app's update check: one file per OS and processor.
+        # These names are the contract with the app's update check and the README's download links
+        # (releases/latest/download/<name>): one file per OS and processor, with no version in the name.
         run: |
           ls -l dist
-          for file in "Helix-$VERSION-arm64.dmg" "Helix-$VERSION-x64.dmg" "Helix-Setup-$VERSION-x64.exe" "Helix-$VERSION-x86_64.AppImage" "Helix-$VERSION-amd64.deb"; do
+          for file in Helix-arm64.dmg Helix-x64.dmg Helix-Setup-x64.exe Helix-x86_64.AppImage Helix-amd64.deb; do
             [ -f "dist/$file" ] || { echo "::error::Missing dist/$file"; exit 1; }
           done
       - name: Create the draft release
